@@ -1,0 +1,16 @@
+
+{
+  "name": "iot-parking",
+  "version": "1.0.0",
+  "description": "Cyber-style parking occupancy monitor with MockAPI integration",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx live-server --port=8080"
+  },
+  "keywords": ["parking", "iot", "cyber", "mockapi"],
+  "author": "PARKiT",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
