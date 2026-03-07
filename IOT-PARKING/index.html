@@ -95,28 +95,26 @@
       margin-bottom: 8px;
     }
 
-    .alert {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
+    .net-indicator {
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
       padding: 16px;
-      margin: 20px 0;
       border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      display: none;
-      animation: slideIn 0.3s ease-out;
-      box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+      margin: 20px 0;
+      border: 1px solid #bae6fd;
     }
 
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .net-label {
+      font-size: 12px;
+      color: #0369a1;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .net-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0284c7;
     }
 
     button {
@@ -177,19 +175,22 @@
     
     <div class="stats-wrapper">
       <div class="stat-card">
-        <div class="stat-icon">🅿️</div>
-        <div class="stat-label">Vehicles Inside</div>
-        <div class="stat-value" id="inside">0</div>
+        <div class="stat-icon">⬇️</div>
+        <div class="stat-label">Total Entered</div>
+        <div class="stat-value" id="entered">0</div>
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon">🚙</div>
-        <div class="stat-label">Vehicles Exited</div>
-        <div class="stat-value" id="exit">0</div>
+        <div class="stat-icon">⬆️</div>
+        <div class="stat-label">Total Exited</div>
+        <div class="stat-value" id="exited">0</div>
       </div>
     </div>
 
-    <div class="alert" id="alert">⚠️ Parking Full! Over Capacity!</div>
+    <div class="net-indicator">
+      <div class="net-label">Currently Inside</div>
+      <div class="net-value" id="inside">0</div>
+    </div>
     
     <button onclick="fetchParkingData()" id="refreshBtn">
       <span class="refresh-icon">🔄</span>
@@ -199,7 +200,6 @@
 
   <script>
     const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
-    const MAX_CAPACITY = 6;
 
     async function fetchParkingData() {
       const btn = document.getElementById('refreshBtn');
@@ -213,24 +213,23 @@
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        let totalInside = 0;
+        // Simple logic: sum up all entries directly from API
+        let totalEntered = 0;
         let totalExited = 0;
 
         data.forEach(entry => {
-          totalInside += parseInt(entry.occupied) || 0;
-          totalExited += parseInt(entry.available) || 0;
+          // API returns direct counts
+          totalEntered += parseInt(entry.entered) || parseInt(entry.entries) || parseInt(entry.in) || 0;
+          totalExited += parseInt(entry.exited) || parseInt(entry.exits) || parseInt(entry.out) || 0;
         });
 
-        // Animate numbers
-        animateValue('inside', parseInt(document.getElementById('inside').textContent), totalInside);
-        animateValue('exit', parseInt(document.getElementById('exit').textContent), totalExited);
+        // Calculate currently inside (simple subtraction)
+        const currentlyInside = totalEntered - totalExited;
 
-        const alertBox = document.getElementById('alert');
-        if (totalInside > MAX_CAPACITY) {
-          alertBox.style.display = 'block';
-        } else {
-          alertBox.style.display = 'none';
-        }
+        // Update display with animation
+        animateValue('entered', parseInt(document.getElementById('entered').textContent), totalEntered);
+        animateValue('exited', parseInt(document.getElementById('exited').textContent), totalExited);
+        animateValue('inside', parseInt(document.getElementById('inside').textContent), currentlyInside);
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -266,6 +265,9 @@
 
     // Fetch on page load
     fetchParkingData();
+    
+    // Auto-refresh every 5 seconds
+    setInterval(fetchParkingData, 5000);
   </script>
 
 </body>
