@@ -1,4 +1,4 @@
-// MockAPI Configuration - IMONG URL
+// MockAPI Configuration
 const MOCKAPI_BASE = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io';
 const PARKING_ENDPOINT = 'parking';      // Endpoint para sa current status
 const LOGS_ENDPOINT = 'logs';            // Endpoint para sa history logs
@@ -40,7 +40,7 @@ async function fetchAllData() {
     setLoading(true);
     
     try {
-        // Fetch parking status (current inside, entrance count, exit count)
+        // Fetch parking status
         const statusRes = await fetch(`${MOCKAPI_BASE}/${PARKING_ENDPOINT}`);
         const statusData = await statusRes.json();
         
@@ -48,8 +48,8 @@ async function fetchAllData() {
         const logsRes = await fetch(`${MOCKAPI_BASE}/${LOGS_ENDPOINT}?sortBy=createdAt&order=desc&limit=10`);
         const logsData = await logsRes.json();
         
-        console.log('Status:', statusData);
-        console.log('Logs:', logsData);
+        console.log('Status Data:', statusData);
+        console.log('Logs Data:', logsData);
         
         // Parse and display
         parseAndDisplay(statusData, logsData);
@@ -68,19 +68,28 @@ function parseAndDisplay(statusData, logsData) {
     let todayEntrance = 0;
     let todayExit = 0;
     
-    // Parse status data - adjust base sa imong MockAPI structure
+    // IMPORTANT: MockAPI always returns ARRAY
     if (Array.isArray(statusData) && statusData.length > 0) {
-        // Kung array, kuhaa ang latest or first item
-        const latest = statusData[0]; // or statusData[statusData.length - 1] for latest
-        currentInside = parseInt(latest.currentInside ?? latest.count ?? latest.inside ?? 0);
-        todayEntrance = parseInt(latest.todayEntrance ?? latest.entrance ?? latest.entranceCount ?? 0);
-        todayExit = parseInt(latest.todayExit ?? latest.exit ?? latest.exitCount ?? 0);
-    } else if (typeof statusData === 'object' && statusData !== null) {
-        // Kung single object
-        currentInside = parseInt(statusData.currentInside ?? statusData.count ?? statusData.inside ?? 0);
-        todayEntrance = parseInt(statusData.todayEntrance ?? statusData.entrance ?? statusData.entranceCount ?? 0);
-        todayExit = parseInt(statusData.todayExit ?? statusData.exit ?? statusData.exitCount ?? 0);
+        // Kuhaon ang PINAKA-LATEST (last item sa array)
+        const latest = statusData[statusData.length - 1];
+        
+        console.log('Latest record:', latest);
+        
+        // Extract values - adjust field names base sa imong MockAPI
+        currentInside = parseInt(latest.occupied ?? latest.currentInside ?? latest.count ?? latest.inside ?? 0);
+        todayEntrance = parseInt(latest.entrance ?? latest.todayEntrance ?? latest.entranceCount ?? 0);
+        todayExit = parseInt(latest.exit ?? latest.todayExit ?? latest.exitCount ?? 0);
+        
+        // Kung gusto nimo specific ID, uncomment ni:
+        // const specificRecord = statusData.find(item => item.id === '1');
+        // if (specificRecord) {
+        //     currentInside = parseInt(specificRecord.occupied ?? 0);
+        //     todayEntrance = parseInt(specificRecord.entrance ?? 0);
+        //     todayExit = parseInt(specificRecord.exit ?? 0);
+        // }
     }
+    
+    console.log('Parsed values:', { currentInside, todayEntrance, todayExit });
     
     // Update display
     updateDisplay(currentInside, todayEntrance, todayExit);
