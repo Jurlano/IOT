@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Parking Tracker</title>
   <style>
-    body { font-family: Arial; background: #f2f2f2; display: flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    body { font-family: Arial; background: #f2f2f2; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
     .container { background:#fff; padding:30px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.2); text-align:center; width:320px; }
     h1 { color:#00bcd4; margin-bottom:20px; }
     .stat { margin:15px 0; font-size:20px; font-weight:bold; }
@@ -16,74 +16,52 @@
 </head>
 <body>
 
-  <div class="container">
-    <h1>⚡ Parking Tracker ⚡</h1>
-    <div class="stat">Vehicles Inside: <span id="inside">0</span></div>
-    <div class="stat">Vehicles Exited: <span id="exit">0</span></div>
-    <div class="alert" id="alert">⚠️ Parking Full! Over Capacity!</div>
-    <button onclick="fetchParkingData()">Refresh Data</button>
-  </div>
+<div class="container">
+  <h1>⚡ Parking Tracker ⚡</h1>
+  <div class="stat">Vehicles Inside: <span id="inside">0</span></div>
+  <div class="stat">Vehicles Exited: <span id="exit">0</span></div>
+  <div class="alert" id="alert">⚠️ Parking Full! Over Capacity!</div>
+  <button onclick="fetchParkingData()">Refresh Data</button>
+</div>
 
-  <script>
-    const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
-    const MAX_CAPACITY = 6;
+<script>
+const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+const MAX_CAPACITY = 6;
 
-    // Store previous occupied status to detect in/out
-    let prevStatus = {};
+function fetchParkingData() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      let totalInside = 0;
+      let totalExited = 0;
 
-    let totalInside = 0;
-    let totalExited = 0;
+      data.forEach(entry => {
+        if (entry.occupied === "1") totalInside++;
+        if (entry.occupied === "0") totalExited++;
+      });
 
-    async function fetchParkingData() {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+      document.getElementById('inside').textContent = totalInside;
+      document.getElementById('exit').textContent = totalExited;
 
-        data.forEach(entry => {
-          const id = entry.id;
-          const occupied = parseInt(entry.occupied);
-
-          if (!(id in prevStatus)) {
-            // First time, initialize
-            prevStatus[id] = occupied;
-            if (occupied === 1) totalInside++;
-          } else {
-            // Detect changes
-            if (prevStatus[id] === 0 && occupied === 1) {
-              // Vehicle entered
-              totalInside++;
-            } else if (prevStatus[id] === 1 && occupied === 0) {
-              // Vehicle exited
-              totalInside--;
-              totalExited++;
-            }
-            // Update stored status
-            prevStatus[id] = occupied;
-          }
-        });
-
-        document.getElementById('inside').textContent = totalInside;
-        document.getElementById('exit').textContent = totalExited;
-
-        const alertBox = document.getElementById('alert');
-        if (totalInside > MAX_CAPACITY) {
-          alertBox.style.display = 'block';
-        } else {
-          alertBox.style.display = 'none';
-        }
-
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        alert('Failed to fetch parking data');
+      const alertBox = document.getElementById('alert');
+      if (totalInside > MAX_CAPACITY) {
+        alertBox.style.display = 'block';
+      } else {
+        alertBox.style.display = 'none';
       }
-    }
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      alert('Failed to fetch parking data');
+    });
+}
 
-    // Initial fetch
-    fetchParkingData();
+// Initial fetch
+fetchParkingData();
 
-    // Auto-refresh every 5 seconds
-    setInterval(fetchParkingData, 5000);
-  </script>
+// Auto-refresh every 5 seconds
+setInterval(fetchParkingData, 5000);
+</script>
 
 </body>
 </html>
