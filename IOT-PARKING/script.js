@@ -1,145 +1,157 @@
-// ==========================
-// SIMPLE PARKING MONITOR
-// ==========================
+// ===== script.js =====
+(function() {
+    "use strict";
 
-// Config
-const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io';
-const MAX = 6;
+    // ========== MOCKAPI + CYBER HISTORY ==========
+    const MOCKAPI_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+    
+    // local history store (maximum 5 entries)
+    let visitHistory = [];
 
-// Get elements
-const elements = {
-    inside: document.getElementById('currentInside'),
-    exit: document.getElementById('todayExit'),
-    slots: document.getElementById('slotsLeft'),
-    bar: document.getElementById('capacityBar'),
-    barText: document.getElementById('capacityText'),
-    alert: document.getElementById('alertBox'),
-    history: document.getElementById('historyList'),
-    refresh: document.getElementById('refreshBtn'),
-    date: document.getElementById('dateDisplay')
-};
-
-// Start
-window.onload = function() {
-    showDate();
-    getData();
-    setInterval(getData, 5000); // every 5 seconds
-};
-
-// Show current date
-function showDate() {
-    let d = new Date();
-    elements.date.innerHTML = `<i class="far fa-calendar-alt"></i> ${d.toLocaleDateString('en-US', {month:'short', day:'numeric'})}`;
-}
-
-// Main function
-async function getData() {
-    try {
-        // Get parking data
-        let parkRes = await fetch(`${API_URL}/parking`);
-        let parkData = await parkRes.json();
-        
-        // Get logs
-        let logsRes = await fetch(`${API_URL}/logs`);
-        let logsData = await logsRes.json();
-        
-        // Calculate
-        let inside = 0;
-        parkData.forEach(item => {
-            inside += Number(item.occupied) || 0;
-        });
-        
-        // Count today's exits
-        let today = new Date().toDateString();
-        let exits = 0;
-        logsData.forEach(log => {
-            let logDate = new Date(log.createdAt).toDateString();
-            let action = String(log.action || '').toLowerCase();
-            if (logDate === today && (action === 'exit' || action === 'gawas')) {
-                exits++;
+    // ---------- load from localStorage ----------
+    function loadHistory() {
+        try {
+            const stored = localStorage.getItem('parking_cyber_history');
+            if (stored) {
+                visitHistory = JSON.parse(stored);
+            } else {
+                // initial default (cyber vibe)
+                visitHistory = [
+                    { dateStr: 'Peb 14, 2026', count: 7 },
+                    { dateStr: 'Peb 13, 2026', count: 3 },
+                    { dateStr: 'Peb 12, 2026', count: 0 },
+                    { dateStr: 'Peb 11, 2026', count: 5 },
+                    { dateStr: 'Peb 10, 2026', count: 2 }
+                ];
             }
-        });
-        
-        // Update display
-        updateUI(inside, exits);
-        
-        // Show history (last 10)
-        showHistory(logsData.slice(-10));
-        
-    } catch(err) {
-        console.log('Error:', err);
-        elements.inside.textContent = '?';
-        elements.exit.textContent = '?';
-        elements.history.innerHTML = '<li style="color:red">⚠ Network Error</li>';
-    }
-}
-
-// Update numbers and bars
-function updateUI(inside, exits) {
-    // Basic numbers
-    elements.inside.textContent = inside;
-    elements.exit.textContent = exits;
-    
-    // Slots left
-    let left = MAX - inside;
-    if (left < 0) left = 0;
-    elements.slots.textContent = left + ' slots available';
-    
-    // Alert if full
-    if (inside >= MAX) {
-        elements.alert.style.display = 'block';
-        elements.alert.innerHTML = '⚠ PARKING FULL ⚠';
-    } else {
-        elements.alert.style.display = 'none';
-    }
-    
-    // Progress bar
-    let percent = (inside / MAX) * 100;
-    if (percent > 100) percent = 100;
-    elements.bar.style.width = percent + '%';
-    elements.barText.textContent = inside + '/' + MAX;
-    
-    // Bar color
-    elements.bar.className = 'progress-bar';
-    if (inside >= MAX) {
-        elements.bar.classList.add('danger');
-    } else if (inside >= 4) {
-        elements.bar.classList.add('warning');
-    }
-}
-
-// Show history list
-function showHistory(logs) {
-    let html = '';
-    
-    logs.reverse().forEach(log => {
-        let time = new Date(log.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        let action = String(log.action || '').toLowerCase();
-        
-        let badge = 'SULOD';
-        let color = '#27ae60';
-        
-        if (action === 'exit' || action === 'gawas') {
-            badge = 'GAWAS';
-            color = '#e74c3c';
+        } catch (e) {
+            console.warn("localStorage fail");
+            visitHistory = [];
         }
-        
-        html += `<li>
-            <span style="color:#7f8c8d;">${time}</span>
-            <span style="background:${color}; color:white; padding:3px 8px; border-radius:12px; font-size:12px;">${badge}</span>
-        </li>`;
-    });
-    
-    if (html === '') {
-        html = '<li style="color:#95a5a6; text-align:center;">No records</li>';
+        renderHistory();
     }
-    
-    elements.history.innerHTML = html;
-}
 
-// Refresh button
-elements.refresh.onclick = function() {
-    this.style.transform = 'rotate(180deg)';
-    setTimeout(() => this.style.transform = 'none', 300);
-    getData();
-};
+    // ---------- save history ----------
+    function saveHistory() {
+        try {
+            localStorage.setItem('parking_cyber_history', JSON.stringify(visitHistory.slice(0, 5)));
+        } catch (e) {}
+    }
+
+    // ---------- add a record (today's visit) ----------
+    function addTodayToHistory(todayStr, count) {
+        const existingIndex = visitHistory.findIndex(entry => entry.dateStr === todayStr);
+        if (existingIndex !== -1) {
+            visitHistory[existingIndex].count = count;
+        } else {
+            visitHistory.unshift({ dateStr: todayStr, count: count });
+        }
+        if (visitHistory.length > 5) {
+            visitHistory = visitHistory.slice(0, 5);
+        }
+        saveHistory();
+        renderHistory();
+    }
+
+    // ---------- render history list ----------
+    function renderHistory() {
+        const listEl = document.getElementById('historyList');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        if (visitHistory.length === 0) {
+            listEl.innerHTML = '<li style="justify-content:center;"><i class="fas fa-ban"></i> walay history</li>';
+            return;
+        }
+        visitHistory.forEach(item => {
+            const li = document.createElement('li');
+            const countDisplay = item.count + ' sakyanan';
+            // optional zero style
+            const zeroStyle = item.count === 0 ? 'background: #555; color:white; text-shadow:none;' : '';
+            li.innerHTML = `<i class="fas fa-calendar-day"></i> <span>${item.dateStr}</span> <span class="history-badge" style="${zeroStyle}">${countDisplay}</span>`;
+            listEl.appendChild(li);
+        });
+    }
+
+    // ---------- get today's date in Filipino format ----------
+    function getTodayDateStr() {
+        const now = new Date();
+        const monthNames = ['Enero', 'Pebrero', 'Marso', 'Abril', 'Mayo', 'Hunyo', 
+                           'Hulyo', 'Agosto', 'Setyembre', 'Oktubre', 'Nobyembre', 'Disyembre'];
+        const month = monthNames[now.getMonth()];
+        const day = now.getDate();
+        const year = now.getFullYear();
+        return `${month} ${day}, ${year}`;
+    }
+
+    // ---------- update header and full date displays ----------
+    function updateDateDisplay() {
+        const now = new Date();
+        const optionsHeader = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+        const headerDate = now.toLocaleDateString('en-PH', optionsHeader);
+        document.getElementById('dateDisplay').innerHTML = `<i class="far fa-calendar-alt"></i> ${headerDate}`;
+
+        const monthNames = ['Enero', 'Pebrero', 'Marso', 'Abril', 'Mayo', 'Hunyo', 
+                           'Hulyo', 'Agosto', 'Setyembre', 'Oktubre', 'Nobyembre', 'Disyembre'];
+        const month = monthNames[now.getMonth()];
+        const day = now.getDate();
+        const year = now.getFullYear();
+        const fullDateString = `${month} ${day}, ${year}`;
+        document.getElementById('fullDateDisplay').innerHTML = `<i class="far fa-calendar-check"></i> ${fullDateString}`;
+    }
+
+    // ---------- fetch from mockapi & update UI ----------
+    async function fetchParkingData() {
+        document.getElementById('occupiedCount').textContent = '⋯';
+        document.getElementById('statusMessage').innerHTML = `<i class="fas fa-spinner fa-pulse"></i> nag scan...`;
+        try {
+            const response = await fetch(MOCKAPI_URL);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            
+            // count occupied (status "1" or 1)
+            let occupied = 0;
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].status == "1" || data[i].status === 1) {
+                    occupied++;
+                }
+            }
+
+            // update big number
+            document.getElementById('occupiedCount').textContent = occupied;
+
+            // status message with zero handling
+            let message = "";
+            if (occupied === 0) {
+                message = "⛔ ZERO sakyanan · walay bisita";
+            } else if (occupied === 1) {
+                message = "🚗 1 ka sakyanan ang naka-parking";
+            } else {
+                message = `🚘 ${occupied} ka sakyanan ang naka-parking`;
+            }
+            document.getElementById('statusMessage').innerHTML = `<i class="fas fa-parking" style="color: #ffcc00;"></i> ${message}`;
+
+            // add today's record to history
+            const todayStr = getTodayDateStr();
+            addTodayToHistory(todayStr, occupied);
+
+        } catch (error) {
+            console.error('fetch error:', error);
+            document.getElementById('occupiedCount').textContent = '?';
+            document.getElementById('statusMessage').innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ff44ee;"></i> network error`;
+        }
+    }
+
+    // ---------- initial calls ----------
+    loadHistory();          // show stored or default history
+    updateDateDisplay();    // set dates immediately
+    fetchParkingData();     // first fetch
+
+    // refresh button
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        fetchParkingData();
+    });
+
+    // auto refresh every 20 seconds
+    setInterval(fetchParkingData, 20000);
+    setInterval(updateDateDisplay, 60000);
+})();
