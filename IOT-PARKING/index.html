@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
     <title>⚡ PARKiT · CYBER ADLAW ⚡</title>
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- External CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="parking-container">
         <div class="park-card">
 
-            <!-- ===== HEADER ===== -->
+            <!-- HEADER -->
             <div class="adlaw-header">
                 <span class="api-tag">
                     <i class="fas fa-skull"></i> CYBER•PARK
@@ -25,73 +22,78 @@
                 </span>
             </div>
 
-            <!-- ===== MAIN COUNTER ===== -->
+            <!-- MAIN COUNTER - CURRENT INSIDE -->
             <div class="today-counter">
                 <div class="adlaw-label">
-                    <i class="fas fa-car-side"></i> KARON
+                    <i class="fas fa-car-side"></i> NAA SULOD KARON
                 </div>
                 <div>
-                    <span class="adlaw-number" id="occupiedCount">—</span>
-                    <span class="adlaw-unit">sakyanan</span>
+                    <span class="adlaw-number" id="currentInside">—</span>
+                    <span class="adlaw-unit">ka sakyanan</span>
                 </div>
-                <div class="today-date-highlight" id="fullDateDisplay">
-                    <i class="far fa-calendar-check"></i> ...
+                <div class="slots-left" id="slotsLeft">
+                    <i class="fas fa-parking"></i> <span id="vacantSlots">—</span> ka slots ang bakante
                 </div>
             </div>
 
-            <!-- ===== ALERT BOX (SHOWS WHEN FULL) ===== -->
+            <!-- ALERT BOX (SHOWS WHEN FULL) -->
             <div class="alert-box" id="alertBox" style="display: none;">
-                <div class="alert-content">
-                    <i class="fas fa-triangle-exclamation"></i>
-                    <span class="alert-text">PARKING FULL!</span>
-                    <span class="alert-sub">Way bakante nga space</span>
+                <i class="fas fa-triangle-exclamation"></i>
+                <span class="alert-text">PARKING FULL!</span>
+            </div>
+
+            <!-- TWO BOXES: ENTRANCE & EXIT -->
+            <div class="stats-grid">
+                <div class="stat-box entrance-box">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    <div class="stat-label">SULOD KARON</div>
+                    <div class="stat-number" id="todayEntrance">0</div>
+                    <div class="stat-sub">ka entrance</div>
+                </div>
+                
+                <div class="stat-box exit-box">
+                    <i class="fas fa-arrow-right-from-bracket"></i>
+                    <div class="stat-label">GAWAS KARON</div>
+                    <div class="stat-number" id="todayExit">0</div>
+                    <div class="stat-sub">ka exit</div>
                 </div>
             </div>
 
-            <!-- ===== STATUS MESSAGE ===== -->
-            <div class="status-message">
-                <span class="status-text" id="statusMessage">
-                    <i class="fas fa-parking"></i> scanning...
-                </span>
-            </div>
-
-            <!-- ===== CAPACITY BAR ===== -->
+            <!-- CAPACITY BAR -->
             <div class="capacity-section">
                 <div class="capacity-header">
-                    <span><i class="fas fa-chart-bar"></i> CAPACITY</span>
-                    <span id="capacityText">0/50</span>
+                    <span><i class="fas fa-chart-bar"></i> CAPACITY (6 MAX)</span>
+                    <span id="capacityText">0/6</span>
                 </div>
                 <div class="capacity-bar-bg">
                     <div class="capacity-bar-fill" id="capacityBar"></div>
                 </div>
             </div>
 
-            <!-- ===== HISTORY LOG ===== -->
-            <div class="history-section" id="historySection">
+            <!-- HISTORY LIST -->
+            <div class="history-section">
                 <div class="history-header">
-                    <i class="fas fa-history"></i> MGA ADLAW • VISIT LOG
-                    <span class="latest-badge">LATEST 5</span>
+                    <i class="fas fa-history"></i> HISTORY LOG
+                    <span class="latest-badge">LATEST</span>
                 </div>
                 <ul class="history-list" id="historyList">
-                    <!-- dynamic from javascript -->
+                    <!-- dynamic -->
                 </ul>
             </div>
 
-            <!-- refresh button -->
+            <!-- REFRESH BUTTON -->
             <button class="refresh-btn" id="refreshBtn">
-                <i class="fas fa-sync-alt"></i> i-refresh / i-update
+                <i class="fas fa-sync-alt"></i> i-REFRESH
             </button>
 
-            <!-- footer -->
+            <!-- FOOTER -->
             <div class="footer">
                 <span><i class="fas fa-microchip"></i> ADLAW•ZERO</span>
-                <span><i class="fas fa-eye"></i> cyber log</span>
                 <span><i class="fas fa-database"></i> MOCK</span>
             </div>
         </div>
     </div>
 
-    <!-- External JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
