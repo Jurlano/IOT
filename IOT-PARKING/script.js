@@ -3,7 +3,7 @@
 // ==========================
 const MOCKAPI_BASE = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io';
 const PARKING_ENDPOINT = 'parking'; // Current parking status
-const LOGS_ENDPOINT = 'logs';       // History logs
+const LOGS_ENDPOINT = 'logs';       // Entrance/exit logs
 
 // ==========================
 // Settings
@@ -13,11 +13,9 @@ const MAX_CAPACITY = 6;
 // ==========================
 // DOM Elements
 // ==========================
-const currentInsideEl = document.getElementById('currentInside');
-const vacantSlotsEl = document.getElementById('vacantSlots');
+const currentInsideEl = document.getElementById('currentInside'); // green box
+const todayExitEl = document.getElementById('todayExit');         // red box
 const slotsLeftEl = document.getElementById('slotsLeft');
-const todayEntranceEl = document.getElementById('todayEntrance');
-const todayExitEl = document.getElementById('todayExit');
 const capacityBar = document.getElementById('capacityBar');
 const capacityText = document.getElementById('capacityText');
 const alertBox = document.getElementById('alertBox');
@@ -31,8 +29,8 @@ const dateDisplay = document.getElementById('dateDisplay');
 document.addEventListener('DOMContentLoaded', () => {
     updateDate();
     fetchAllData();
-    setInterval(fetchAllData, 3000); // Auto refresh every 3 seconds
-    setInterval(updateDate, 60000);   // Update date every 1 min
+    setInterval(fetchAllData, 3000); // Auto refresh
+    setInterval(updateDate, 60000);   // Update date
 });
 
 // ==========================
@@ -45,7 +43,7 @@ function updateDate() {
 }
 
 // ==========================
-// Fetch All Data
+// Fetch Data from MockAPI
 // ==========================
 async function fetchAllData() {
     setLoading(true);
@@ -55,18 +53,15 @@ async function fetchAllData() {
         const statusRes = await fetch(`${MOCKAPI_BASE}/${PARKING_ENDPOINT}`);
         const statusData = await statusRes.json();
 
-        // Fetch logs/history (latest 50 to calculate accurate counts)
+        // Fetch logs/history (latest 50 entries for today)
         const logsRes = await fetch(`${MOCKAPI_BASE}/${LOGS_ENDPOINT}?sortBy=createdAt&order=desc&limit=50`);
         const logsData = await logsRes.json();
 
-        console.log('Status Data:', statusData);
-        console.log('Logs Data:', logsData);
-
-        // Parse and display
+        // Process data
         parseAndDisplay(statusData, logsData);
 
     } catch (error) {
-        console.error('Fetch error:', error.message);
+        console.error('Fetch error:', error);
         showError();
     } finally {
         setLoading(false);
@@ -74,72 +69,56 @@ async function fetchAllData() {
 }
 
 // ==========================
-// Parse Data and Update UI
+// Process Data and Update UI
 // ==========================
 function parseAndDisplay(statusData, logsData) {
     let currentInside = 0;
-    let todayEntrance = 0;
     let todayExit = 0;
 
-    // Sum occupied from all parking records
-    if (Array.isArray(statusData) && statusData.length > 0) {
-        currentInside = statusData.reduce((sum, record) => {
-            return sum + parseInt(record.occupied ?? 0);
-        }, 0);
+    // Sum all occupied from parking objects
+    if (Array.isArray(statusData)) {
+        currentInside = statusData.reduce((sum, rec) => sum + parseInt(rec.occupied ?? 0), 0);
     }
 
-    // Calculate todayEntrance and todayExit from logs
-    if (Array.isArray(logsData) && logsData.length > 0) {
-        const todayDate = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
-
+    // Count exits for today
+    if (Array.isArray(logsData)) {
+        const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
         logsData.forEach(log => {
             const logDate = new Date(log.createdAt || log.timestamp || log.date || Date.now());
             const logDay = logDate.toISOString().split('T')[0];
+            const action = (log.action || log.type || '').toLowerCase();
 
-            if (logDay === todayDate) {
-                const action = (log.action || log.type || 'entrance').toLowerCase();
-                if (['entrance', 'in', 'sulod'].includes(action)) {
-                    todayEntrance++;
-                } else {
-                    todayExit++;
-                }
+            if (logDay === today && ['exit', 'out', 'gawas'].includes(action)) {
+                todayExit++;
             }
         });
     }
 
-    console.log('Calculated values:', { currentInside, todayEntrance, todayExit });
-
-    updateDisplay(currentInside, todayEntrance, todayExit);
+    // Update UI
+    updateDisplay(currentInside, todayExit);
     renderHistory(logsData);
 }
 
 // ==========================
-// Update Display
+// Update Display Boxes
 // ==========================
-function updateDisplay(inside, entrance, exit) {
+function updateDisplay(inside, exit) {
     const vacant = MAX_CAPACITY - inside;
 
-    // Update "SULOD KARON" box
+    // Green box - current inside
     currentInsideEl.textContent = inside;
 
-    // Update "GAWAS KARON" box
+    // Red box - exited today
     todayExitEl.textContent = exit;
 
-    // Optional: Vacant slots
-    vacantSlotsEl.textContent = vacant >= 0 ? vacant : 0;
-
-    // Full capacity alert
-    if (inside >= MAX_CAPACITY) {
-        slotsLeftEl.innerHTML = `<i class="fas fa-ban"></i> WALAY BAKANTE`;
-        alertBox.style.display = 'block';
-    } else {
-        slotsLeftEl.innerHTML = `<i class="fas fa-parking"></i> ${vacant} ka slots ang bakante`;
-        alertBox.style.display = 'none';
-    }
+    // Slots left and alerts
+    slotsLeftEl.textContent = vacant >= 0 ? `${vacant} ka slots ang bakante` : '0 ka slots';
+    if (inside >= MAX_CAPACITY) alertBox.style.display = 'block';
+    else alertBox.style.display = 'none';
 
     // Capacity bar
-    const percentage = Math.min((inside / MAX_CAPACITY) * 100, 100);
-    capacityBar.style.width = `${percentage}%`;
+    const percent = Math.min((inside / MAX_CAPACITY) * 100, 100);
+    capacityBar.style.width = `${percent}%`;
     capacityText.textContent = `${inside}/${MAX_CAPACITY}`;
 
     // Color coding
@@ -153,31 +132,22 @@ function updateDisplay(inside, entrance, exit) {
 // ==========================
 function renderHistory(logs) {
     historyListEl.innerHTML = '';
-
     if (!logs || logs.length === 0) {
-        historyListEl.innerHTML = '<li class="history-item"><span class="history-time">No records found</span></li>';
+        historyListEl.innerHTML = '<li>No records found</li>';
         return;
     }
 
-    const logsArray = Array.isArray(logs) ? logs : [logs];
-
-    logsArray.forEach(log => {
-        const item = document.createElement('li');
-        const action = (log.action || log.type || 'entrance').toLowerCase();
-        const isEntrance = ['entrance', 'in', 'sulod'].includes(action);
-        const actionClass = isEntrance ? 'entrance' : 'exit';
-        const badgeText = isEntrance ? 'SULOD' : 'GAWAS';
-
-        item.className = `history-item ${actionClass}`;
+    logs.forEach(log => {
+        const li = document.createElement('li');
+        const action = (log.action || log.type || '').toLowerCase();
+        const badge = ['entrance', 'in', 'sulod'].includes(action) ? 'SULOD' : 'GAWAS';
+        const cls = badge.toLowerCase();
 
         const time = new Date(log.createdAt || log.timestamp || log.date || Date.now());
         const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-        item.innerHTML = `
-            <span class="history-time">${timeStr}</span>
-            <span class="history-badge ${actionClass}">${badgeText}</span>
-        `;
-        historyListEl.appendChild(item);
+        li.innerHTML = `<span>${timeStr}</span> <span class="${cls}">${badge}</span>`;
+        historyListEl.appendChild(li);
     });
 }
 
@@ -186,14 +156,13 @@ function renderHistory(logs) {
 // ==========================
 function showError() {
     currentInsideEl.textContent = 'ERR';
-    vacantSlotsEl.textContent = '--';
-    todayEntranceEl.textContent = '--';
-    todayExitEl.textContent = '--';
-    historyListEl.innerHTML = '<li class="history-item"><span class="history-time" style="color: var(--neon-red)">Connection Error</span></li>';
+    todayExitEl.textContent = 'ERR';
+    slotsLeftEl.textContent = '--';
+    historyListEl.innerHTML = '<li style="color:red">Connection Error</li>';
 }
 
 // ==========================
-// Loading State
+// Loading Spinner
 // ==========================
 function setLoading(loading) {
     if (loading) refreshBtn.classList.add('spinning');
@@ -201,7 +170,6 @@ function setLoading(loading) {
 }
 
 // ==========================
-// Event Listeners
+// Event Listener
 // ==========================
 refreshBtn.addEventListener('click', fetchAllData);
-
