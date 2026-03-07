@@ -9,7 +9,6 @@
   .container { background:#fff; padding:30px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.2); text-align:center; width:320px; }
   h1 { color:#00bcd4; margin-bottom:20px; }
   .stat { margin:15px 0; font-size:20px; font-weight:bold; }
-  .status { margin-top:20px; font-size:18px; color:red; font-weight:bold; }
   button { background:#00bcd4; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:16px; margin-top:20px; }
   button:hover { background:#0097a7; }
 </style>
@@ -21,13 +20,11 @@
   <div class="stat">Vehicles Entered Today: <span id="entered">0</span></div>
   <div class="stat">Vehicles Exited Today: <span id="exited">0</span></div>
   <div class="stat">Currently Inside: <span id="inside">0</span></div>
-  <div class="status" id="statusText"></div>
   <button id="refreshBtn" onclick="fetchParkingData()">Refresh Data</button>
 </div>
 
 <script>
 const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
-const MAX_CAPACITY = 6;
 
 async function fetchParkingData() {
   const btn = document.getElementById('refreshBtn');
@@ -42,7 +39,6 @@ async function fetchParkingData() {
     let totalEntered = 0;
     let totalExited = 0;
 
-    // Count entries and exits
     data.forEach(entry => {
       if (entry.occupied === "1") totalEntered++;
       if (entry.occupied === "0") totalExited++;
@@ -54,10 +50,6 @@ async function fetchParkingData() {
     animateValue('entered', parseInt(document.getElementById('entered').textContent), totalEntered);
     animateValue('exited', parseInt(document.getElementById('exited').textContent), totalExited);
     animateValue('inside', parseInt(document.getElementById('inside').textContent), currentlyInside);
-
-    // Show Full only if inside >= MAX_CAPACITY or all available = 0
-    const isFull = currentlyInside >= MAX_CAPACITY || data.every(e => parseInt(e.available) === 0 || e.status === "full");
-    document.getElementById('statusText').textContent = isFull ? '🚨 Parking Full!' : '';
 
   } catch (err) {
     console.error('Error:', err);
