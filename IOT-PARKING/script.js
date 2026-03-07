@@ -12,7 +12,6 @@
         return `${monthNames[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
     }
 
-    // ---------- History ----------
     function loadHistory() {
         try {
             const stored = localStorage.getItem('parking_cyber_history');
@@ -53,32 +52,31 @@
         });
     }
 
-    // ---------- Update date display ----------
     function updateDateDisplay() {
         const now = new Date();
         const optionsHeader = { weekday:'short', month:'short', day:'numeric', year:'numeric'};
         document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-PH', optionsHeader);
     }
 
-    // ---------- Fetch from MockAPI ----------
     async function fetchParkingData() {
         try {
             const res = await fetch(MOCKAPI_URL);
             if(!res.ok) throw new Error(res.status);
             const data = await res.json();
 
-            // Count occupied slots (0/1 per slot)
+            // Count occupied slots
             let occupied = data.filter(slot => parseInt(slot.occupied) === 1).length;
 
-            // Sum entrance and exit from all slots
+            // Latest slot's available for vacant display
+            let latestAvailable = parseInt(data[data.length-1]?.available) || (MAX_CAPACITY - occupied);
+
+            // Entrance/Exit (view-only) sum all records if present
             let entrance = data.reduce((sum, slot) => sum + (parseInt(slot.entrance) || 0), 0);
             let exitCount = data.reduce((sum, slot) => sum + (parseInt(slot.exit) || 0), 0);
 
-            const vacant = MAX_CAPACITY - occupied;
-
-            // Update dashboard numbers
+            // Update dashboard
             document.getElementById('currentInside').textContent = occupied;
-            document.getElementById('vacantSlots').textContent = vacant >= 0 ? vacant : 0;
+            document.getElementById('vacantSlots').textContent = latestAvailable;
             document.getElementById('todayEntrance').textContent = entrance;
             document.getElementById('todayExit').textContent = exitCount;
 
@@ -91,7 +89,7 @@
             else if(capPercent>=100) capBar.classList.add('danger');
             document.getElementById('capacityText').textContent = `${occupied}/${MAX_CAPACITY}`;
 
-            // Show alert if full
+            // Alert if full
             const alertBox = document.getElementById('alertBox');
             alertBox.style.display = (occupied >= MAX_CAPACITY) ? 'flex' : 'none';
 
@@ -103,15 +101,12 @@
         }
     }
 
-    // ---------- Initial calls ----------
     loadHistory();
     updateDateDisplay();
     fetchParkingData();
 
-    // ---------- Refresh button ----------
     document.getElementById('refreshBtn').addEventListener('click', fetchParkingData);
 
-    // ---------- Auto refresh ----------
     setInterval(fetchParkingData, 20000);
     setInterval(updateDateDisplay, 60000);
 })();
