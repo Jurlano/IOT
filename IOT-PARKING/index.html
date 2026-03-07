@@ -5,59 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Parking Tracker</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-      text-align: center;
-      width: 300px;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      color: #00bcd4;
-    }
-
-    .stat {
-      margin: 15px 0;
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .alert {
-      background-color: #f44336;
-      color: white;
-      padding: 10px;
-      margin-top: 20px;
-      border-radius: 8px;
-      display: none;
-    }
-
-    button {
-      background-color: #00bcd4;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin-top: 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #0097a7;
-    }
+    body { font-family: Arial; background: #f2f2f2; display: flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    .container { background:#fff; padding:30px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.2); text-align:center; width:320px; }
+    h1 { color:#00bcd4; margin-bottom:20px; }
+    .stat { margin:15px 0; font-size:20px; font-weight:bold; }
+    .alert { background:#f44336; color:#fff; padding:10px; margin-top:20px; border-radius:8px; display:none; }
+    button { background:#00bcd4; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:16px; margin-top:20px; }
+    button:hover { background:#0097a7; }
   </style>
 </head>
 <body>
@@ -74,17 +28,38 @@
     const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
     const MAX_CAPACITY = 6;
 
+    // Store previous occupied status to detect in/out
+    let prevStatus = {};
+
+    let totalInside = 0;
+    let totalExited = 0;
+
     async function fetchParkingData() {
       try {
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        let totalInside = 0;
-        let totalExited = 0;
-
         data.forEach(entry => {
-          totalInside += parseInt(entry.occupied);
-          totalExited += parseInt(entry.available);
+          const id = entry.id;
+          const occupied = parseInt(entry.occupied);
+
+          if (!(id in prevStatus)) {
+            // First time, initialize
+            prevStatus[id] = occupied;
+            if (occupied === 1) totalInside++;
+          } else {
+            // Detect changes
+            if (prevStatus[id] === 0 && occupied === 1) {
+              // Vehicle entered
+              totalInside++;
+            } else if (prevStatus[id] === 1 && occupied === 0) {
+              // Vehicle exited
+              totalInside--;
+              totalExited++;
+            }
+            // Update stored status
+            prevStatus[id] = occupied;
+          }
         });
 
         document.getElementById('inside').textContent = totalInside;
@@ -103,8 +78,11 @@
       }
     }
 
-    // Fetch on page load
+    // Initial fetch
     fetchParkingData();
+
+    // Auto-refresh every 5 seconds
+    setInterval(fetchParkingData, 5000);
   </script>
 
 </body>
