@@ -1,6 +1,7 @@
-// MockAPI Configuration
+// MockAPI Configuration - IMONG URL
 const MOCKAPI_BASE = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io';
-const ENDPOINT = 'parking';
+const PARKING_ENDPOINT = 'parking';      // Endpoint para sa current status
+const LOGS_ENDPOINT = 'logs';            // Endpoint para sa history logs
 
 // Settings
 const MAX_CAPACITY = 6;
@@ -21,9 +22,9 @@ const dateDisplay = document.getElementById('dateDisplay');
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     updateDate();
-    fetchData();
+    fetchAllData();
     // Auto refresh every 3 seconds
-    setInterval(fetchData, 3000);
+    setInterval(fetchAllData, 3000);
     setInterval(updateDate, 60000);
 });
 
@@ -34,49 +35,58 @@ function updateDate() {
     dateDisplay.innerHTML = `<i class="far fa-calendar-alt"></i> ${now.toLocaleDateString('en-US', options)}`;
 }
 
-// Fetch Data from MockAPI
-async function fetchData() {
+// Fetch All Data (Status + Logs)
+async function fetchAllData() {
+    setLoading(true);
+    
     try {
-        setLoading(true);
+        // Fetch parking status (current inside, entrance count, exit count)
+        const statusRes = await fetch(`${MOCKAPI_BASE}/${PARKING_ENDPOINT}`);
+        const statusData = await statusRes.json();
         
-        const response = await fetch(`${MOCKAPI_BASE}/${ENDPOINT}`);
-        if (!response.ok) throw new Error('Error');
+        // Fetch logs/history
+        const logsRes = await fetch(`${MOCKAPI_BASE}/${LOGS_ENDPOINT}?sortBy=createdAt&order=desc&limit=10`);
+        const logsData = await logsRes.json();
         
-        const data = await response.json();
-        console.log('Data:', data);
+        console.log('Status:', statusData);
+        console.log('Logs:', logsData);
         
-        // Parse data - adjust base sa imong MockAPI structure
-        let currentInside = 0;
-        let todayEntrance = 0;
-        let todayExit = 0;
-        let logs = [];
-        
-        if (Array.isArray(data)) {
-            // Kung array, kuhaon ang latest
-            const latest = data[data.length - 1];
-            currentInside = parseInt(latest.currentInside || latest.count || 0);
-            todayEntrance = parseInt(latest.todayEntrance || latest.entrance || 0);
-            todayExit = parseInt(latest.todayExit || latest.exit || 0);
-            logs = data.slice(-10).reverse(); // Last 10 logs
-        } else {
-            // Kung object
-            currentInside = parseInt(data.currentInside || data.count || 0);
-            todayEntrance = parseInt(data.todayEntrance || data.entrance || 0);
-            todayExit = parseInt(data.todayExit || data.exit || 0);
-            logs = data.logs || [];
-        }
-        
-        updateDisplay(currentInside, todayEntrance, todayExit);
-        renderHistory(logs);
+        // Parse and display
+        parseAndDisplay(statusData, logsData);
         
     } catch (error) {
-        console.error('Error:', error);
-        // Demo data kung fail
-        updateDisplay(4, 8, 4);
-        renderDemoHistory();
+        console.error('Error fetching:', error);
+        showError();
     } finally {
         setLoading(false);
     }
+}
+
+// Parse Data and Display
+function parseAndDisplay(statusData, logsData) {
+    let currentInside = 0;
+    let todayEntrance = 0;
+    let todayExit = 0;
+    
+    // Parse status data - adjust base sa imong MockAPI structure
+    if (Array.isArray(statusData) && statusData.length > 0) {
+        // Kung array, kuhaa ang latest or first item
+        const latest = statusData[0]; // or statusData[statusData.length - 1] for latest
+        currentInside = parseInt(latest.currentInside ?? latest.count ?? latest.inside ?? 0);
+        todayEntrance = parseInt(latest.todayEntrance ?? latest.entrance ?? latest.entranceCount ?? 0);
+        todayExit = parseInt(latest.todayExit ?? latest.exit ?? latest.exitCount ?? 0);
+    } else if (typeof statusData === 'object' && statusData !== null) {
+        // Kung single object
+        currentInside = parseInt(statusData.currentInside ?? statusData.count ?? statusData.inside ?? 0);
+        todayEntrance = parseInt(statusData.todayEntrance ?? statusData.entrance ?? statusData.entranceCount ?? 0);
+        todayExit = parseInt(statusData.todayExit ?? statusData.exit ?? statusData.exitCount ?? 0);
+    }
+    
+    // Update display
+    updateDisplay(currentInside, todayEntrance, todayExit);
+    
+    // Render history
+    renderHistory(logsData);
 }
 
 // Update Display
@@ -85,9 +95,9 @@ function updateDisplay(inside, entrance, exit) {
     
     // Main counter
     currentInsideEl.textContent = inside;
-    vacantSlotsEl.textContent = vacant;
+    vacantSlotsEl.textContent = vacant >= 0 ? vacant : 0;
     
-    // Color coding
+    // Check if full
     if (inside >= MAX_CAPACITY) {
         currentInsideEl.classList.add('full');
         slotsLeftEl.classList.add('full');
@@ -105,10 +115,11 @@ function updateDisplay(inside, entrance, exit) {
     todayExitEl.textContent = exit;
     
     // Capacity bar
-    const percentage = (inside / MAX_CAPACITY) * 100;
+    const percentage = Math.min((inside / MAX_CAPACITY) * 100, 100);
     capacityBar.style.width = `${percentage}%`;
     capacityText.textContent = `${inside}/${MAX_CAPACITY}`;
     
+    // Color coding
     capacityBar.classList.remove('warning', 'danger');
     if (inside >= MAX_CAPACITY) {
         capacityBar.classList.add('danger');
@@ -122,22 +133,30 @@ function renderHistory(logs) {
     historyListEl.innerHTML = '';
     
     if (!logs || logs.length === 0) {
-        historyListEl.innerHTML = '<li class="history-item"><span>No records</span></li>';
+        historyListEl.innerHTML = '<li class="history-item"><span class="history-time">No records found</span></li>';
         return;
     }
     
-    logs.forEach(log => {
+    // Ensure array
+    const logsArray = Array.isArray(logs) ? logs : [logs];
+    
+    logsArray.forEach(log => {
         const item = document.createElement('li');
-        const isEntrance = log.action === 'entrance' || log.type === 'entrance';
+        
+        // Determine action type
+        const action = (log.action || log.type || 'entrance').toLowerCase();
+        const isEntrance = action === 'entrance' || action === 'in' || action === 'sulod';
         const actionClass = isEntrance ? 'entrance' : 'exit';
         const badgeText = isEntrance ? 'SULOD' : 'GAWAS';
         
         item.className = `history-item ${actionClass}`;
         
-        const time = new Date(log.timestamp || log.createdAt || Date.now());
+        // Parse time
+        const time = new Date(log.createdAt || log.timestamp || log.date || Date.now());
         const timeStr = time.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
-            minute: '2-digit' 
+            minute: '2-digit',
+            hour12: true
         });
         
         item.innerHTML = `
@@ -149,16 +168,13 @@ function renderHistory(logs) {
     });
 }
 
-// Demo History (kung wala pa MockAPI)
-function renderDemoHistory() {
-    const demoLogs = [
-        { action: 'entrance', timestamp: new Date(Date.now() - 20000) },
-        { action: 'entrance', timestamp: new Date(Date.now() - 45000) },
-        { action: 'exit', timestamp: new Date(Date.now() - 120000) },
-        { action: 'entrance', timestamp: new Date(Date.now() - 180000) },
-        { action: 'exit', timestamp: new Date(Date.now() - 300000) },
-    ];
-    renderHistory(demoLogs);
+// Show Error
+function showError() {
+    currentInsideEl.textContent = 'ERR';
+    vacantSlotsEl.textContent = '--';
+    todayEntranceEl.textContent = '--';
+    todayExitEl.textContent = '--';
+    historyListEl.innerHTML = '<li class="history-item"><span class="history-time" style="color: var(--neon-red)">Connection Error</span></li>';
 }
 
 // Loading State
@@ -171,4 +187,4 @@ function setLoading(loading) {
 }
 
 // Event Listeners
-refreshBtn.addEventListener('click', fetchData);
+refreshBtn.addEventListener('click', fetchAllData);
