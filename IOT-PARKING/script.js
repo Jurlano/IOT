@@ -8,7 +8,7 @@
     function getTodayDateStr() {
         const now = new Date();
         const monthNames = ['Enero','Pebrero','Marso','Abril','Mayo','Hunyo',
-                            'Hulyo','Agosto','Setyembre','Oktubre','Nobyembre','Disyembre'];
+                            'Hulyo','Agosto','Setymbre','Oktubre','Nobyembre','Disyembre'];
         return `${monthNames[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
     }
 
@@ -64,21 +64,21 @@
             if(!res.ok) throw new Error(res.status);
             const data = await res.json();
 
-            // Count occupied slots
-            let occupied = data.filter(slot => parseInt(slot.occupied) === 1).length;
+            // Count occupied slots (current inside)
+            let occupied = data.reduce((sum, slot) => sum + parseInt(slot.occupied || 0), 0);
 
-            // Latest slot's available for vacant display
-            let latestAvailable = parseInt(data[data.length-1]?.available) || (MAX_CAPACITY - occupied);
+            // Calculate total entered/exited (using entrance/exit fields if available)
+            let totalEntrance = data.reduce((sum, slot) => sum + parseInt(slot.entrance || 0), 0);
+            let totalExit = data.reduce((sum, slot) => sum + parseInt(slot.exit || 0), 0);
 
-            // Entrance/Exit (view-only) sum all records if present
-            let entrance = data.reduce((sum, slot) => sum + (parseInt(slot.entrance) || 0), 0);
-            let exitCount = data.reduce((sum, slot) => sum + (parseInt(slot.exit) || 0), 0);
+            // Available slots
+            let vacant = MAX_CAPACITY - occupied;
 
-            // Update dashboard
+            // Update dashboard numbers
             document.getElementById('currentInside').textContent = occupied;
-            document.getElementById('vacantSlots').textContent = latestAvailable;
-            document.getElementById('todayEntrance').textContent = entrance;
-            document.getElementById('todayExit').textContent = exitCount;
+            document.getElementById('vacantSlots').textContent = vacant;
+            document.getElementById('todayEntrance').textContent = totalEntrance;
+            document.getElementById('todayExit').textContent = totalExit;
 
             // Capacity bar
             const capPercent = Math.min((occupied/MAX_CAPACITY)*100,100);
@@ -90,8 +90,7 @@
             document.getElementById('capacityText').textContent = `${occupied}/${MAX_CAPACITY}`;
 
             // Alert if full
-            const alertBox = document.getElementById('alertBox');
-            alertBox.style.display = (occupied >= MAX_CAPACITY) ? 'flex' : 'none';
+            document.getElementById('alertBox').style.display = (occupied >= MAX_CAPACITY) ? 'flex' : 'none';
 
             // Update history
             addTodayToHistory(getTodayDateStr(), occupied);
@@ -107,6 +106,6 @@
 
     document.getElementById('refreshBtn').addEventListener('click', fetchParkingData);
 
-    setInterval(fetchParkingData, 20000);
+    setInterval(fetchParkingData, 10000); // fetch every 10s
     setInterval(updateDateDisplay, 60000);
 })();
