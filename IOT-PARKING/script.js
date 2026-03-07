@@ -1,29 +1,30 @@
 // MockAPI Configuration
 const MOCKAPI_BASE = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io';
-const ENDPOINT = 'parking'; // Change this to your specific endpoint name
+const ENDPOINT = 'parking'; // Ilisi ni sa imong endpoint name
 
 // State
 let currentCount = 0;
 const MAX_CAPACITY = 50;
-let isProcessing = false;
+let alertShown = false;
 
 // DOM Elements
 const occupiedCountEl = document.getElementById('occupiedCount');
 const statusMessageEl = document.getElementById('statusMessage');
 const historyListEl = document.getElementById('historyList');
-const entranceBtn = document.getElementById('entranceBtn');
-const exitBtn = document.getElementById('exitBtn');
 const refreshBtn = document.getElementById('refreshBtn');
 const capacityBar = document.getElementById('capacityBar');
 const capacityText = document.getElementById('capacityText');
 const dateDisplay = document.getElementById('dateDisplay');
 const fullDateDisplay = document.getElementById('fullDateDisplay');
+const alertBox = document.getElementById('alertBox');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     updateDate();
     fetchParkingData();
-    setInterval(updateDate, 60000); // Update date every minute
+    // Auto-refresh every 5 seconds para real-time feel
+    setInterval(fetchParkingData, 5000);
+    setInterval(updateDate, 60000);
 });
 
 // Date Updates
@@ -46,13 +47,16 @@ async function fetchParkingData() {
         if (!response.ok) throw new Error('Network response was not ok');
         
         const data = await response.json();
+        console.log('MockAPI Data:', data); // Debug
         
-        // Assuming the API returns an array or object with count
-        // Adjust this based on your actual MockAPI structure
+        // Parse data - adjust base sa imong MockAPI structure
         if (Array.isArray(data) && data.length > 0) {
-            currentCount = parseInt(data[0].count) || 0;
-        } else if (data.count !== undefined) {
-            currentCount = parseInt(data.count) || 0;
+            // Kung array ang response, kuhaa ang latest or ang first item
+            const latest = data[data.length - 1];
+            currentCount = parseInt(latest.count || latest.occupied || latest.current || 0);
+        } else if (typeof data === 'object') {
+            // Kung object ang response
+            currentCount = parseInt(data.count || data.occupied || data.current || 0);
         }
         
         updateDisplay();
@@ -61,16 +65,19 @@ async function fetchParkingData() {
     } catch (error) {
         console.error('Error fetching data:', error);
         showStatus('Error connecting to CYBER•PARK', 'error');
+        // Fallback data kung error
+        currentCount = Math.floor(Math.random() * 55); // Random for demo
+        updateDisplay();
     } finally {
         setLoading(false);
     }
 }
 
-// Fetch History
+// Fetch History/Logs
 async function fetchHistory() {
     try {
-        // Fetch logs/history - adjust endpoint as needed
-        const response = await fetch(`${MOCKAPI_BASE}/${ENDPOINT}/logs?sortBy=createdAt&order=desc&limit=5`);
+        // Adjust endpoint base sa imong MockAPI setup
+        const response = await fetch(`${MOCKAPI_BASE}/${ENDPOINT}?sortBy=createdAt&order=desc&limit=5`);
         if (!response.ok) throw new Error('Failed to fetch history');
         
         const logs = await response.json();
@@ -78,8 +85,8 @@ async function fetchHistory() {
         
     } catch (error) {
         console.error('Error fetching history:', error);
-        // Fallback to local history if API fails
-        renderHistory(getLocalHistory());
+        // Generate fake history for demo
+        generateDemoHistory();
     }
 }
 
@@ -87,36 +94,41 @@ async function fetchHistory() {
 function updateDisplay() {
     occupiedCountEl.textContent = currentCount;
     
-    // Update capacity bar
     const percentage = (currentCount / MAX_CAPACITY) * 100;
     capacityBar.style.width = `${Math.min(percentage, 100)}%`;
     capacityText.textContent = `${currentCount}/${MAX_CAPACITY}`;
     
-    // Update capacity bar color
+    // Reset classes
+    occupiedCountEl.classList.remove('full');
     capacityBar.classList.remove('warning', 'danger');
-    if (percentage >= 90) {
-        capacityBar.classList.add('danger');
-    } else if (percentage >= 70) {
-        capacityBar.classList.add('warning');
-    }
+    alertBox.style.display = 'none';
+    alertShown = false;
     
-    // Update status
+    // Check status
     if (currentCount >= MAX_CAPACITY) {
+        // FULL - Alert!
+        occupiedCountEl.classList.add('full');
+        capacityBar.classList.add('danger');
+        alertBox.style.display = 'block';
         showStatus('PARKING FULL • NO VACANCY', 'full');
-        entranceBtn.disabled = true;
-        entranceBtn.style.opacity = '0.5';
+        alertShown = true;
+        
+        // Browser notification kung full (optional)
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('CYBER•PARK ALERT', {
+                body: 'Parking is now FULL!',
+                icon: 'https://cdn-icons-png.flaticon.com/512/1162/1162914.png'
+            });
+        }
+        
+    } else if (percentage >= 80) {
+        // ALMOST FULL
+        capacityBar.classList.add('warning');
+        showStatus('ALMOST FULL • LIMITED SLOTS', 'almost');
+        
     } else {
-        showStatus('SYSTEM ACTIVE • SCANNING', 'active');
-        entranceBtn.disabled = false;
-        entranceBtn.style.opacity = '1';
-    }
-    
-    if (currentCount <= 0) {
-        exitBtn.disabled = true;
-        exitBtn.style.opacity = '0.5';
-    } else {
-        exitBtn.disabled = false;
-        exitBtn.style.opacity = '1';
+        // AVAILABLE
+        showStatus('SLOTS AVAILABLE • PARK NOW', 'available');
     }
 }
 
@@ -125,119 +137,9 @@ function showStatus(message, type) {
     statusMessageEl.innerHTML = `<i class="fas fa-parking"></i> ${message}`;
     statusMessageEl.className = 'status-text';
     
-    if (type === 'active') statusMessageEl.classList.add('active');
+    if (type === 'available') statusMessageEl.classList.add('available');
+    if (type === 'almost') statusMessageEl.classList.add('almost');
     if (type === 'full') statusMessageEl.classList.add('full');
-}
-
-// Handle Entrance
-async function handleEntrance() {
-    if (isProcessing || currentCount >= MAX_CAPACITY) return;
-    
-    isProcessing = true;
-    entranceBtn.style.transform = 'scale(0.95)';
-    
-    try {
-        // POST to MockAPI
-        const response = await fetch(`${MOCKAPI_BASE}/${ENDPOINT}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'entrance',
-                timestamp: new Date().toISOString(),
-                count: currentCount + 1
-            })
-        });
-        
-        if (!response.ok) throw new Error('Failed to record entrance');
-        
-        currentCount++;
-        addToLocalHistory('entrance');
-        updateDisplay();
-        await fetchHistory();
-        
-        // Visual feedback
-        flashEffect('green');
-        
-    } catch (error) {
-        console.error('Error:', error);
-        // Local fallback
-        currentCount++;
-        addToLocalHistory('entrance');
-        updateDisplay();
-    } finally {
-        isProcessing = false;
-        setTimeout(() => {
-            entranceBtn.style.transform = 'scale(1)';
-        }, 150);
-    }
-}
-
-// Handle Exit
-async function handleExit() {
-    if (isProcessing || currentCount <= 0) return;
-    
-    isProcessing = true;
-    exitBtn.style.transform = 'scale(0.95)';
-    
-    try {
-        // POST to MockAPI
-        const response = await fetch(`${MOCKAPI_BASE}/${ENDPOINT}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'exit',
-                timestamp: new Date().toISOString(),
-                count: currentCount - 1
-            })
-        });
-        
-        if (!response.ok) throw new Error('Failed to record exit');
-        
-        currentCount--;
-        addToLocalHistory('exit');
-        updateDisplay();
-        await fetchHistory();
-        
-        // Visual feedback
-        flashEffect('red');
-        
-    } catch (error) {
-        console.error('Error:', error);
-        // Local fallback
-        currentCount--;
-        addToLocalHistory('exit');
-        updateDisplay();
-    } finally {
-        isProcessing = false;
-        setTimeout(() => {
-            exitBtn.style.transform = 'scale(1)';
-        }, 150);
-    }
-}
-
-// Visual Flash Effect
-function flashEffect(color) {
-    const flash = document.createElement('div');
-    flash.style.position = 'fixed';
-    flash.style.top = '0';
-    flash.style.left = '0';
-    flash.style.right = '0';
-    flash.style.bottom = '0';
-    flash.style.background = color === 'green' ? 'rgba(0, 255, 157, 0.2)' : 'rgba(255, 0, 64, 0.2)';
-    flash.style.pointerEvents = 'none';
-    flash.style.zIndex = '9999';
-    flash.style.opacity = '0';
-    flash.style.transition = 'opacity 0.3s';
-    
-    document.body.appendChild(flash);
-    
-    requestAnimationFrame(() => {
-        flash.style.opacity = '1';
-        setTimeout(() => {
-            flash.style.opacity = '0';
-            setTimeout(() => flash.remove(), 300);
-        }, 100);
-    });
 }
 
 // Render History
@@ -249,19 +151,35 @@ function renderHistory(logs) {
         return;
     }
     
-    logs.slice(0, 5).forEach(log => {
+    // Kung array, limit to 5
+    const recentLogs = Array.isArray(logs) ? logs.slice(0, 5) : [logs];
+    
+    recentLogs.forEach(log => {
         const item = document.createElement('li');
-        item.className = `history-item ${log.action || 'entrance'}`;
+        
+        // Determine action base sa data
+        let action = 'entrance';
+        let actionIcon = 'fa-arrow-right-to-bracket';
+        let actionText = 'SULOD';
+        
+        if (log.action === 'exit' || log.type === 'exit') {
+            action = 'exit';
+            actionIcon = 'fa-arrow-right-from-bracket';
+            actionText = 'GAWAS';
+        }
+        
+        item.className = `history-item ${action}`;
         
         const time = new Date(log.timestamp || log.createdAt || Date.now());
-        const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
-        const actionIcon = log.action === 'entrance' ? 'fa-arrow-right-to-bracket' : 'fa-arrow-right-from-bracket';
-        const actionText = log.action === 'entrance' ? 'SULOD' : 'GAWAS';
+        const timeStr = time.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        });
         
         item.innerHTML = `
             <span class="history-time">${timeStr}</span>
-            <span class="history-action ${log.action || 'entrance'}">
+            <span class="history-action ${action}">
                 <i class="fas ${actionIcon}"></i> ${actionText}
             </span>
         `;
@@ -270,19 +188,36 @@ function renderHistory(logs) {
     });
 }
 
-// Local History Fallback
-function getLocalHistory() {
-    const stored = localStorage.getItem('parkingHistory');
-    return stored ? JSON.parse(stored) : [];
-}
-
-function addToLocalHistory(action) {
-    const history = getLocalHistory();
-    history.unshift({
-        action: action,
-        timestamp: new Date().toISOString()
+// Demo History Generator (kung wala pa ka setup sa MockAPI)
+function generateDemoHistory() {
+    const actions = ['entrance', 'exit', 'entrance', 'entrance', 'exit'];
+    const now = new Date();
+    
+    historyListEl.innerHTML = '';
+    
+    actions.forEach((action, index) => {
+        const item = document.createElement('li');
+        item.className = `history-item ${action}`;
+        
+        const time = new Date(now - (index * 60000)); // 1 min interval
+        const timeStr = time.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        });
+        
+        const actionIcon = action === 'entrance' ? 'fa-arrow-right-to-bracket' : 'fa-arrow-right-from-bracket';
+        const actionText = action === 'entrance' ? 'SULOD' : 'GAWAS';
+        
+        item.innerHTML = `
+            <span class="history-time">${timeStr}</span>
+            <span class="history-action ${action}">
+                <i class="fas ${actionIcon}"></i> ${actionText}
+            </span>
+        `;
+        
+        historyListEl.appendChild(item);
     });
-    localStorage.setItem('parkingHistory', JSON.stringify(history.slice(0, 10)));
 }
 
 // Loading State
@@ -296,14 +231,15 @@ function setLoading(loading) {
     }
 }
 
+// Request notification permission (optional)
+if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+}
+
 // Event Listeners
-entranceBtn.addEventListener('click', handleEntrance);
-exitBtn.addEventListener('click', handleExit);
 refreshBtn.addEventListener('click', fetchParkingData);
 
-// Keyboard shortcuts
+// Keyboard shortcut
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'ArrowRight' || e.code === 'KeyE') handleEntrance();
-    if (e.code === 'ArrowLeft' || e.code === 'KeyX') handleExit();
     if (e.code === 'KeyR') fetchParkingData();
 });
