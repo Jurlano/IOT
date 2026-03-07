@@ -20,7 +20,8 @@
   <h1>⚡ Parking Tracker ⚡</h1>
   <div class="stat">Vehicles Inside: <span id="inside">0</span></div>
   <div class="stat">Vehicles Exited: <span id="exit">0</span></div>
-  <div class="alert" id="alert">⚠️ Parking Full! Over Capacity!</div>
+  <div class="alert" id="overAlert">⚠️ Over Capacity! More than 6 vehicles inside!</div>
+  <div class="alert" id="emptyAlert">⚠️ Parking Full! No available slots!</div>
   <button onclick="fetchParkingData()">Refresh Data</button>
 </div>
 
@@ -34,21 +35,34 @@ function fetchParkingData() {
     .then(data => {
       let totalInside = 0;
       let totalExited = 0;
+      let parkingFull = false;
 
       data.forEach(entry => {
         if (entry.occupied === "1") totalInside++;
         if (entry.occupied === "0") totalExited++;
+
+        if (parseInt(entry.available) === 0) parkingFull = true; // alert if no slots
       });
 
       document.getElementById('inside').textContent = totalInside;
       document.getElementById('exit').textContent = totalExited;
 
-      const alertBox = document.getElementById('alert');
+      // Over capacity alert
+      const overAlert = document.getElementById('overAlert');
       if (totalInside > MAX_CAPACITY) {
-        alertBox.style.display = 'block';
+        overAlert.style.display = 'block';
       } else {
-        alertBox.style.display = 'none';
+        overAlert.style.display = 'none';
       }
+
+      // Parking full alert
+      const emptyAlert = document.getElementById('emptyAlert');
+      if (parkingFull) {
+        emptyAlert.style.display = 'block';
+      } else {
+        emptyAlert.style.display = 'none';
+      }
+
     })
     .catch(err => {
       console.error('Error:', err);
