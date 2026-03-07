@@ -29,8 +29,8 @@ const dateDisplay = document.getElementById('dateDisplay');
 document.addEventListener('DOMContentLoaded', () => {
     updateDate();
     fetchAllData();
-    setInterval(fetchAllData, 3000); // Auto refresh
-    setInterval(updateDate, 60000);   // Update date
+    setInterval(fetchAllData, 3000); // Auto refresh every 3 seconds
+    setInterval(updateDate, 60000);   // Update date every minute
 });
 
 // ==========================
@@ -49,20 +49,22 @@ async function fetchAllData() {
     setLoading(true);
 
     try {
-        // Fetch parking status
+        // Fetch parking status (current occupied counts)
         const statusRes = await fetch(`${MOCKAPI_BASE}/${PARKING_ENDPOINT}`);
+        if (!statusRes.ok) throw new Error('Failed to fetch parking data');
         const statusData = await statusRes.json();
 
-        // Fetch logs/history (latest 50 entries for today)
+        // Fetch logs/history (latest 50 entries)
         const logsRes = await fetch(`${MOCKAPI_BASE}/${LOGS_ENDPOINT}?sortBy=createdAt&order=desc&limit=50`);
+        if (!logsRes.ok) throw new Error('Failed to fetch logs data');
         const logsData = await logsRes.json();
 
-        // Process data
+        // Process and display data
         parseAndDisplay(statusData, logsData);
 
     } catch (error) {
         console.error('Fetch error:', error);
-        showError();
+        showError(error.message);
     } finally {
         setLoading(false);
     }
@@ -75,26 +77,39 @@ function parseAndDisplay(statusData, logsData) {
     let currentInside = 0;
     let todayExit = 0;
 
-    // Sum all occupied from parking objects
+    // Calculate total occupied from parking objects
     if (Array.isArray(statusData)) {
-        currentInside = statusData.reduce((sum, rec) => sum + parseInt(rec.occupied ?? 0), 0);
+        currentInside = statusData.reduce((sum, record) => {
+            // Handle different possible field names for occupied status
+            const occupied = parseInt(record.occupied ?? record.count ?? record.value ?? 0);
+            return sum + (isNaN(occupied) ? 0 : occupied);
+        }, 0);
     }
 
-    // Count exits for today
+    // Count exits for today from logs
     if (Array.isArray(logsData)) {
-        const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+        const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        
         logsData.forEach(log => {
-            const logDate = new Date(log.createdAt || log.timestamp || log.date || Date.now());
+            // Try different possible date field names
+            const dateStr = log.createdAt || log.timestamp || log.date || log.time;
+            const logDate = dateStr ? new Date(dateStr) : new Date();
+            
+            if (isNaN(logDate.getTime())) return; // Skip invalid dates
+            
             const logDay = logDate.toISOString().split('T')[0];
-            const action = (log.action || log.type || '').toLowerCase();
-
-            if (logDay === today && ['exit', 'out', 'gawas'].includes(action)) {
+            
+            // Check if it's an exit/out action (case insensitive)
+            const action = (log.action || log.type || log.event || '').toLowerCase();
+            const isExit = ['exit', 'out', 'gawas', 'left', 'depart'].includes(action);
+            
+            if (logDay === today && isExit) {
                 todayExit++;
             }
         });
     }
 
-    // Update UI
+    // Update UI with processed data
     updateDisplay(currentInside, todayExit);
     renderHistory(logsData);
 }
@@ -103,73 +118,184 @@ function parseAndDisplay(statusData, logsData) {
 // Update Display Boxes
 // ==========================
 function updateDisplay(inside, exit) {
-    const vacant = MAX_CAPACITY - inside;
+    const vacant = Math.max(MAX_CAPACITY - inside, 0);
 
-    // Green box - current inside
+    // Update numeric displays
     currentInsideEl.textContent = inside;
-
-    // Red box - exited today
     todayExitEl.textContent = exit;
+    
+    // Update slots left text (Bisaya/English mix)
+    slotsLeftEl.textContent = vacant > 0 ? 
+        `${vacant} ka slots ang bakante` : 
+        'Puno na ang parking';
 
-    // Slots left and alerts
-    slotsLeftEl.textContent = vacant >= 0 ? `${vacant} ka slots ang bakante` : '0 ka slots';
-    if (inside >= MAX_CAPACITY) alertBox.style.display = 'block';
-    else alertBox.style.display = 'none';
+    // Show/hide full capacity alert
+    if (inside >= MAX_CAPACITY) {
+        alertBox.style.display = 'block';
+        alertBox.textContent = '⚠ PUNO NA ANG PARKING ⚠';
+    } else {
+        alertBox.style.display = 'none';
+    }
 
-    // Capacity bar
+    // Update capacity bar
     const percent = Math.min((inside / MAX_CAPACITY) * 100, 100);
     capacityBar.style.width = `${percent}%`;
     capacityText.textContent = `${inside}/${MAX_CAPACITY}`;
 
-    // Color coding
+    // Color code the capacity bar
     capacityBar.classList.remove('warning', 'danger');
-    if (inside >= MAX_CAPACITY) capacityBar.classList.add('danger');
-    else if (inside >= 4) capacityBar.classList.add('warning');
+    if (inside >= MAX_CAPACITY) {
+        capacityBar.classList.add('danger'); // Red - full
+    } else if (inside >= 4) {
+        capacityBar.classList.add('warning'); // Yellow - almost full
+    }
 }
 
 // ==========================
-// Render History
+// Render History List
 // ==========================
 function renderHistory(logs) {
     historyListEl.innerHTML = '';
+    
     if (!logs || logs.length === 0) {
-        historyListEl.innerHTML = '<li>No records found</li>';
+        historyListEl.innerHTML = '<li class="empty-state">Walay records nga nakit-an</li>';
         return;
     }
 
-    logs.forEach(log => {
+    // Sort logs by date (newest first) just to be sure
+    const sortedLogs = [...logs].sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.timestamp || a.date || 0);
+        const dateB = new Date(b.createdAt || b.timestamp || b.date || 0);
+        return dateB - dateA;
+    });
+
+    // Display only the 20 most recent entries
+    sortedLogs.slice(0, 20).forEach(log => {
         const li = document.createElement('li');
-        const action = (log.action || log.type || '').toLowerCase();
-        const badge = ['entrance', 'in', 'sulod'].includes(action) ? 'SULOD' : 'GAWAS';
-        const cls = badge.toLowerCase();
+        
+        // Determine action type
+        const action = (log.action || log.type || log.event || '').toLowerCase();
+        const isEntry = ['entrance', 'in', 'sulod', 'enter', 'arrive'].includes(action);
+        const isExit = ['exit', 'out', 'gawas', 'left', 'depart'].includes(action);
+        
+        let badgeText = 'SULOD';
+        let badgeClass = 'sulod';
+        
+        if (isExit) {
+            badgeText = 'GAWAS';
+            badgeClass = 'gawas';
+        } else if (!isEntry && !isExit) {
+            // Handle unknown action types
+            badgeText = action.toUpperCase() || 'UNKNOWN';
+            badgeClass = 'unknown';
+        }
 
-        const time = new Date(log.createdAt || log.timestamp || log.date || Date.now());
-        const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        // Format time
+        const dateStr = log.createdAt || log.timestamp || log.date || log.time;
+        const logDate = dateStr ? new Date(dateStr) : new Date();
+        const timeStr = logDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
 
-        li.innerHTML = `<span>${timeStr}</span> <span class="${cls}">${badge}</span>`;
+        // Get vehicle info if available
+        const vehicleInfo = log.vehicle || log.plate || log.car || '';
+
+        li.innerHTML = `
+            <span class="time">${timeStr}</span>
+            ${vehicleInfo ? `<span class="vehicle">${vehicleInfo}</span>` : ''}
+            <span class="badge ${badgeClass}">${badgeText}</span>
+        `;
+        
         historyListEl.appendChild(li);
     });
+
+    // If no items after filtering
+    if (historyListEl.children.length === 0) {
+        historyListEl.innerHTML = '<li class="empty-state">Walay records nga nakit-an</li>';
+    }
 }
 
 // ==========================
 // Error Display
 // ==========================
-function showError() {
+function showError(errorMsg = '') {
     currentInsideEl.textContent = 'ERR';
     todayExitEl.textContent = 'ERR';
     slotsLeftEl.textContent = '--';
-    historyListEl.innerHTML = '<li style="color:red">Connection Error</li>';
+    
+    historyListEl.innerHTML = `
+        <li class="error-state">
+            <span>❌ Connection Error</span>
+            <small>${errorMsg || 'Please check your connection'}</small>
+        </li>
+    `;
+    
+    // Hide alert box on error
+    alertBox.style.display = 'none';
 }
 
 // ==========================
-// Loading Spinner
+// Loading Spinner Control
 // ==========================
 function setLoading(loading) {
-    if (loading) refreshBtn.classList.add('spinning');
-    else refreshBtn.classList.remove('spinning');
+    if (loading) {
+        refreshBtn.classList.add('spinning');
+        refreshBtn.disabled = true;
+    } else {
+        refreshBtn.classList.remove('spinning');
+        refreshBtn.disabled = false;
+    }
 }
 
 // ==========================
-// Event Listener
+// Manual Refresh
 // ==========================
-refreshBtn.addEventListener('click', fetchAllData);
+refreshBtn.addEventListener('click', () => {
+    fetchAllData();
+});
+
+// ==========================
+// Optional: Add CSS for spinner
+// ==========================
+const style = document.createElement('style');
+style.textContent = `
+    .spinning {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .badge.unknown {
+        background-color: #95a5a6;
+    }
+    
+    .empty-state, .error-state {
+        text-align: center;
+        color: #7f8c8d;
+        padding: 20px !important;
+        font-style: italic;
+    }
+    
+    .error-state {
+        color: #e74c3c;
+    }
+    
+    .error-state small {
+        display: block;
+        font-size: 12px;
+        color: #95a5a6;
+        margin-top: 5px;
+    }
+    
+    .vehicle {
+        color: #2c3e50;
+        font-size: 12px;
+        margin: 0 5px;
+    }
+`;
+document.head.appendChild(style);
