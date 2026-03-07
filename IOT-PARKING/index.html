@@ -123,99 +123,118 @@
       letter-spacing: 0.5px;
     }
 
-    .traffic-section {
+    .capacity-section {
       background: #f8fafc;
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 24px;
     }
 
-    .traffic-header {
+    .capacity-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
-    .traffic-title {
+    .capacity-title {
       font-size: 14px;
       font-weight: 600;
       color: #475569;
     }
 
-    .traffic-flow {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .capacity-ratio {
+      font-size: 14px;
+      font-weight: 700;
+      color: #667eea;
     }
 
-    .flow-indicator {
+    .progress-bar {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .status-indicator {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      font-size: 13px;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
       font-weight: 600;
     }
 
-    .flow-in {
-      color: #22c55e;
+    .status-available {
+      background: #dcfce7;
+      color: #166534;
     }
 
-    .flow-out {
-      color: #ef4444;
+    .status-full {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
-    .flow-arrow {
-      font-size: 20px;
-      animation: flowAnimation 1.5s infinite;
+    .status-near {
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    @keyframes flowAnimation {
-      0%, 100% { transform: translateX(0); opacity: 1; }
-      50% { transform: translateX(5px); opacity: 0.5; }
-    }
-
-    .activity-log {
-      max-height: 200px;
-      overflow-y: auto;
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
+    .parking-visual {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
       margin-bottom: 24px;
-      border: 1px solid #e2e8f0;
     }
 
-    .activity-item {
+    .slot {
+      aspect-ratio: 1;
+      border-radius: 12px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 14px;
+      justify-content: center;
+      font-size: 24px;
+      transition: all 0.3s;
+      border: 2px solid transparent;
     }
 
-    .activity-item:last-child {
-      border-bottom: none;
-    }
-
-    .activity-time {
-      font-size: 12px;
-      color: #94a3b8;
-    }
-
-    .activity-type {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 500;
-    }
-
-    .type-entry {
-      color: #22c55e;
-    }
-
-    .type-exit {
+    .slot.occupied {
+      background: #fee2e2;
       color: #ef4444;
+      border-color: #fecaca;
+    }
+
+    .slot.available {
+      background: #dcfce7;
+      color: #22c55e;
+      border-color: #bbf7d0;
     }
 
     .refresh-btn {
@@ -287,15 +306,6 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-
-    .total-count {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-    }
   </style>
 </head>
 <body>
@@ -307,45 +317,38 @@
 
   <div class="header">
     <h1>🚗 Smart Parking</h1>
-    <div class="status-badge">Live Monitoring - Unlimited Access</div>
+    <div class="status-badge">Live Monitoring</div>
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon">🅿️</div>
-      <div class="stat-value" id="inside">0</div>
-      <div class="stat-label">Currently Inside</div>
+      <div class="stat-value" id="occupied">0</div>
+      <div class="stat-label">Occupied</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">🚙</div>
-      <div class="stat-value" id="exit">0</div>
-      <div class="stat-label">Total Exited</div>
+      <div class="stat-icon">✓</div>
+      <div class="stat-value" id="available">0</div>
+      <div class="stat-label">Available</div>
     </div>
   </div>
 
-  <div class="traffic-section">
-    <div class="traffic-header">
-      <span class="traffic-title">Traffic Flow</span>
-      <div class="traffic-flow">
-        <div class="flow-indicator flow-in">
-          <span class="flow-arrow">⬇️</span>
-          <span id="entryCount">0 entries</span>
-        </div>
-        <div class="flow-indicator flow-out">
-          <span class="flow-arrow">⬆️</span>
-          <span id="exitCount">0 exits</span>
-        </div>
-      </div>
+  <div class="capacity-section">
+    <div class="capacity-header">
+      <span class="capacity-title">Capacity Usage</span>
+      <span class="capacity-ratio" id="capacityRatio">0/0</span>
     </div>
-    <div style="font-size: 13px; color: #64748b; margin-top: 8px;">
-      Total vehicles processed today: <span class="total-count" id="totalProcessed">0</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressBar" style="width: 0%; background: linear-gradient(90deg, #00bcd4, #667eea);"></div>
+    </div>
+    <div class="status-indicator status-available" id="statusIndicator">
+      <span id="statusIcon">✓</span>
+      <span id="statusText">Spaces Available</span>
     </div>
   </div>
 
-  <div class="activity-log" id="activityLog">
-    <div style="text-align: center; color: #94a3b8; font-size: 14px; padding: 20px;">
-      No activity yet...
-    </div>
+  <div class="parking-visual" id="parkingGrid">
+    <!-- Slots generated by JS -->
   </div>
 
   <button class="refresh-btn" id="refreshBtn" onclick="fetchParkingData()">
@@ -359,7 +362,35 @@
 <script>
 const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
 
-let activityHistory = [];
+// Calculate total capacity from first data fetch
+let totalCapacity = 0;
+
+function initParkingGrid(capacity) {
+  const grid = document.getElementById('parkingGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < capacity; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'slot available';
+    slot.id = `slot-${i}`;
+    slot.innerHTML = '✓';
+    grid.appendChild(slot);
+  }
+}
+
+function updateParkingGrid(occupied, total) {
+  for (let i = 0; i < total; i++) {
+    const slot = document.getElementById(`slot-${i}`);
+    if (slot) {
+      if (i < occupied) {
+        slot.className = 'slot occupied';
+        slot.innerHTML = '🚗';
+      } else {
+        slot.className = 'slot available';
+        slot.innerHTML = '✓';
+      }
+    }
+  }
+}
 
 function fetchParkingData() {
   const btn = document.getElementById('refreshBtn');
@@ -374,46 +405,64 @@ function fetchParkingData() {
       return res.json();
     })
     .then(data => {
-      let totalInside = 0;
-      let totalExited = 0;
-      let entries = 0;
-      let exits = 0;
-
-      // Clear previous activity
-      activityHistory = [];
-
-      data.forEach(entry => {
-        if (entry.occupied === "1") {
-          totalInside++;
-          entries++;
-          activityHistory.push({
-            type: 'entry',
-            time: entry.timestamp || new Date().toISOString(),
-            id: entry.id
-          });
-        }
-        if (entry.occupied === "0") {
-          totalExited++;
-          exits++;
-          activityHistory.push({
-            type: 'exit',
-            time: entry.timestamp || new Date().toISOString(),
-            id: entry.id
-          });
-        }
-      });
+      // Get the first (or most recent) entry
+      const parkingData = Array.isArray(data) ? data[0] : data;
+      
+      const occupied = parseInt(parkingData.occupied) || 0;
+      const available = parseInt(parkingData.available) || 0;
+      const status = parkingData.status || 'unknown';
+      const total = occupied + available;
+      
+      // Initialize grid on first load
+      if (totalCapacity === 0 && total > 0) {
+        totalCapacity = total;
+        initParkingGrid(total);
+      }
 
       // Update stats with animation
-      animateValue('inside', parseInt(document.getElementById('inside').textContent), totalInside);
-      animateValue('exit', parseInt(document.getElementById('exit').textContent), totalExited);
-      
-      // Update traffic flow indicators
-      document.getElementById('entryCount').textContent = `${entries} entries`;
-      document.getElementById('exitCount').textContent = `${exits} exits`;
-      document.getElementById('totalProcessed').textContent = entries + exits;
+      animateValue('occupied', parseInt(document.getElementById('occupied').textContent), occupied);
+      animateValue('available', parseInt(document.getElementById('available').textContent), available);
 
-      // Update activity log
-      updateActivityLog();
+      // Update capacity display
+      document.getElementById('capacityRatio').textContent = `${occupied}/${total}`;
+      
+      // Update progress bar
+      const percentage = total > 0 ? (occupied / total) * 100 : 0;
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = `${percentage}%`;
+      
+      // Color code based on availability
+      if (available === 0) {
+        progressBar.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+      } else if (available <= 2) {
+        progressBar.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+      } else {
+        progressBar.style.background = 'linear-gradient(90deg, #00bcd4, #667eea)';
+      }
+
+      // Update status indicator
+      const statusIndicator = document.getElementById('statusIndicator');
+      const statusIcon = document.getElementById('statusIcon');
+      const statusText = document.getElementById('statusText');
+      
+      statusIndicator.className = 'status-indicator';
+      
+      if (available === 0) {
+        statusIndicator.classList.add('status-full');
+        statusIcon.textContent = '🚫';
+        statusText.textContent = 'Parking Full';
+      } else if (available <= 2) {
+        statusIndicator.classList.add('status-near');
+        statusIcon.textContent = '⚠️';
+        statusText.textContent = 'Almost Full';
+      } else {
+        statusIndicator.classList.add('status-available');
+        statusIcon.textContent = '✓';
+        statusText.textContent = 'Spaces Available';
+      }
+
+      // Update visual grid
+      updateParkingGrid(occupied, total);
 
       // Update timestamp
       const now = new Date();
@@ -428,32 +477,6 @@ function fetchParkingData() {
       btn.classList.remove('spinning');
       loading.classList.remove('active');
     });
-}
-
-function updateActivityLog() {
-  const log = document.getElementById('activityLog');
-  
-  if (activityHistory.length === 0) {
-    log.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 14px; padding: 20px;">No activity yet...</div>';
-    return;
-  }
-
-  // Sort by time (newest first)
-  activityHistory.sort((a, b) => new Date(b.time) - new Date(a.time));
-
-  log.innerHTML = activityHistory.slice(0, 10).map(activity => {
-    const time = new Date(activity.time).toLocaleTimeString();
-    const isEntry = activity.type === 'entry';
-    return `
-      <div class="activity-item">
-        <div class="activity-type ${isEntry ? 'type-entry' : 'type-exit'}">
-          <span>${isEntry ? '🟢' : '🔴'}</span>
-          <span>Vehicle ${isEntry ? 'Entered' : 'Exited'}</span>
-        </div>
-        <div class="activity-time">${time}</div>
-      </div>
-    `;
-  }).join('');
 }
 
 function animateValue(id, start, end) {
