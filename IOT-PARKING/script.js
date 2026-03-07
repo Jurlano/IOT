@@ -55,8 +55,8 @@ async function fetchAllData() {
         const statusRes = await fetch(`${MOCKAPI_BASE}/${PARKING_ENDPOINT}`);
         const statusData = await statusRes.json();
 
-        // Fetch logs/history (latest 10)
-        const logsRes = await fetch(`${MOCKAPI_BASE}/${LOGS_ENDPOINT}?sortBy=createdAt&order=desc&limit=10`);
+        // Fetch logs/history (latest 50 to calculate accurate currentInside)
+        const logsRes = await fetch(`${MOCKAPI_BASE}/${LOGS_ENDPOINT}?sortBy=createdAt&order=desc&limit=50`);
         const logsData = await logsRes.json();
 
         console.log('Status Data:', statusData);
@@ -81,17 +81,29 @@ function parseAndDisplay(statusData, logsData) {
     let todayEntrance = 0;
     let todayExit = 0;
 
-    // MockAPI always returns an array
-    if (Array.isArray(statusData) && statusData.length > 0) {
-        const latest = statusData[statusData.length - 1];
-        console.log('Latest record:', latest);
+    // Calculate from logs
+    if (Array.isArray(logsData) && logsData.length > 0) {
+        const now = new Date();
+        const todayDate = now.toISOString().split('T')[0]; // yyyy-mm-dd
 
-        currentInside = parseInt(latest.occupied ?? latest.currentInside ?? latest.count ?? 0);
-        todayEntrance = parseInt(latest.entrance ?? latest.todayEntrance ?? latest.entranceCount ?? 0);
-        todayExit = parseInt(latest.exit ?? latest.todayExit ?? latest.exitCount ?? 0);
+        logsData.forEach(log => {
+            const logDate = new Date(log.createdAt || log.timestamp || log.date || Date.now());
+            const logDay = logDate.toISOString().split('T')[0];
+
+            if (logDay === todayDate) {
+                const action = (log.action || log.type || 'entrance').toLowerCase();
+                if (['entrance', 'in', 'sulod'].includes(action)) {
+                    todayEntrance++;
+                    currentInside++;
+                } else {
+                    todayExit++;
+                    currentInside = Math.max(0, currentInside - 1);
+                }
+            }
+        });
     }
 
-    console.log('Parsed values:', { currentInside, todayEntrance, todayExit });
+    console.log('Calculated values:', { currentInside, todayEntrance, todayExit });
 
     updateDisplay(currentInside, todayEntrance, todayExit);
     renderHistory(logsData);
