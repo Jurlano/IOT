@@ -198,77 +198,76 @@
     </button>
   </div>
 
-  <script>
-    const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+ <script>
+const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
 
-    async function fetchParkingData() {
-      const btn = document.getElementById('refreshBtn');
-      const originalContent = btn.innerHTML;
-      
-      // Show loading state
-      btn.innerHTML = '<span class="loading"></span> Loading...';
-      btn.disabled = true;
+async function fetchParkingData() {
+  const btn = document.getElementById('refreshBtn');
+  const originalContent = btn.innerHTML;
+  
+  // Show loading state
+  btn.innerHTML = 'Loading...';
+  btn.disabled = true;
 
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+  try {
+    const response = await fetch(API_URL);
+    const data = await response.json();
 
-        // Simple logic: sum up all entries directly from API
-        let totalEntered = 0;
-        let totalExited = 0;
+    let totalEntered = 0;
+    let totalExited = 0;
+    let isFull = false;
 
-        data.forEach(entry => {
-          // API returns direct counts
-          totalEntered += parseInt(entry.entered) || parseInt(entry.entries) || parseInt(entry.in) || 0;
-          totalExited += parseInt(entry.exited) || parseInt(entry.exits) || parseInt(entry.out) || 0;
-        });
+    data.forEach(entry => {
+      if (entry.occupied === "1") totalEntered++;
+      if (entry.occupied === "0") totalExited++;
+      if (entry.status === "full" || parseInt(entry.available) === 0) isFull = true;
+    });
 
-        // Calculate currently inside (simple subtraction)
-        const currentlyInside = totalEntered - totalExited;
+    const currentlyInside = totalEntered - totalExited;
 
-        // Update display with animation
-        animateValue('entered', parseInt(document.getElementById('entered').textContent), totalEntered);
-        animateValue('exited', parseInt(document.getElementById('exited').textContent), totalExited);
-        animateValue('inside', parseInt(document.getElementById('inside').textContent), currentlyInside);
+    // Animate values
+    animateValue('entered', parseInt(document.getElementById('entered').textContent), totalEntered);
+    animateValue('exited', parseInt(document.getElementById('exited').textContent), totalExited);
+    animateValue('inside', parseInt(document.getElementById('inside').textContent), currentlyInside);
 
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        alert('Failed to fetch parking data');
-      } finally {
-        // Restore button
-        btn.innerHTML = originalContent;
-        btn.disabled = false;
-      }
-    }
+    // Update full status
+    document.getElementById('statusText').textContent = isFull ? '🚨 Parking Full!' : '';
 
-    function animateValue(id, start, end) {
-      if (start === end) return;
-      const obj = document.getElementById(id);
-      const range = end - start;
-      const duration = 500;
-      const startTime = performance.now();
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    alert('Failed to fetch parking data');
+  } finally {
+    btn.innerHTML = originalContent;
+    btn.disabled = false;
+  }
+}
 
-      function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeProgress = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(start + (range * easeProgress));
-        obj.textContent = current;
-        
-        if (progress < 1) {
-          requestAnimationFrame(update);
-        }
-      }
-      
-      requestAnimationFrame(update);
-    }
+function animateValue(id, start, end) {
+  if (start === end) return;
+  const obj = document.getElementById(id);
+  const range = end - start;
+  const duration = 500;
+  const startTime = performance.now();
 
-    // Fetch on page load
-    fetchParkingData();
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(start + (range * easeProgress));
+    obj.textContent = current;
     
-    // Auto-refresh every 5 seconds
-    setInterval(fetchParkingData, 5000);
-  </script>
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  
+  requestAnimationFrame(update);
+}
 
+// Fetch on page load
+fetchParkingData();
+
+// Auto-refresh every 5 seconds
+setInterval(fetchParkingData, 5000);
+</script>
 </body>
 </html>
+
