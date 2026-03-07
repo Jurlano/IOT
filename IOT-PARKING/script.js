@@ -119,25 +119,23 @@ function parseAndDisplay(statusData, logsData) {
 function updateDisplay(inside, entrance, exit) {
     const vacant = MAX_CAPACITY - inside;
 
+    // Update "SULOD KARON" box
     currentInsideEl.textContent = inside;
+
+    // Update "GAWAS KARON" box
+    todayExitEl.textContent = exit;
+
+    // Optional: Vacant slots
     vacantSlotsEl.textContent = vacant >= 0 ? vacant : 0;
 
     // Full capacity alert
     if (inside >= MAX_CAPACITY) {
-        currentInsideEl.classList.add('full');
-        slotsLeftEl.classList.add('full');
         slotsLeftEl.innerHTML = `<i class="fas fa-ban"></i> WALAY BAKANTE`;
         alertBox.style.display = 'block';
     } else {
-        currentInsideEl.classList.remove('full');
-        slotsLeftEl.classList.remove('full');
         slotsLeftEl.innerHTML = `<i class="fas fa-parking"></i> ${vacant} ka slots ang bakante`;
         alertBox.style.display = 'none';
     }
-
-    // Stats boxes
-    todayEntranceEl.textContent = entrance;
-    todayExitEl.textContent = exit;
 
     // Capacity bar
     const percentage = Math.min((inside / MAX_CAPACITY) * 100, 100);
@@ -146,11 +144,8 @@ function updateDisplay(inside, entrance, exit) {
 
     // Color coding
     capacityBar.classList.remove('warning', 'danger');
-    if (inside >= MAX_CAPACITY) {
-        capacityBar.classList.add('danger');
-    } else if (inside >= 4) {
-        capacityBar.classList.add('warning');
-    }
+    if (inside >= MAX_CAPACITY) capacityBar.classList.add('danger');
+    else if (inside >= 4) capacityBar.classList.add('warning');
 }
 
 // ==========================
@@ -209,3 +204,4 @@ function setLoading(loading) {
 // Event Listeners
 // ==========================
 refreshBtn.addEventListener('click', fetchAllData);
+
