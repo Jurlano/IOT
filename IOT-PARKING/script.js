@@ -5,7 +5,6 @@
     const MAX_CAPACITY = 6;
     let visitHistory = [];
 
-    // ---------- Utility: Get today's date string ----------
     function getTodayDateStr() {
         const now = new Date();
         const monthNames = ['Enero','Pebrero','Marso','Abril','Mayo','Hunyo',
@@ -67,10 +66,12 @@
             if(!res.ok) throw new Error(res.status);
             const data = await res.json();
 
-            // Use latest record posted by ESP8266
-            const latest = data[data.length - 1] || {occupied: 0, available: MAX_CAPACITY, entrance: 0, exit: 0, status: 'available'};
+            // Latest record posted by ESP8266
+            const latest = data[data.length - 1] || {occupied: 0, entrance: 0, exit: 0};
             const occupied = parseInt(latest.occupied) || 0;
-            const vacant = parseInt(latest.available) || (MAX_CAPACITY - occupied);
+            const vacant = MAX_CAPACITY - occupied;
+
+            // Entrance and exit counts (just counters)
             const entranceToday = parseInt(latest.entrance) || 0;
             const exitToday = parseInt(latest.exit) || 0;
 
@@ -113,4 +114,5 @@
     // ---------- Auto refresh ----------
     setInterval(fetchParkingData, 20000);
     setInterval(updateDateDisplay, 60000);
+
 })();
