@@ -9,6 +9,7 @@
   .container { background:#fff; padding:30px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.2); text-align:center; width:320px; }
   h1 { color:#00bcd4; margin-bottom:20px; }
   .stat { margin:15px 0; font-size:20px; font-weight:bold; }
+  .status { margin-top:20px; font-size:18px; color:red; font-weight:bold; }
   button { background:#00bcd4; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:16px; margin-top:20px; }
   button:hover { background:#0097a7; }
 </style>
@@ -17,9 +18,8 @@
 
 <div class="container">
   <h1>⚡ Parking Tracker ⚡</h1>
-  <div class="stat">Vehicles Entered Today: <span id="entered">0</span></div>
-  <div class="stat">Vehicles Exited Today: <span id="exited">0</span></div>
-  <div class="stat">Currently Inside: <span id="inside">0</span></div>
+  <div class="stat">Total Vehicles Inside: <span id="inside">0</span></div>
+  <div class="status" id="statusText"></div>
   <button id="refreshBtn" onclick="fetchParkingData()">Refresh Data</button>
 </div>
 
@@ -36,20 +36,19 @@ async function fetchParkingData() {
     const response = await fetch(API_URL);
     const data = await response.json();
 
-    let totalEntered = 0;
-    let totalExited = 0;
+    let totalInside = 0;
 
+    // Sum all occupied
     data.forEach(entry => {
-      if (entry.occupied === "1") totalEntered++;
-      if (entry.occupied === "0") totalExited++;
+      totalInside += parseInt(entry.occupied) || 0;
     });
 
-    const currentlyInside = totalEntered - totalExited;
+    // Animate the counter
+    animateValue('inside', parseInt(document.getElementById('inside').textContent), totalInside);
 
-    // Animate counters
-    animateValue('entered', parseInt(document.getElementById('entered').textContent), totalEntered);
-    animateValue('exited', parseInt(document.getElementById('exited').textContent), totalExited);
-    animateValue('inside', parseInt(document.getElementById('inside').textContent), currentlyInside);
+    // Show full alert only if all lots are full
+    const allFull = data.every(e => parseInt(e.available) === 0 || e.status === "full");
+    document.getElementById('statusText').textContent = allFull ? '🚨 Parking Full!' : '';
 
   } catch (err) {
     console.error('Error:', err);
