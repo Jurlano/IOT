@@ -3,10 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Parking Tracker</title>
+  <title>Parking Tracker</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -23,8 +27,9 @@
       padding: 40px;
       border-radius: 24px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      text-align: center;
       width: 100%;
-      max-width: 480px;
+      max-width: 380px;
       position: relative;
       overflow: hidden;
     }
@@ -39,60 +44,27 @@
       background: linear-gradient(90deg, #00bcd4, #667eea);
     }
 
-    .header {
-      text-align: center;
+    h1 {
       margin-bottom: 30px;
-    }
-
-    .header h1 {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
       background: linear-gradient(135deg, #667eea, #764ba2);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
 
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: #e0f2f1;
-      color: #00897b;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .status-badge::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      background: #00e676;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 30px;
+    .stats-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     .stat-card {
-      background: linear-gradient(145deg, #ffffff, #f5f7fa);
-      padding: 20px 15px;
+      background: linear-gradient(145deg, #f8fafc, #ffffff);
+      padding: 20px;
       border-radius: 16px;
-      text-align: center;
       border: 1px solid rgba(0, 0, 0, 0.05);
       transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -102,19 +74,20 @@
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
     }
 
-    .stat-card.wide {
-      grid-column: span 3;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+    .stat-label {
+      font-size: 13px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
     }
 
-    .stat-card.wide .stat-value {
-      color: white;
-      font-size: 48px;
-    }
-
-    .stat-card.wide .stat-label {
-      color: rgba(255, 255, 255, 0.9);
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: #1e293b;
+      line-height: 1;
     }
 
     .stat-icon {
@@ -122,430 +95,178 @@
       margin-bottom: 8px;
     }
 
-    .stat-value {
-      font-size: 28px;
-      font-weight: 800;
-      color: #1a1a2e;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      color: #64748b;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .traffic-flow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      padding: 20px;
-      background: #f8fafc;
-      border-radius: 16px;
-    }
-
-    .flow-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .flow-arrow {
-      font-size: 32px;
-      animation: bounce 1.5s infinite;
-    }
-
-    .flow-in .flow-arrow {
-      color: #22c55e;
-      animation-direction: normal;
-    }
-
-    .flow-out .flow-arrow {
-      color: #ef4444;
-      animation-direction: reverse;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .flow-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #64748b;
-      text-transform: uppercase;
-    }
-
-    .flow-value {
-      font-size: 24px;
-      font-weight: 800;
-      color: #1a1a2e;
-    }
-
-    .flow-net {
-      text-align: center;
-      padding: 0 20px;
-    }
-
-    .net-value {
-      font-size: 36px;
-      font-weight: 800;
-      color: #667eea;
-    }
-
-    .net-label {
-      font-size: 11px;
-      color: #64748b;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .activity-log {
-      max-height: 200px;
-      overflow-y: auto;
-      background: white;
-      border-radius: 12px;
+    .alert {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
       padding: 16px;
-      margin-bottom: 24px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .activity-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #f1f5f9;
+      margin: 20px 0;
+      border-radius: 12px;
       font-size: 14px;
+      font-weight: 600;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
     }
 
-    .activity-item:last-child {
-      border-bottom: none;
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .activity-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .activity-icon {
-      font-size: 20px;
-    }
-
-    .activity-text {
-      font-weight: 500;
-    }
-
-    .activity-time {
-      font-size: 12px;
-      color: #94a3b8;
-    }
-
-    .refresh-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    button {
+      background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
       color: white;
       border: none;
-      padding: 16px 24px;
+      padding: 14px 28px;
       border-radius: 12px;
       cursor: pointer;
       font-size: 15px;
       font-weight: 600;
+      width: 100%;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px -1px rgba(0, 188, 212, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.2);
     }
 
-    .refresh-btn:hover {
+    button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px -5px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 10px 20px -5px rgba(0, 188, 212, 0.4);
     }
 
-    .refresh-btn:active {
+    button:active {
       transform: translateY(0);
     }
 
-    .refresh-btn.spinning .refresh-icon {
-      animation: spin 1s linear infinite;
+    .refresh-icon {
+      font-size: 18px;
+      transition: transform 0.3s;
+    }
+
+    button:hover .refresh-icon {
+      transform: rotate(180deg);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
     }
 
     @keyframes spin {
-      from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
-    }
-
-    .last-updated {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 12px;
-      color: #94a3b8;
-    }
-
-    .loading-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      border-radius: 24px;
-      z-index: 10;
-    }
-
-    .loading-overlay.active {
-      display: flex;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="loading-overlay" id="loading">
-    <div class="spinner"></div>
-  </div>
-
-  <div class="header">
-    <h1>🚗 Smart Parking</h1>
-    <div class="status-badge">Real-time Traffic</div>
-  </div>
-
-  <div class="stats-grid">
-    <div class="stat-card wide">
-      <div class="stat-icon">🅿️</div>
-      <div class="stat-value" id="currentlyInside">0</div>
-      <div class="stat-label">Vehicles Currently Inside</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">⬇️</div>
-      <div class="stat-value" id="totalEntries">0</div>
-      <div class="stat-label">Total Entries</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">⬆️</div>
-      <div class="stat-value" id="totalExits">0</div>
-      <div class="stat-label">Total Exits</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">📊</div>
-      <div class="stat-value" id="totalTraffic">0</div>
-      <div class="stat-label">Total Traffic</div>
-    </div>
-  </div>
-
-  <div class="traffic-flow">
-    <div class="flow-item flow-in">
-      <div class="flow-arrow">⬇️</div>
-      <div class="flow-label">Entries</div>
-      <div class="flow-value" id="flowEntries">0</div>
-    </div>
-    <div class="flow-net">
-      <div class="net-value" id="netFlow">0</div>
-      <div class="net-label">Net Inside</div>
-    </div>
-    <div class="flow-item flow-out">
-      <div class="flow-arrow">⬆️</div>
-      <div class="flow-label">Exits</div>
-      <div class="flow-value" id="flowExits">0</div>
-    </div>
-  </div>
-
-  <div class="activity-log" id="activityLog">
-    <div style="text-align: center; color: #94a3b8; font-size: 14px; padding: 20px;">
-      Waiting for vehicle activity...
-    </div>
-  </div>
-
-  <button class="refresh-btn" id="refreshBtn" onclick="fetchParkingData()">
-    <span class="refresh-icon">🔄</span>
-    <span>Refresh Data</span>
-  </button>
-
-  <div class="last-updated" id="lastUpdated">Last updated: Never</div>
-</div>
-
-<script>
-const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
-
-// Store previous values to calculate changes
-let previousData = {
-  entries: 0,
-  exits: 0
-};
-
-function fetchParkingData() {
-  const btn = document.getElementById('refreshBtn');
-  const loading = document.getElementById('loading');
-  
-  btn.classList.add('spinning');
-  loading.classList.add('active');
-
-  fetch(API_URL)
-    .then(res => {
-      if (!res.ok) throw new Error('Network response was not ok');
-      return res.json();
-    })
-    .then(data => {
-      // Handle both array and single object responses
-      const parkingData = Array.isArray(data) ? data : [data];
-      
-      // Sum up all entries and exits from the data
-      let totalEntries = 0;
-      let totalExits = 0;
-      let activities = [];
-
-      parkingData.forEach(entry => {
-        const entryCount = parseInt(entry.entries) || parseInt(entry.entry) || parseInt(entry.in) || 0;
-        const exitCount = parseInt(entry.exits) || parseInt(entry.exit) || parseInt(entry.out) || 0;
-        
-        totalEntries += entryCount;
-        totalExits += exitCount;
-
-        // Track activity for log
-        if (entryCount > 0) {
-          activities.push({
-            type: 'entry',
-            count: entryCount,
-            time: entry.timestamp || entry.time || new Date().toISOString(),
-            id: entry.id
-          });
-        }
-        if (exitCount > 0) {
-          activities.push({
-            type: 'exit',
-            count: exitCount,
-            time: entry.timestamp || entry.time || new Date().toISOString(),
-            id: entry.id
-          });
-        }
-      });
-
-      // Calculate currently inside (entries - exits)
-      const currentlyInside = Math.max(0, totalEntries - totalExits);
-      const totalTraffic = totalEntries + totalExits;
-      const netFlow = totalEntries - totalExits;
-
-      // Update main stats with animation
-      animateValue('currentlyInside', parseInt(document.getElementById('currentlyInside').textContent), currentlyInside);
-      animateValue('totalEntries', parseInt(document.getElementById('totalEntries').textContent), totalEntries);
-      animateValue('totalExits', parseInt(document.getElementById('totalExits').textContent), totalExits);
-      animateValue('totalTraffic', parseInt(document.getElementById('totalTraffic').textContent), totalTraffic);
-
-      // Update flow display
-      document.getElementById('flowEntries').textContent = totalEntries;
-      document.getElementById('flowExits').textContent = totalExits;
-      document.getElementById('netFlow').textContent = (netFlow > 0 ? '+' : '') + netFlow;
-
-      // Color code net flow
-      const netElement = document.getElementById('netFlow');
-      if (netFlow > 0) {
-        netElement.style.color = '#22c55e'; // Green - more entering
-      } else if (netFlow < 0) {
-        netElement.style.color = '#ef4444'; // Red - more exiting
-      } else {
-        netElement.style.color = '#64748b'; // Gray - balanced
-      }
-
-      // Update activity log
-      updateActivityLog(activities);
-
-      // Store current values for next comparison
-      previousData = { entries: totalEntries, exits: totalExits };
-
-      // Update timestamp
-      const now = new Date();
-      document.getElementById('lastUpdated').textContent = 
-        `Last updated: ${now.toLocaleTimeString()}`;
-    })
-    .catch(err => {
-      console.error('Error:', err);
-      alert('Failed to fetch parking data');
-    })
-    .finally(() => {
-      btn.classList.remove('spinning');
-      loading.classList.remove('active');
-    });
-}
-
-function updateActivityLog(activities) {
-  const log = document.getElementById('activityLog');
-  
-  if (activities.length === 0) {
-    log.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 14px; padding: 20px;">No recent activity...</div>';
-    return;
-  }
-
-  // Sort by time (newest first)
-  activities.sort((a, b) => new Date(b.time) - new Date(a.time));
-
-  log.innerHTML = activities.slice(0, 8).map(activity => {
-    const time = new Date(activity.time).toLocaleTimeString();
-    const isEntry = activity.type === 'entry';
-    const count = activity.count || 1;
-    return `
-      <div class="activity-item">
-        <div class="activity-info">
-          <span class="activity-icon">${isEntry ? '🟢' : '🔴'}</span>
-          <span class="activity-text" style="color: ${isEntry ? '#166534' : '#991b1b'}">
-            ${count} Vehicle${count > 1 ? 's' : ''} ${isEntry ? 'Entered' : 'Exited'}
-          </span>
-        </div>
-        <div class="activity-time">${time}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function animateValue(id, start, end) {
-  if (start === end) return;
-  const obj = document.getElementById(id);
-  const range = end - start;
-  const duration = 600;
-  const startTime = performance.now();
-
-  function update(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const easeProgress = 1 - Math.pow(1 - progress, 3);
-    const current = Math.round(start + (range * easeProgress));
-    obj.textContent = current;
+  <div class="container">
+    <h1>⚡ Parking Tracker</h1>
     
-    if (progress < 1) {
+    <div class="stats-wrapper">
+      <div class="stat-card">
+        <div class="stat-icon">🅿️</div>
+        <div class="stat-label">Vehicles Inside</div>
+        <div class="stat-value" id="inside">0</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🚙</div>
+        <div class="stat-label">Vehicles Exited</div>
+        <div class="stat-value" id="exit">0</div>
+      </div>
+    </div>
+
+    <div class="alert" id="alert">⚠️ Parking Full! Over Capacity!</div>
+    
+    <button onclick="fetchParkingData()" id="refreshBtn">
+      <span class="refresh-icon">🔄</span>
+      <span>Refresh Data</span>
+    </button>
+  </div>
+
+  <script>
+    const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+    const MAX_CAPACITY = 6;
+
+    async function fetchParkingData() {
+      const btn = document.getElementById('refreshBtn');
+      const originalContent = btn.innerHTML;
+      
+      // Show loading state
+      btn.innerHTML = '<span class="loading"></span> Loading...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        let totalInside = 0;
+        let totalExited = 0;
+
+        data.forEach(entry => {
+          totalInside += parseInt(entry.occupied) || 0;
+          totalExited += parseInt(entry.available) || 0;
+        });
+
+        // Animate numbers
+        animateValue('inside', parseInt(document.getElementById('inside').textContent), totalInside);
+        animateValue('exit', parseInt(document.getElementById('exit').textContent), totalExited);
+
+        const alertBox = document.getElementById('alert');
+        if (totalInside > MAX_CAPACITY) {
+          alertBox.style.display = 'block';
+        } else {
+          alertBox.style.display = 'none';
+        }
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        alert('Failed to fetch parking data');
+      } finally {
+        // Restore button
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+      }
+    }
+
+    function animateValue(id, start, end) {
+      if (start === end) return;
+      const obj = document.getElementById(id);
+      const range = end - start;
+      const duration = 500;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (range * easeProgress));
+        obj.textContent = current;
+        
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+      
       requestAnimationFrame(update);
     }
-  }
-  
-  requestAnimationFrame(update);
-}
 
-// Initial fetch
-fetchParkingData();
-
-// Auto-refresh every 5 seconds
-setInterval(fetchParkingData, 5000);
-</script>
+    // Fetch on page load
+    fetchParkingData();
+  </script>
 
 </body>
 </html>
