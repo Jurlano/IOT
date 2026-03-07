@@ -428,7 +428,7 @@ function fetchParkingData() {
       let parkingFull = false;
 
       data.forEach(entry => {
-        if (entry.occupied === "1") totalInside++;
+        if (entry.occupied === "6") totalInside++;
         if (entry.occupied === "0") totalExited++;
         if (parseInt(entry.available) === 0) parkingFull = true;
       });
@@ -514,3 +514,4 @@ setInterval(fetchParkingData, 5000);
 
 </body>
 </html>
+
