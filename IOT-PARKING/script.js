@@ -15,7 +15,6 @@
             if (stored) {
                 visitHistory = JSON.parse(stored);
             } else {
-                // initial default (cyber vibe)
                 visitHistory = [
                     { dateStr: 'Peb 14, 2026', count: 7 },
                     { dateStr: 'Peb 13, 2026', count: 3 },
@@ -65,7 +64,6 @@
         visitHistory.forEach(item => {
             const li = document.createElement('li');
             const countDisplay = item.count + ' sakyanan';
-            // optional zero style
             const zeroStyle = item.count === 0 ? 'background: #555; color:white; text-shadow:none;' : '';
             li.innerHTML = `<i class="fas fa-calendar-day"></i> <span>${item.dateStr}</span> <span class="history-badge" style="${zeroStyle}">${countDisplay}</span>`;
             listEl.appendChild(li);
@@ -103,23 +101,28 @@
     async function fetchParkingData() {
         document.getElementById('occupiedCount').textContent = '⋯';
         document.getElementById('statusMessage').innerHTML = `<i class="fas fa-spinner fa-pulse"></i> nag scan...`;
+        document.getElementById('availableCount').textContent = '⋯';
         try {
             const response = await fetch(MOCKAPI_URL);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             
-            // count occupied (status "1" or 1)
+            // count occupied and available
             let occupied = 0;
+            let available = 0;
             for (let i = 0; i < data.length; i++) {
                 if (data[i].status == "1" || data[i].status === 1) {
                     occupied++;
+                } else {
+                    available++;
                 }
             }
 
-            // update big number
+            // update big numbers
             document.getElementById('occupiedCount').textContent = occupied;
+            document.getElementById('availableCount').textContent = available;
 
-            // status message with zero handling
+            // status message
             let message = "";
             if (occupied === 0) {
                 message = "⛔ ZERO sakyanan · walay bisita";
@@ -137,14 +140,15 @@
         } catch (error) {
             console.error('fetch error:', error);
             document.getElementById('occupiedCount').textContent = '?';
+            document.getElementById('availableCount').textContent = '?';
             document.getElementById('statusMessage').innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ff44ee;"></i> network error`;
         }
     }
 
     // ---------- initial calls ----------
-    loadHistory();          // show stored or default history
-    updateDateDisplay();    // set dates immediately
-    fetchParkingData();     // first fetch
+    loadHistory();
+    updateDateDisplay();
+    fetchParkingData();
 
     // refresh button
     document.getElementById('refreshBtn').addEventListener('click', function() {
