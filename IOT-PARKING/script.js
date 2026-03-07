@@ -5,7 +5,6 @@
     const MAX_CAPACITY = 6;
     let visitHistory = [];
 
-    // ---------- Get today's date string ----------
     function getTodayDateStr() {
         const now = new Date();
         const monthNames = ['Enero','Pebrero','Marso','Abril','Mayo','Hunyo',
@@ -68,21 +67,12 @@
             if(!res.ok) throw new Error(res.status);
             const data = await res.json();
 
-            // Calculate totals
-            let occupied = 0;
-            let entrance = 0;
-            let exitCount = 0;
+            // Count occupied slots (0/1 per slot)
+            let occupied = data.filter(slot => parseInt(slot.occupied) === 1).length;
 
-            data.forEach(slot => {
-                // Occupied: count if slot is full
-                if(parseInt(slot.occupied) > 0) occupied += parseInt(slot.occupied);
-
-                // Entrance today (view-only)
-                entrance += parseInt(slot.entrance || 0);
-
-                // Exit today (view-only)
-                exitCount += parseInt(slot.exit || 0);
-            });
+            // Sum entrance and exit from all slots
+            let entrance = data.reduce((sum, slot) => sum + (parseInt(slot.entrance) || 0), 0);
+            let exitCount = data.reduce((sum, slot) => sum + (parseInt(slot.exit) || 0), 0);
 
             const vacant = MAX_CAPACITY - occupied;
 
