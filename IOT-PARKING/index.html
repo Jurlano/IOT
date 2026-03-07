@@ -9,6 +9,7 @@
     .container { background:#fff; padding:30px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.2); text-align:center; width:320px; }
     h1 { color:#00bcd4; margin-bottom:20px; }
     .stat { margin:15px 0; font-size:20px; font-weight:bold; }
+    .alert { background:#f44336; color:#fff; padding:10px; margin-top:20px; border-radius:8px; display:none; }
     button { background:#00bcd4; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:16px; margin-top:20px; }
     button:hover { background:#0097a7; }
   </style>
@@ -17,13 +18,16 @@
 
 <div class="container">
   <h1>⚡ Parking Tracker ⚡</h1>
-  <div class="stat">Vehicles Entered Today: <span id="inside">0</span></div>
-  <div class="stat">Vehicles Exited Today: <span id="exit">0</span></div>
+  <div class="stat">Vehicles Inside: <span id="inside">0</span></div>
+  <div class="stat">Vehicles Exited: <span id="exit">0</span></div>
+  <div class="alert" id="overAlert">⚠️ Over Capacity! More than 6 vehicles inside!</div>
+  <div class="alert" id="emptyAlert">⚠️ Parking Full! No available slots!</div>
   <button onclick="fetchParkingData()">Refresh Data</button>
 </div>
 
 <script>
 const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+const MAX_CAPACITY = 6;
 
 function fetchParkingData() {
   fetch(API_URL)
@@ -31,14 +35,33 @@ function fetchParkingData() {
     .then(data => {
       let totalInside = 0;
       let totalExited = 0;
+      let parkingFull = false;
 
       data.forEach(entry => {
         if (entry.occupied === "1") totalInside++;
         if (entry.occupied === "0") totalExited++;
+
+        if (parseInt(entry.available) === 0) parkingFull = true; // alert if no slots
       });
 
       document.getElementById('inside').textContent = totalInside;
       document.getElementById('exit').textContent = totalExited;
+
+      // Over capacity alert
+      const overAlert = document.getElementById('overAlert');
+      if (totalInside > MAX_CAPACITY) {
+        overAlert.style.display = 'block';
+      } else {
+        overAlert.style.display = 'none';
+      }
+
+      // Parking full alert
+      const emptyAlert = document.getElementById('emptyAlert');
+      if (parkingFull) {
+        emptyAlert.style.display = 'block';
+      } else {
+        emptyAlert.style.display = 'none';
+      }
 
     })
     .catch(err => {
