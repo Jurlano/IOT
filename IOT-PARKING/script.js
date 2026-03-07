@@ -1,4 +1,3 @@
-// ===== script.js =====
 (function() {
     "use strict";
 
@@ -6,7 +5,6 @@
     const MAX_CAPACITY = 6;
     let visitHistory = [];
 
-    // ---------- Utility: Get today's date string ----------
     function getTodayDateStr() {
         const now = new Date();
         const monthNames = ['Enero','Pebrero','Marso','Abril','Mayo','Hunyo',
@@ -68,13 +66,10 @@
             if(!res.ok) throw new Error(res.status);
             const data = await res.json();
 
-            let occupied = 0;
-            let vacant = 0;
-
-            data.forEach(slot => {
-                if(slot.status=="1"||slot.status===1) occupied++;
-                else vacant++;
-            });
+            // Use latest record posted by ESP8266
+            const latest = data[data.length - 1] || {occupied: 0, available: MAX_CAPACITY, status: 'available'};
+            const occupied = parseInt(latest.occupied) || 0;
+            const vacant = parseInt(latest.available) || (MAX_CAPACITY - occupied);
 
             // Update dashboard numbers
             document.getElementById('currentInside').textContent = occupied;
@@ -84,13 +79,17 @@
 
             // Capacity bar
             const capPercent = Math.min((occupied/MAX_CAPACITY)*100,100);
-            document.getElementById('capacityBar').style.width = capPercent+'%';
+            const capBar = document.getElementById('capacityBar');
+            capBar.style.width = capPercent+'%';
+            capBar.classList.remove('warning','danger');
+            if(capPercent>=80 && capPercent<100) capBar.classList.add('warning');
+            else if(capPercent>=100) capBar.classList.add('danger');
+
             document.getElementById('capacityText').textContent = `${occupied}/${MAX_CAPACITY}`;
 
             // Show alert if full
             const alertBox = document.getElementById('alertBox');
-            if(occupied >= MAX_CAPACITY) alertBox.style.display = 'flex';
-            else alertBox.style.display = 'none';
+            alertBox.style.display = (occupied >= MAX_CAPACITY) ? 'flex' : 'none';
 
             // Update history
             addTodayToHistory(getTodayDateStr(), occupied);
