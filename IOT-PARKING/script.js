@@ -5,6 +5,7 @@
     const MAX_CAPACITY = 6;
     let visitHistory = [];
 
+    // ---------- Utility: Get today's date string ----------
     function getTodayDateStr() {
         const now = new Date();
         const monthNames = ['Enero','Pebrero','Marso','Abril','Mayo','Hunyo',
@@ -67,15 +68,17 @@
             const data = await res.json();
 
             // Use latest record posted by ESP8266
-            const latest = data[data.length - 1] || {occupied: 0, available: MAX_CAPACITY, status: 'available'};
+            const latest = data[data.length - 1] || {occupied: 0, available: MAX_CAPACITY, entrance: 0, exit: 0, status: 'available'};
             const occupied = parseInt(latest.occupied) || 0;
             const vacant = parseInt(latest.available) || (MAX_CAPACITY - occupied);
+            const entranceToday = parseInt(latest.entrance) || 0;
+            const exitToday = parseInt(latest.exit) || 0;
 
             // Update dashboard numbers
             document.getElementById('currentInside').textContent = occupied;
             document.getElementById('vacantSlots').textContent = vacant;
-            document.getElementById('todayEntrance').textContent = occupied;
-            document.getElementById('todayExit').textContent = vacant;
+            document.getElementById('todayEntrance').textContent = entranceToday;
+            document.getElementById('todayExit').textContent = exitToday;
 
             // Capacity bar
             const capPercent = Math.min((occupied/MAX_CAPACITY)*100,100);
