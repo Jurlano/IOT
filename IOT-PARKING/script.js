@@ -55,7 +55,7 @@ async function fetchAllData() {
         const statusRes = await fetch(`${MOCKAPI_BASE}/${PARKING_ENDPOINT}`);
         const statusData = await statusRes.json();
 
-        // Fetch logs/history (latest 50 to calculate accurate currentInside)
+        // Fetch logs/history (latest 50 to calculate accurate counts)
         const logsRes = await fetch(`${MOCKAPI_BASE}/${LOGS_ENDPOINT}?sortBy=createdAt&order=desc&limit=50`);
         const logsData = await logsRes.json();
 
@@ -81,10 +81,16 @@ function parseAndDisplay(statusData, logsData) {
     let todayEntrance = 0;
     let todayExit = 0;
 
-    // Calculate from logs
+    // Sum occupied from all parking records
+    if (Array.isArray(statusData) && statusData.length > 0) {
+        currentInside = statusData.reduce((sum, record) => {
+            return sum + parseInt(record.occupied ?? 0);
+        }, 0);
+    }
+
+    // Calculate todayEntrance and todayExit from logs
     if (Array.isArray(logsData) && logsData.length > 0) {
-        const now = new Date();
-        const todayDate = now.toISOString().split('T')[0]; // yyyy-mm-dd
+        const todayDate = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
 
         logsData.forEach(log => {
             const logDate = new Date(log.createdAt || log.timestamp || log.date || Date.now());
@@ -94,10 +100,8 @@ function parseAndDisplay(statusData, logsData) {
                 const action = (log.action || log.type || 'entrance').toLowerCase();
                 if (['entrance', 'in', 'sulod'].includes(action)) {
                     todayEntrance++;
-                    currentInside++;
                 } else {
                     todayExit++;
-                    currentInside = Math.max(0, currentInside - 1);
                 }
             }
         });
