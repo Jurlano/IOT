@@ -1,98 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-    <title>⚡ PARKiT · CYBER ADLAW ⚡</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parking Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 300px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #00bcd4;
+    }
+
+    .stat {
+      margin: 15px 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .alert {
+      background-color: #f44336;
+      color: white;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    button {
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0097a7;
+    }
+  </style>
 </head>
 <body>
-    <div class="parking-container">
-        <div class="park-card">
 
-            <!-- HEADER -->
-            <div class="adlaw-header">
-                <span class="api-tag">
-                    <i class="fas fa-skull"></i> CYBER•PARK
-                </span>
-                <span class="date-badge" id="dateDisplay">
-                    <i class="far fa-calendar-alt"></i> LOAD...
-                </span>
-            </div>
+  <div class="container">
+    <h1>⚡ Parking Tracker ⚡</h1>
+    <div class="stat">Vehicles Inside: <span id="inside">0</span></div>
+    <div class="stat">Vehicles Exited: <span id="exit">0</span></div>
+    <div class="alert" id="alert">⚠️ Parking Full! Over Capacity!</div>
+    <button onclick="fetchParkingData()">Refresh Data</button>
+  </div>
 
-            <!-- CURRENT INSIDE -->
-            <div class="today-counter">
-                <div class="adlaw-label">
-                    <i class="fas fa-car-side"></i> NAA SULOD KARON
-                </div>
-                <div>
-                    <span class="adlaw-number" id="currentInside">—</span>
-                    <span class="adlaw-unit">ka sakyanan</span>
-                </div>
-                <div class="slots-left" id="vacantSlots">
-                    <i class="fas fa-parking"></i> — ka slots ang bakante
-                </div>
-            </div>
+  <script>
+    const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+    const MAX_CAPACITY = 6;
 
-            <!-- ALERT BOX -->
-            <div class="alert-box" id="alertBox" style="display: none;">
-                <i class="fas fa-triangle-exclamation"></i>
-                <span class="alert-text">PARKING FULL!</span>
-            </div>
+    async function fetchParkingData() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
 
-            <!-- ENTRANCE & EXIT BOXES -->
-            <div class="stats-grid">
-                <div class="stat-box entrance-box">
-                    <i class="fas fa-arrow-right-to-bracket"></i>
-                    <div class="stat-label">SULOD KARON</div>
-                    <div class="stat-number" id="todayEntrance">0</div>
-                    <div class="stat-sub">ka entrance</div>
-                </div>
-                <div class="stat-box exit-box">
-                    <i class="fas fa-arrow-right-from-bracket"></i>
-                    <div class="stat-label">GAWAS KARON</div>
-                    <div class="stat-number" id="todayExit">0</div>
-                    <div class="stat-sub">ka exit</div>
-                </div>
-            </div>
+        let totalInside = 0;
+        let totalExited = 0;
 
-            <!-- CAPACITY BAR -->
-            <div class="capacity-section">
-                <div class="capacity-header">
-                    <span><i class="fas fa-chart-bar"></i> CAPACITY (6 MAX)</span>
-                    <span id="capacityText">0/6</span>
-                </div>
-                <div class="capacity-bar-bg">
-                    <div class="capacity-bar-fill" id="capacityBar"></div>
-                </div>
-            </div>
+        data.forEach(entry => {
+          totalInside += parseInt(entry.occupied);
+          totalExited += parseInt(entry.available);
+        });
 
-            <!-- HISTORY LIST -->
-            <div class="history-section">
-                <div class="history-header">
-                    <i class="fas fa-history"></i> HISTORY LOG
-                    <span class="latest-badge">LATEST</span>
-                </div>
-                <ul class="history-list" id="historyList">
-                    <!-- dynamically populated -->
-                </ul>
-            </div>
+        document.getElementById('inside').textContent = totalInside;
+        document.getElementById('exit').textContent = totalExited;
 
-            <!-- REFRESH BUTTON -->
-            <button class="refresh-btn" id="refreshBtn">
-                <i class="fas fa-sync-alt"></i> i-REFRESH
-            </button>
+        const alertBox = document.getElementById('alert');
+        if (totalInside > MAX_CAPACITY) {
+          alertBox.style.display = 'block';
+        } else {
+          alertBox.style.display = 'none';
+        }
 
-            <!-- FOOTER -->
-            <div class="footer">
-                <span><i class="fas fa-microchip"></i> ADLAW•ZERO</span>
-                <span><i class="fas fa-database"></i> MOCK</span>
-            </div>
-        </div>
-    </div>
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        alert('Failed to fetch parking data');
+      }
+    }
 
-    <script src="script.js"></script>
+    // Fetch on page load
+    fetchParkingData();
+  </script>
+
 </body>
 </html>
