@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x2 Parking - Fixed</title>
+  <title>3x2 Parking - Multiple Objects</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
@@ -15,7 +15,7 @@
       margin: 0;
     }
     .container {
-      max-width: 600px;
+      max-width: 700px;
       width: 100%;
       background: white;
       border-radius: 20px;
@@ -64,22 +64,22 @@
     }
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
       margin-bottom: 20px;
     }
     .stat {
       background: #f8f9fa;
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
       text-align: center;
     }
     .stat .label {
-      font-size: 12px;
+      font-size: 11px;
       color: #666;
     }
     .stat .value {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       color: #333;
     }
@@ -175,6 +175,8 @@
       font-family: monospace;
       font-size: 12px;
       margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
       white-space: pre-wrap;
     }
     .mockapi-data {
@@ -182,13 +184,28 @@
       padding: 10px;
       border-radius: 5px;
       margin-bottom: 10px;
-      font-size: 14px;
+      font-size: 12px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .summary-item {
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1><i class="fas fa-parking"></i> 3x2 Parking</h1>
+    <h1><i class="fas fa-parking"></i> 3x2 Parking - Multiple Objects</h1>
 
     <!-- Mockapi Data Display -->
     <div class="mockapi-data" id="mockapiDisplay">
@@ -212,23 +229,33 @@
       </div>
     </div>
 
+    <!-- Summary ng lahat ng objects -->
+    <div class="summary" id="summary">
+      <!-- Mapupuno ng JavaScript -->
+    </div>
+
     <!-- Stats -->
     <div class="stats">
       <div class="stat">
-        <div class="label">TOTAL</div>
-        <div class="value" id="totalSlots">6</div>
+        <div class="label">TOTAL SLOTS</div>
+        <div class="value" id="totalSlots">0</div>
       </div>
       <div class="stat">
-        <div class="label">NAKAPARK</div>
-        <div class="value" id="occupiedCount">0/6</div>
+        <div class="label">TOTAL OCCUPIED</div>
+        <div class="value" id="totalOccupied">0</div>
       </div>
       <div class="stat">
-        <div class="label">BAKANTE</div>
-        <div class="value" id="availableCount">6/6</div>
+        <div class="label">TOTAL AVAILABLE</div>
+        <div class="value" id="totalAvailable">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">OBJECTS</div>
+        <div class="value" id="objectCount">0</div>
       </div>
     </div>
 
-    <!-- 3x2 Parking slots -->
+    <!-- 3x2 Parking slots (first object lang muna) -->
+    <h3>First Object Parking (ID: <span id="firstObjectId">1</span>)</h3>
     <div class="parking-grid" id="parkingGrid">
       <!-- Mapupuno ng JavaScript -->
     </div>
@@ -252,25 +279,46 @@
   </div>
 
   <script>
-    // Simple at direct na code
     const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
     
     // Variables
-    let previousOccupied = 0;
+    let previousData = [];
     let totalEntry = 0;
     let totalExit = 0;
     let activityLog = [];
 
     // Kunin ang elements
     const debugInfo = document.getElementById('debugInfo');
-    const mockapiDisplay = document.getElementById('mockapiContent');
+    const mockapiContent = document.getElementById('mockapiContent');
+    const summary = document.getElementById('summary');
     const parkingGrid = document.getElementById('parkingGrid');
     const statusDisplay = document.getElementById('statusDisplay');
     const entryCount = document.getElementById('entryCount');
     const exitCount = document.getElementById('exitCount');
-    const occupiedCount = document.getElementById('occupiedCount');
-    const availableCount = document.getElementById('availableCount');
+    const totalSlots = document.getElementById('totalSlots');
+    const totalOccupied = document.getElementById('totalOccupied');
+    const totalAvailable = document.getElementById('totalAvailable');
+    const objectCount = document.getElementById('objectCount');
+    const firstObjectId = document.getElementById('firstObjectId');
     const logList = document.getElementById('logList');
+
+    // Function para mag-compute ng totals
+    function computeTotals(data) {
+      let slots = 0;
+      let occupied = 0;
+      let available = 0;
+      
+      data.forEach(item => {
+        const occ = parseInt(item.occupied) || 0;
+        const avail = parseInt(item.available) || 0;
+        
+        occupied += occ;
+        available += avail;
+        slots += (occ + avail);
+      });
+      
+      return { slots, occupied, available };
+    }
 
     // Function para mag-fetch ng data
     async function fetchData() {
@@ -282,97 +330,100 @@
         const data = await response.json();
         
         // Ipakita ang mockapi data
-        mockapiDisplay.innerHTML = JSON.stringify(data, null, 2);
+        mockapiContent.innerHTML = JSON.stringify(data, null, 2);
         
-        // Kunin ang occupied at available values
-        // Assuming na array ang response na may isang object
-        let occupied = 0;
-        let available = 6;
+        // Compute totals
+        const totals = computeTotals(data);
         
-        if (Array.isArray(data) && data.length > 0) {
-          // Kunin ang unang object sa array
-          const firstItem = data[0];
+        // Ipakita sa debug
+        debugInfo.innerHTML = '✓ May data!\n';
+        debugInfo.innerHTML += `Number of objects: ${data.length}\n`;
+        debugInfo.innerHTML += `Total slots: ${totals.slots}\n`;
+        debugInfo.innerHTML += `Total occupied: ${totals.occupied}\n`;
+        debugInfo.innerHTML += `Total available: ${totals.available}\n`;
+        
+        // Update summary
+        objectCount.textContent = data.length;
+        totalSlots.textContent = totals.slots;
+        totalOccupied.textContent = totals.occupied;
+        totalAvailable.textContent = totals.available;
+        
+        // Show summary ng bawat object
+        summary.innerHTML = '';
+        data.forEach((item, index) => {
+          const occ = parseInt(item.occupied) || 0;
+          const avail = parseInt(item.available) || 0;
           
-          // Check kung may occupied field
-          if (firstItem.occupied !== undefined) {
-            occupied = parseInt(firstItem.occupied) || 0;
-          }
-          
-          // Check kung may available field
-          if (firstItem.available !== undefined) {
-            available = parseInt(firstItem.available) || 0;
-          }
-          
-          debugInfo.innerHTML = `✓ May data!\n`;
-          debugInfo.innerHTML += `Occupied: ${occupied}\n`;
-          debugInfo.innerHTML += `Available: ${available}\n`;
-          debugInfo.innerHTML += `Total: ${occupied + available}`;
-        } else {
-          debugInfo.innerHTML = '⚠️ Walang data sa mockapi';
-        }
+          const summaryItem = document.createElement('div');
+          summaryItem.className = 'summary-item';
+          summaryItem.innerHTML = `
+            <div>Object ${item.id}</div>
+            <div style="font-size: 14px;">Occupied: ${occ} | Available: ${avail}</div>
+          `;
+          summary.appendChild(summaryItem);
+        });
 
         // Check kung may nagbago (para sa entry/exit count)
-        if (previousOccupied !== 0) {
-          if (occupied > previousOccupied) {
-            const diff = occupied - previousOccupied;
+        if (previousData.length > 0) {
+          const previousTotals = computeTotals(previousData);
+          
+          if (totals.occupied > previousTotals.occupied) {
+            const diff = totals.occupied - previousTotals.occupied;
             totalEntry += diff;
             addToLog('entry', diff + ' sasakyan pumasok');
-          } else if (occupied < previousOccupied) {
-            const diff = previousOccupied - occupied;
+          } else if (totals.occupied < previousTotals.occupied) {
+            const diff = previousTotals.occupied - totals.occupied;
             totalExit += diff;
             addToLog('exit', diff + ' sasakyan lumabas');
           }
         }
 
-        // I-save ang current state
-        previousOccupied = occupied;
+        // I-save ang current data
+        previousData = [...data];
 
-        // Update ang display
-        updateDisplay(occupied, available);
+        // Update counters
+        entryCount.textContent = totalEntry;
+        exitCount.textContent = totalExit;
+
+        // Update status
+        if (totals.available === 0) {
+          statusDisplay.innerHTML = '⚠️ PUNO NA! Lahat occupied';
+        } else {
+          statusDisplay.innerHTML = `✅ ${totals.available} bakante · ${totals.occupied} nakapark (total)`;
+        }
+
+        // Ipakita ang unang object sa parking grid
+        if (data.length > 0) {
+          const firstItem = data[0];
+          firstObjectId.textContent = firstItem.id;
+          
+          const occ = parseInt(firstItem.occupied) || 0;
+          const total = occ + (parseInt(firstItem.available) || 0);
+          
+          // Update parking grid - 3x2 = 6 slots
+          parkingGrid.innerHTML = '';
+          
+          for (let i = 0; i < 6; i++) {
+            // Kung ang slot number ay <= occupied, occupied siya
+            const isOccupied = i < occ;
+            
+            const slotDiv = document.createElement('div');
+            slotDiv.className = `slot ${isOccupied ? 'occupied' : 'available'}`;
+            
+            slotDiv.innerHTML = `
+              <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
+              <div class="id">Slot ${i+1}</div>
+              <div class="status-text">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
+            `;
+            
+            parkingGrid.appendChild(slotDiv);
+          }
+        }
 
       } catch (error) {
         debugInfo.innerHTML = '❌ Error: ' + error.message;
         statusDisplay.innerHTML = '❌ Error sa connection';
-        mockapiDisplay.innerHTML = 'Error: ' + error.message;
-      }
-    }
-
-    // Function para i-update ang display
-    function updateDisplay(occupied, available) {
-      const total = 6;
-
-      // Update stats
-      entryCount.textContent = totalEntry;
-      exitCount.textContent = totalExit;
-      occupiedCount.textContent = occupied + '/6';
-      availableCount.textContent = (total - occupied) + '/6';
-      
-      // Update status
-      if (occupied === total) {
-        statusDisplay.innerHTML = '⚠️ PUNO NA! Lahat occupied';
-      } else {
-        statusDisplay.innerHTML = `✅ ${total - occupied} bakante · ${occupied} nakapark`;
-      }
-
-      // Update parking grid - 3x2 = 6 slots
-      parkingGrid.innerHTML = '';
-      
-      // Create 6 slots
-      // Ang unang 'occupied' na slots ay occupied, ang iba ay available
-      for (let i = 0; i < total; i++) {
-        // Kung ang slot number ay <= occupied, occupied siya
-        const isOccupied = i < occupied;
-        
-        const slotDiv = document.createElement('div');
-        slotDiv.className = `slot ${isOccupied ? 'occupied' : 'available'}`;
-        
-        slotDiv.innerHTML = `
-          <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
-          <div class="id">Slot ${i+1}</div>
-          <div class="status-text">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
-        `;
-        
-        parkingGrid.appendChild(slotDiv);
+        mockapiContent.innerHTML = 'Error: ' + error.message;
       }
     }
 
@@ -411,7 +462,7 @@
     function resetCounters() {
       totalEntry = 0;
       totalExit = 0;
-      previousOccupied = 0;
+      previousData = [];
       activityLog = [];
       
       entryCount.textContent = '0';
