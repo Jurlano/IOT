@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x2 Parking - Simple</title>
+  <title>3x2 Parking - Fixed</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
@@ -177,11 +177,23 @@
       margin-top: 10px;
       white-space: pre-wrap;
     }
+    .mockapi-data {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1><i class="fas fa-parking"></i> 3x2 Parking</h1>
+
+    <!-- Mockapi Data Display -->
+    <div class="mockapi-data" id="mockapiDisplay">
+      <i class="fas fa-database"></i> <span id="mockapiContent">Waiting for data...</span>
+    </div>
 
     <!-- Simple status -->
     <div class="status" id="statusDisplay">
@@ -233,7 +245,7 @@
       <button class="reset" id="resetBtn"><i class="fas fa-redo-alt"></i> Reset</button>
     </div>
 
-    <!-- Debug info (makikita mo to) -->
+    <!-- Debug info -->
     <div class="debug" id="debugInfo">
       Naghihintay ng data...
     </div>
@@ -251,6 +263,7 @@
 
     // Kunin ang elements
     const debugInfo = document.getElementById('debugInfo');
+    const mockapiDisplay = document.getElementById('mockapiContent');
     const parkingGrid = document.getElementById('parkingGrid');
     const statusDisplay = document.getElementById('statusDisplay');
     const entryCount = document.getElementById('entryCount');
@@ -268,26 +281,35 @@
         const response = await fetch(API_URL);
         const data = await response.json();
         
-        // Ipakita ang unang 6 na items
-        const first6 = data.slice(0, 6);
+        // Ipakita ang mockapi data
+        mockapiDisplay.innerHTML = JSON.stringify(data, null, 2);
         
-        // I-debug: ipakita ang raw data
-        debugInfo.innerHTML = '✓ May data!\n';
-        debugInfo.innerHTML += 'Total items: ' + data.length + '\n';
-        debugInfo.innerHTML += 'First 6 items:\n';
-        first6.forEach((item, i) => {
-          debugInfo.innerHTML += `  Slot ${i+1}: ${JSON.stringify(item)}\n`;
-        });
-
-        // Bilangin ang occupied
+        // Kunin ang occupied at available values
+        // Assuming na array ang response na may isang object
         let occupied = 0;
-        first6.forEach(item => {
-          // Tingnan kung ano ang status value
-          const status = item.status ? item.status.toString().toLowerCase() : '';
-          if (status === 'occupied' || status === 'true' || status === '1') {
-            occupied++;
+        let available = 6;
+        
+        if (Array.isArray(data) && data.length > 0) {
+          // Kunin ang unang object sa array
+          const firstItem = data[0];
+          
+          // Check kung may occupied field
+          if (firstItem.occupied !== undefined) {
+            occupied = parseInt(firstItem.occupied) || 0;
           }
-        });
+          
+          // Check kung may available field
+          if (firstItem.available !== undefined) {
+            available = parseInt(firstItem.available) || 0;
+          }
+          
+          debugInfo.innerHTML = `✓ May data!\n`;
+          debugInfo.innerHTML += `Occupied: ${occupied}\n`;
+          debugInfo.innerHTML += `Available: ${available}\n`;
+          debugInfo.innerHTML += `Total: ${occupied + available}`;
+        } else {
+          debugInfo.innerHTML = '⚠️ Walang data sa mockapi';
+        }
 
         // Check kung may nagbago (para sa entry/exit count)
         if (previousOccupied !== 0) {
@@ -306,41 +328,40 @@
         previousOccupied = occupied;
 
         // Update ang display
-        updateDisplay(first6, occupied);
+        updateDisplay(occupied, available);
 
       } catch (error) {
         debugInfo.innerHTML = '❌ Error: ' + error.message;
         statusDisplay.innerHTML = '❌ Error sa connection';
+        mockapiDisplay.innerHTML = 'Error: ' + error.message;
       }
     }
 
     // Function para i-update ang display
-    function updateDisplay(slots, occupied) {
+    function updateDisplay(occupied, available) {
       const total = 6;
-      const available = total - occupied;
 
       // Update stats
       entryCount.textContent = totalEntry;
       exitCount.textContent = totalExit;
       occupiedCount.textContent = occupied + '/6';
-      availableCount.textContent = available + '/6';
+      availableCount.textContent = (total - occupied) + '/6';
       
       // Update status
-      if (available === 0) {
+      if (occupied === total) {
         statusDisplay.innerHTML = '⚠️ PUNO NA! Lahat occupied';
       } else {
-        statusDisplay.innerHTML = `✅ ${available} bakante · ${occupied} nakapark`;
+        statusDisplay.innerHTML = `✅ ${total - occupied} bakante · ${occupied} nakapark`;
       }
 
-      // Update parking grid
+      // Update parking grid - 3x2 = 6 slots
       parkingGrid.innerHTML = '';
       
+      // Create 6 slots
+      // Ang unang 'occupied' na slots ay occupied, ang iba ay available
       for (let i = 0; i < total; i++) {
-        const slot = slots[i] || { status: 'available' };
-        const isOccupied = slot.status ? 
-          (slot.status.toString().toLowerCase() === 'occupied' || 
-           slot.status.toString().toLowerCase() === 'true' || 
-           slot.status === '1') : false;
+        // Kung ang slot number ay <= occupied, occupied siya
+        const isOccupied = i < occupied;
         
         const slotDiv = document.createElement('div');
         slotDiv.className = `slot ${isOccupied ? 'occupied' : 'available'}`;
