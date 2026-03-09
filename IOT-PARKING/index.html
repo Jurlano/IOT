@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x2 parking · 6 slots entry/exit tracker</title>
+  <title>3x2 parking · mockapi tracker</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
@@ -23,7 +23,7 @@
     }
 
     .glass-panel {
-      max-width: 550px;
+      max-width: 600px;
       width: 100%;
       margin: 0 auto;
       background: rgba(255, 255, 255, 0.75);
@@ -48,13 +48,18 @@
       margin-bottom: 0.8rem;
     }
 
-    h1 i {
-      background: #1e4f6b;
-      color: white;
-      padding: 10px;
-      border-radius: 30px;
-      font-size: 1.3rem;
-      box-shadow: 0 8px 18px -6px #1e4f6b70;
+    .debug-info {
+      background: #1e1e2f;
+      color: #0ff;
+      padding: 0.8rem;
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 100px;
+      overflow-y: auto;
     }
 
     .status-badge {
@@ -68,13 +73,7 @@
       background: #edf6fc;
       color: #0b4b6b;
       border: 1px solid #c2dcf0;
-      box-shadow: 0 2px 8px rgba(0,50,80,0.05);
       transition: all 0.2s ease;
-    }
-
-    .status-badge i {
-      margin-right: 6px;
-      font-size: 1rem;
     }
 
     .status-badge.warning {
@@ -114,20 +113,11 @@
       margin-bottom: 0.3rem;
     }
 
-    .counter-label i {
-      margin-right: 6px;
-    }
-
     .counter-value {
       font-size: 2.5rem;
       font-weight: 700;
       color: #112b3f;
       line-height: 1.2;
-    }
-
-    .counter-sub {
-      font-size: 0.8rem;
-      color: #608a9f;
     }
 
     .stats-grid {
@@ -162,12 +152,6 @@
       line-height: 1.2;
     }
 
-    .stat-value small {
-      font-size: 0.8rem;
-      font-weight: 400;
-      color: #608a9f;
-    }
-
     .parking-container {
       background: rgba(255,255,255,0.6);
       border-radius: 28px;
@@ -200,7 +184,7 @@
     .parking-slot {
       background: #f8fafc;
       border-radius: 16px;
-      padding: 1.2rem 0.5rem;
+      padding: 1rem 0.3rem;
       text-align: center;
       border: 2px solid #e2edf5;
       transition: all 0.2s ease;
@@ -210,11 +194,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-    }
-
-    .parking-slot:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0,100,150,0.15);
     }
 
     .parking-slot.occupied {
@@ -229,7 +208,7 @@
 
     .slot-icon {
       font-size: 2rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
 
     .occupied .slot-icon {
@@ -241,10 +220,9 @@
     }
 
     .slot-id {
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: #1e4f6b;
-      margin-bottom: 0.3rem;
     }
 
     .slot-status {
@@ -252,8 +230,7 @@
       font-weight: 600;
       padding: 0.2rem 0.5rem;
       border-radius: 30px;
-      display: inline-block;
-      text-transform: uppercase;
+      margin-top: 0.2rem;
     }
 
     .occupied .slot-status {
@@ -270,7 +247,7 @@
       background: white;
       border-radius: 20px;
       padding: 1rem;
-      max-height: 140px;
+      max-height: 120px;
       overflow-y: auto;
       font-size: 0.8rem;
       border: 1px solid #e2edf5;
@@ -334,12 +311,7 @@
 
     .modern-btn:hover {
       background: #edf7fd;
-      box-shadow: 0 12px 24px -8px #1f5979, 0 0 0 1px #7bc0db inset;
       transform: scale(1.02);
-    }
-
-    .modern-btn:active {
-      transform: scale(0.98);
     }
 
     .modern-btn.reset {
@@ -357,8 +329,6 @@
       height: 8px;
       background: #34b56f;
       border-radius: 50%;
-      margin-right: 4px;
-      box-shadow: 0 0 0 2px #a3e0c0;
       animation: pulse 2s infinite;
     }
 
@@ -373,22 +343,19 @@
       font-size: 0.7rem;
       color: #5e849c;
       margin-top: 1rem;
-      border-top: 1px dashed #c1dae9;
       padding-top: 0.8rem;
-      opacity: 0.7;
+      border-top: 1px dashed #c1dae9;
     }
 
-    .row-label {
-      grid-column: span 3;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #1e4f6b;
+    .raw-data {
+      background: #f0f0f0;
+      padding: 0.5rem;
+      border-radius: 8px;
+      font-size: 0.7rem;
       margin-top: 0.5rem;
-      margin-bottom: 0.2rem;
-    }
-
-    .row-label:first-of-type {
-      margin-top: 0;
+      max-height: 60px;
+      overflow-y: auto;
+      color: #333;
     }
   </style>
 </head>
@@ -396,49 +363,44 @@
 <div class="glass-panel">
   <h1>
     <i class="fas fa-square-parking"></i> 
-    3x2 parking
-    <i class="fas fa-chart-simple" style="background:transparent; color:#1e4f6b; box-shadow:none;"></i>
+    3x2 parking · mockapi
   </h1>
+
+  <!-- Debug info - makikita natin kung ano ang laman ng mockapi -->
+  <div class="debug-info" id="debugInfo">
+    <i class="fas fa-spinner fa-spin"></i> Kinukuha ang data mula mockapi...
+  </div>
 
   <div class="status-badge" id="statusBadge">
     <i class="fas fa-circle-check"></i> <span id="statusMessage">nagbabasa ng mockapi...</span>
   </div>
 
-  <!-- Entry/Exit Counters -->
   <div class="entry-exit-grid">
     <div class="counter-card entry">
-      <div class="counter-label">
-        <i class="fas fa-sign-in-alt"></i> PUMASOK
-      </div>
+      <div class="counter-label"><i class="fas fa-sign-in-alt"></i> PUMASOK</div>
       <div class="counter-value" id="totalEntry">0</div>
-      <div class="counter-sub">kabuuang pumasok</div>
     </div>
     <div class="counter-card exit">
-      <div class="counter-label">
-        <i class="fas fa-sign-out-alt"></i> LUMABAS
-      </div>
+      <div class="counter-label"><i class="fas fa-sign-out-alt"></i> LUMABAS</div>
       <div class="counter-value" id="totalExit">0</div>
-      <div class="counter-sub">kabuuang lumabas</div>
     </div>
   </div>
 
-  <!-- Current Status -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-layer-group"></i> total</div>
+      <div class="stat-label">TOTAL</div>
       <div class="stat-value" id="totalSlots">6</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-car-side"></i> nakapark</div>
+      <div class="stat-label">NAKAPARK</div>
       <div class="stat-value" id="occupiedSlots">0 <small>/6</small></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-arrow-circle-up"></i> bakante</div>
-      <div class="stat-value" id="availableSlots">0 <small>/6</small></div>
+      <div class="stat-label">BAKANTE</div>
+      <div class="stat-value" id="availableSlots">6 <small>/6</small></div>
     </div>
   </div>
 
-  <!-- 3x2 Parking Grid (6 slots) -->
   <div class="parking-container">
     <div class="parking-title">
       <div><i class="fas fa-grid-2"></i> 3x2 Parking (6 slots)</div>
@@ -446,21 +408,23 @@
     </div>
     
     <div class="parking-grid" id="parkingGrid">
-      <!-- 6 slots will be inserted here -->
+      <!-- 6 slots -->
+    </div>
+
+    <!-- Raw data from mockapi -->
+    <div class="raw-data" id="rawData">
+      Naghihintay ng data...
     </div>
   </div>
 
-  <!-- Activity Log -->
-  <div class="activity-log" id="activityLog">
+  <div class="activity-log">
     <div class="log-title"><i class="fas fa-history"></i> Kamakailang Activity</div>
-    <div id="logEntries"></div>
+    <div id="logEntries">— walang activity —</div>
   </div>
 
-  <!-- Buttons -->
   <div class="button-group">
     <button class="modern-btn" id="refreshBtn">
-      <i class="fas fa-sync-alt"></i> i-update
-      <span class="live-badge"></span>
+      <i class="fas fa-sync-alt"></i> manual refresh
     </button>
     <button class="modern-btn reset" id="resetBtn">
       <i class="fas fa-redo-alt"></i> reset counters
@@ -468,29 +432,29 @@
   </div>
 
   <div class="footer-note">
-    <i class="fas fa-database"></i> 3x2 = 6 slots · base sa mockapi · binibilang ang pumasok at lumabas
+    <i class="fas fa-database"></i> 3x2 = 6 slots · base sa mockapi
   </div>
 </div>
 
 <script>
   (function() {
     const API_URL = "https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking";
+    const TOTAL_SLOTS = 6;
 
     // DOM elements
-    const parkingGrid = document.getElementById("parkingGrid");
-    const totalSpan = document.getElementById("totalSlots");
-    const occupiedSpan = document.getElementById("occupiedSlots");
-    const availableSpan = document.getElementById("availableSlots");
-    const totalEntrySpan = document.getElementById("totalEntry");
-    const totalExitSpan = document.getElementById("totalExit");
-    const statusBadge = document.getElementById("statusBadge");
-    const statusMessage = document.getElementById("statusMessage");
-    const logEntries = document.getElementById("logEntries");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const resetBtn = document.getElementById("resetBtn");
-
-    // 3x2 = 6 slots
-    const TOTAL_SLOTS = 6;
+    const debugInfo = document.getElementById('debugInfo');
+    const rawData = document.getElementById('rawData');
+    const parkingGrid = document.getElementById('parkingGrid');
+    const totalSpan = document.getElementById('totalSlots');
+    const occupiedSpan = document.getElementById('occupiedSlots');
+    const availableSpan = document.getElementById('availableSlots');
+    const totalEntrySpan = document.getElementById('totalEntry');
+    const totalExitSpan = document.getElementById('totalExit');
+    const statusMessage = document.getElementById('statusMessage');
+    const statusBadge = document.getElementById('statusBadge');
+    const logEntries = document.getElementById('logEntries');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
     // Store previous state
     let previousOccupied = 0;
@@ -498,119 +462,79 @@
     let totalExit = 0;
     let activityLog = [];
 
-    // Helper: add to activity log
-    function addToLog(action, details) {
-      const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      
-      activityLog.unshift({
-        time,
-        action,
-        details
-      });
-      
-      // Keep only last 6 entries
-      if (activityLog.length > 6) {
-        activityLog.pop();
-      }
-      
-      // Update log display
-      logEntries.innerHTML = '';
-      
-      if (activityLog.length === 0) {
-        logEntries.innerHTML = '<div style="color:#888; text-align:center; padding:0.5rem;">— walang activity —</div>';
-        return;
-      }
-      
-      activityLog.forEach(log => {
-        const logDiv = document.createElement('div');
-        logDiv.className = `log-entry ${log.action}`;
-        
-        let icon = log.action === 'entry' ? 'fa-sign-in-alt' : 'fa-sign-out-alt';
-        let text = log.action === 'entry' ? 'Pumasok' : 'Lumabas';
-        
-        logDiv.innerHTML = `
-          <i class="fas ${icon}"></i>
-          <span>${text} ${log.details}</span>
-          <span class="log-time">${log.time}</span>
-        `;
-        logEntries.appendChild(logDiv);
-      });
-    }
-
-    // Helper: create parking slot element
-    function createParkingSlot(slotData, slotNumber) {
-      const isOccupied = slotData && slotData.status && slotData.status.toLowerCase() === 'occupied';
-      
-      const slotDiv = document.createElement('div');
-      slotDiv.className = `parking-slot ${isOccupied ? 'occupied' : 'available'}`;
-      
-      slotDiv.innerHTML = `
-        <div class="slot-icon">
-          <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
-        </div>
-        <div class="slot-id">Slot ${slotNumber}</div>
-        <div class="slot-status">${isOccupied ? 'occupied' : 'available'}</div>
-      `;
-      
-      // Click to show info
-      slotDiv.addEventListener('click', () => {
-        alert(`Slot ${slotNumber}\nStatus: ${isOccupied ? 'Occupied' : 'Available'}`);
-      });
-      
-      return slotDiv;
-    }
-
-    // Main fetch function
     async function fetchParkingData() {
       try {
+        // Show loading
+        debugInfo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kinukuha ang data mula mockapi...';
+        
         const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('Network error');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
         const data = await response.json();
         
-        // Kunin lang ang unang 6 na slots (3x2)
+        // Ipakita ang raw data para makita natin
+        debugInfo.innerHTML = '✓ May data mula mockapi!';
+        rawData.innerHTML = `<strong>Raw mockapi data (${data.length} items):</strong><br>` + 
+                          JSON.stringify(data.slice(0, 10), null, 2)
+                            .replace(/ /g, '&nbsp;')
+                            .replace(/\n/g, '<br>');
+        
+        // Kunin lang ang unang 6
         const first6Slots = data.slice(0, TOTAL_SLOTS);
         
-        // Bilangin kung ilan ang occupied
+        // Check kung anong status values meron
+        const statusValues = first6Slots.map(s => s.status).join(', ');
+        debugInfo.innerHTML += `<br>Status values: ${statusValues || 'walang status'}`;
+        
+        // Bilangin occupied
         let currentOccupied = 0;
-        first6Slots.forEach(slot => {
-          if (slot.status && slot.status.toLowerCase() === 'occupied') {
-            currentOccupied++;
+        first6Slots.forEach((slot, index) => {
+          // I-debug kung ano ang laman ng status
+          console.log(`Slot ${index + 1}:`, slot);
+          
+          // Check kung may status property
+          if (slot.status) {
+            const statusLower = String(slot.status).toLowerCase();
+            if (statusLower === 'occupied' || statusLower === 'true' || statusLower === '1') {
+              currentOccupied++;
+            }
           }
         });
         
-        // Check kung may nagbago compared sa previous (skip sa first load)
+        // Update debug
+        debugInfo.innerHTML += `<br>Occupied count: ${currentOccupied}`;
+        
+        // Check kung may nagbago
         if (previousOccupied !== 0) {
           if (currentOccupied > previousOccupied) {
-            // May pumasok
             const diff = currentOccupied - previousOccupied;
             totalEntry += diff;
             addToLog('entry', `${diff} sasakyan`);
           } else if (currentOccupied < previousOccupied) {
-            // May lumabas
             const diff = previousOccupied - currentOccupied;
             totalExit += diff;
             addToLog('exit', `${diff} sasakyan`);
           }
         }
         
-        // Update previous state
         previousOccupied = currentOccupied;
         
-        // Compute available
+        // Update UI
         const currentAvailable = TOTAL_SLOTS - currentOccupied;
         
-        // Update UI
         totalSpan.innerText = TOTAL_SLOTS;
         occupiedSpan.innerHTML = `${currentOccupied} <small>/ ${TOTAL_SLOTS}</small>`;
         availableSpan.innerHTML = `${currentAvailable} <small>/ ${TOTAL_SLOTS}</small>`;
         totalEntrySpan.innerText = totalEntry;
         totalExitSpan.innerText = totalExit;
         
-        // Update status badge
+        // Update status
         if (currentAvailable === 0) {
           statusBadge.classList.add('warning');
-          statusMessage.innerHTML = '⚠️ Puno na! 6/6 occupied';
+          statusMessage.innerHTML = '⚠️ Puno na!';
         } else {
           statusBadge.classList.remove('warning');
           statusMessage.innerHTML = `✓ ${currentAvailable} bakante · ${currentOccupied} nakapark`;
@@ -619,51 +543,77 @@
         // Update parking grid
         parkingGrid.innerHTML = '';
         
-        // Create 3x2 grid (2 rows of 3)
         for (let i = 0; i < TOTAL_SLOTS; i++) {
           const slotNumber = i + 1;
           
-          if (i < first6Slots.length) {
-            // Use data from API
-            const slot = createParkingSlot(first6Slots[i], slotNumber);
-            parkingGrid.appendChild(slot);
-          } else {
-            // Fallback if kulang ang data
-            const emptySlot = createParkingSlot({ status: 'available' }, slotNumber);
-            parkingGrid.appendChild(emptySlot);
+          let isOccupied = false;
+          if (i < first6Slots.length && first6Slots[i].status) {
+            const status = String(first6Slots[i].status).toLowerCase();
+            isOccupied = (status === 'occupied' || status === 'true' || status === '1');
           }
+          
+          const slotDiv = document.createElement('div');
+          slotDiv.className = `parking-slot ${isOccupied ? 'occupied' : 'available'}`;
+          
+          slotDiv.innerHTML = `
+            <div class="slot-icon">
+              <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
+            </div>
+            <div class="slot-id">Slot ${slotNumber}</div>
+            <div class="slot-status">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
+          `;
+          
+          parkingGrid.appendChild(slotDiv);
         }
         
       } catch (error) {
         console.error('Error:', error);
-        
+        debugInfo.innerHTML = `❌ Error: ${error.message}`;
+        rawData.innerHTML = 'Walang data mula mockapi';
         statusBadge.classList.add('warning');
-        statusMessage.innerHTML = '⚠️ offline · demo mode';
-        
-        // Show demo data
-        parkingGrid.innerHTML = '';
-        
-        // Random demo data for 6 slots
-        for (let i = 0; i < TOTAL_SLOTS; i++) {
-          const randomStatus = Math.random() > 0.5 ? 'occupied' : 'available';
-          const slot = createParkingSlot({ status: randomStatus }, i + 1);
-          parkingGrid.appendChild(slot);
-        }
+        statusMessage.innerHTML = '⚠️ Error sa mockapi';
       }
     }
 
-    // Reset counters
+    function addToLog(action, details) {
+      const time = new Date().toLocaleTimeString();
+      
+      activityLog.unshift({ time, action, details });
+      
+      if (activityLog.length > 5) {
+        activityLog.pop();
+      }
+      
+      // Update log
+      logEntries.innerHTML = '';
+      
+      if (activityLog.length === 0) {
+        logEntries.innerHTML = '— walang activity —';
+        return;
+      }
+      
+      activityLog.forEach(log => {
+        const div = document.createElement('div');
+        div.className = `log-entry ${log.action}`;
+        div.innerHTML = `
+          <i class="fas ${log.action === 'entry' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
+          <span>${log.action === 'entry' ? 'Pumasok' : 'Lumabas'} ${log.details}</span>
+          <span class="log-time">${log.time}</span>
+        `;
+        logEntries.appendChild(div);
+      });
+    }
+
     function resetCounters() {
       totalEntry = 0;
       totalExit = 0;
-      previousOccupied = 0; // Reset para hindi mag-iba ang count
+      previousOccupied = 0;
       activityLog = [];
       
       totalEntrySpan.innerText = '0';
       totalExitSpan.innerText = '0';
-      logEntries.innerHTML = '<div style="color:#888; text-align:center; padding:0.5rem;">— walang activity —</div>';
+      logEntries.innerHTML = '— walang activity —';
       
-      // Refresh data para mag-sync
       fetchParkingData();
     }
 
@@ -671,25 +621,11 @@
     fetchParkingData();
     
     // Auto-refresh every 3 seconds
-    const intervalId = setInterval(fetchParkingData, 3000);
+    setInterval(fetchParkingData, 3000);
     
     // Event listeners
-    refreshBtn.addEventListener('click', () => {
-      fetchParkingData();
-      // Rotate icon
-      const icon = refreshBtn.querySelector('i');
-      icon.style.transform = 'rotate(180deg)';
-      setTimeout(() => {
-        icon.style.transform = 'rotate(0deg)';
-      }, 200);
-    });
-    
+    refreshBtn.addEventListener('click', fetchParkingData);
     resetBtn.addEventListener('click', resetCounters);
-    
-    // Cleanup
-    window.addEventListener('beforeunload', () => {
-      clearInterval(intervalId);
-    });
 
   })();
 </script>
