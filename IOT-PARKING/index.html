@@ -4,93 +4,185 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Parking System Dashboard</title>
+
 <style>
-  body { font-family: Arial, sans-serif; background:#f2f2f2; margin:0; padding:0; }
-  .container { max-width: 800px; margin: 50px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.2); }
-  h1 { text-align:center; color:#00bcd4; margin-bottom:30px; }
-  .status { text-align:center; font-size:18px; color:red; font-weight:bold; margin-bottom:20px; }
-  .total { text-align:center; font-size:20px; margin-bottom:20px; }
-  table { width:100%; border-collapse: collapse; }
-  th, td { padding:12px; text-align:center; border-bottom:1px solid #ddd; }
-  th { background:#00bcd4; color:white; }
-  tr.full { background:#f44336; color:white; }
-  tr.available { background:#4caf50; color:white; }
-  button { display:block; margin:20px auto; padding:10px 20px; border:none; border-radius:8px; background:#00bcd4; color:white; cursor:pointer; font-size:16px; }
-  button:hover { background:#0097a7; }
+body{
+font-family:Arial;
+background:#f2f2f2;
+margin:0;
+padding:0;
+}
+
+.container{
+max-width:800px;
+margin:40px auto;
+background:#fff;
+padding:20px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+h1{
+text-align:center;
+color:#00bcd4;
+}
+
+.status{
+text-align:center;
+font-size:18px;
+color:red;
+font-weight:bold;
+margin-bottom:20px;
+}
+
+.summary{
+display:flex;
+justify-content:space-around;
+margin:20px 0;
+font-size:18px;
+font-weight:bold;
+}
+
+.summary div{
+background:#00bcd4;
+color:white;
+padding:10px 20px;
+border-radius:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:12px;
+text-align:center;
+border-bottom:1px solid #ddd;
+}
+
+th{
+background:#00bcd4;
+color:white;
+}
+
+tr.full{
+background:#f44336;
+color:white;
+}
+
+tr.available{
+background:#4caf50;
+color:white;
+}
+
+button{
+display:block;
+margin:20px auto;
+padding:10px 20px;
+border:none;
+border-radius:8px;
+background:#00bcd4;
+color:white;
+cursor:pointer;
+font-size:16px;
+}
+
+button:hover{
+background:#0097a7;
+}
 </style>
 </head>
+
 <body>
 
 <div class="container">
-  <h1>⚡ Parking System Dashboard ⚡</h1>
-  <div class="status" id="statusText"></div>
-  <div class="total">Total Vehicles Inside: <span id="totalInside">0</span></div>
 
-  <table id="parkingTable">
-    <thead>
-      <tr>
-        <th>Lot ID</th>
-        <th>Occupied</th>
-        <th>Available</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<h1>⚡ Parking System Dashboard ⚡</h1>
 
-  <button id="refreshBtn" onclick="fetchParkingData()">Refresh Data</button>
+<div class="status" id="statusText"></div>
+
+<div class="summary">
+<div>Total Slots: <span id="totalSlots">0</span></div>
+<div>Occupied: <span id="occupiedSlots">0</span></div>
+<div>Available: <span id="availableSlots">0</span></div>
+</div>
+
+<table id="parkingTable">
+<thead>
+<tr>
+<th>Lot ID</th>
+<th>Occupied</th>
+<th>Available</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<button id="refreshBtn" onclick="fetchParkingData()">Refresh</button>
+
 </div>
 
 <script>
-const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
 
-async function fetchParkingData() {
-  const btn = document.getElementById('refreshBtn');
-  const originalContent = btn.innerHTML;
-  btn.innerHTML = 'Loading...';
-  btn.disabled = true;
+const API_URL = "https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking";
 
-  try {
-    const response = await fetch(API_URL);
-    const data = await response.json();
+async function fetchParkingData(){
 
-    const tbody = document.querySelector('#parkingTable tbody');
-    tbody.innerHTML = '';
+const res = await fetch(API_URL);
+const data = await res.json();
 
-    let totalInside = 0;
+const tbody = document.querySelector("#parkingTable tbody");
+tbody.innerHTML="";
 
-    data.forEach(entry => {
-      totalInside += parseInt(entry.occupied) || 0;
+let totalOccupied = 0;
+let totalAvailable = 0;
+let totalSlots = 0;
 
-      const tr = document.createElement('tr');
-      tr.className = (entry.status === 'full' || parseInt(entry.available) === 0) ? 'full' : 'available';
-      tr.innerHTML = `
-        <td>${entry.id}</td>
-        <td>${entry.occupied}</td>
-        <td>${entry.available}</td>
-        <td>${entry.status}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+data.forEach(item=>{
 
-    document.getElementById('totalInside').textContent = totalInside;
+let occupied = parseInt(item.occupied);
+let available = parseInt(item.available);
 
-    // Show full alert if all lots are full
-    const allFull = data.every(e => parseInt(e.available) === 0 || e.status === 'full');
-    document.getElementById('statusText').textContent = allFull ? '🚨 All Lots Full!' : '';
+totalOccupied += occupied;
+totalAvailable += available;
+totalSlots += occupied + available;
 
-  } catch (err) {
-    console.error('Error:', err);
-    alert('Failed to fetch parking data');
-  } finally {
-    btn.innerHTML = originalContent;
-    btn.disabled = false;
-  }
+const tr = document.createElement("tr");
+
+if(available === 0){
+tr.className="full";
+}else{
+tr.className="available";
 }
 
-// Initial fetch
+tr.innerHTML = `
+<td>${item.id}</td>
+<td>${occupied}</td>
+<td>${available}</td>
+<td>${item.status}</td>
+`;
+
+tbody.appendChild(tr);
+
+});
+
+document.getElementById("totalSlots").innerText = totalSlots;
+document.getElementById("occupiedSlots").innerText = totalOccupied + " / " + totalSlots;
+document.getElementById("availableSlots").innerText = totalAvailable + " / " + totalSlots;
+
+if(totalAvailable === 0){
+document.getElementById("statusText").innerText="🚨 Parking Full!";
+}else{
+document.getElementById("statusText").innerText="";
+}
+
+}
+
 fetchParkingData();
-setInterval(fetchParkingData, 5000);
+setInterval(fetchParkingData,3000);
+
 </script>
 
 </body>
