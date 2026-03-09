@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x3 parking · entry/exit tracker</title>
+  <title>3x2 parking · 6 slots entry/exit tracker</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
@@ -23,7 +23,7 @@
     }
 
     .glass-panel {
-      max-width: 700px;
+      max-width: 550px;
       width: 100%;
       margin: 0 auto;
       background: rgba(255, 255, 255, 0.75);
@@ -171,7 +171,7 @@
     .parking-container {
       background: rgba(255,255,255,0.6);
       border-radius: 28px;
-      padding: 1.2rem;
+      padding: 1.5rem;
       box-shadow: inset 0 2px 6px rgba(0,0,0,0.02), 0 8px 20px -12px #265e7a;
       margin-bottom: 1.5rem;
     }
@@ -180,7 +180,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
     }
 
     .slot-count {
@@ -194,13 +194,13 @@
     .parking-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 0.8rem;
+      gap: 1rem;
     }
 
     .parking-slot {
       background: #f8fafc;
       border-radius: 16px;
-      padding: 1rem 0.3rem;
+      padding: 1.2rem 0.5rem;
       text-align: center;
       border: 2px solid #e2edf5;
       transition: all 0.2s ease;
@@ -228,8 +228,8 @@
     }
 
     .slot-icon {
-      font-size: 1.5rem;
-      margin-bottom: 0.3rem;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
     }
 
     .occupied .slot-icon {
@@ -241,10 +241,10 @@
     }
 
     .slot-id {
-      font-size: 0.9rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #1e4f6b;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.3rem;
     }
 
     .slot-status {
@@ -270,7 +270,7 @@
       background: white;
       border-radius: 20px;
       padding: 1rem;
-      max-height: 120px;
+      max-height: 140px;
       overflow-y: auto;
       font-size: 0.8rem;
       border: 1px solid #e2edf5;
@@ -377,13 +377,26 @@
       padding-top: 0.8rem;
       opacity: 0.7;
     }
+
+    .row-label {
+      grid-column: span 3;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1e4f6b;
+      margin-top: 0.5rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .row-label:first-of-type {
+      margin-top: 0;
+    }
   </style>
 </head>
 <body>
 <div class="glass-panel">
   <h1>
     <i class="fas fa-square-parking"></i> 
-    3x3 parking
+    3x2 parking
     <i class="fas fa-chart-simple" style="background:transparent; color:#1e4f6b; box-shadow:none;"></i>
   </h1>
 
@@ -398,14 +411,14 @@
         <i class="fas fa-sign-in-alt"></i> PUMASOK
       </div>
       <div class="counter-value" id="totalEntry">0</div>
-      <div class="counter-sub">kabuuang entry</div>
+      <div class="counter-sub">kabuuang pumasok</div>
     </div>
     <div class="counter-card exit">
       <div class="counter-label">
         <i class="fas fa-sign-out-alt"></i> LUMABAS
       </div>
       <div class="counter-value" id="totalExit">0</div>
-      <div class="counter-sub">kabuuang exit</div>
+      <div class="counter-sub">kabuuang lumabas</div>
     </div>
   </div>
 
@@ -413,26 +426,27 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label"><i class="fas fa-layer-group"></i> total</div>
-      <div class="stat-value" id="totalSlots">9</div>
+      <div class="stat-value" id="totalSlots">6</div>
     </div>
     <div class="stat-card">
       <div class="stat-label"><i class="fas fa-car-side"></i> nakapark</div>
-      <div class="stat-value" id="occupiedSlots">0 <small>/9</small></div>
+      <div class="stat-value" id="occupiedSlots">0 <small>/6</small></div>
     </div>
     <div class="stat-card">
       <div class="stat-label"><i class="fas fa-arrow-circle-up"></i> bakante</div>
-      <div class="stat-value" id="availableSlots">0 <small>/9</small></div>
+      <div class="stat-value" id="availableSlots">0 <small>/6</small></div>
     </div>
   </div>
 
-  <!-- 3x3 Parking Grid -->
+  <!-- 3x2 Parking Grid (6 slots) -->
   <div class="parking-container">
     <div class="parking-title">
-      <div><i class="fas fa-grid-2"></i> 3x3 Parking Layout</div>
-      <div class="slot-count"><i class="fas fa-car"></i> 9 slots</div>
+      <div><i class="fas fa-grid-2"></i> 3x2 Parking (6 slots)</div>
+      <div class="slot-count"><i class="fas fa-car"></i> 6 slots</div>
     </div>
+    
     <div class="parking-grid" id="parkingGrid">
-      <!-- 9 slots will be inserted here -->
+      <!-- 6 slots will be inserted here -->
     </div>
   </div>
 
@@ -454,7 +468,7 @@
   </div>
 
   <div class="footer-note">
-    <i class="fas fa-database"></i> batay sa mockapi · 3x3 = 9 slots · binibilang ang pumasok at lumabas
+    <i class="fas fa-database"></i> 3x2 = 6 slots · base sa mockapi · binibilang ang pumasok at lumabas
   </div>
 </div>
 
@@ -475,8 +489,8 @@
     const refreshBtn = document.getElementById("refreshBtn");
     const resetBtn = document.getElementById("resetBtn");
 
-    // 3x3 fixed: 9 slots
-    const TOTAL_SLOTS = 9;
+    // 3x2 = 6 slots
+    const TOTAL_SLOTS = 6;
 
     // Store previous state
     let previousOccupied = 0;
@@ -494,8 +508,8 @@
         details
       });
       
-      // Keep only last 8 entries
-      if (activityLog.length > 8) {
+      // Keep only last 6 entries
+      if (activityLog.length > 6) {
         activityLog.pop();
       }
       
@@ -534,11 +548,11 @@
         <div class="slot-icon">
           <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
         </div>
-        <div class="slot-id">${slotNumber}</div>
+        <div class="slot-id">Slot ${slotNumber}</div>
         <div class="slot-status">${isOccupied ? 'occupied' : 'available'}</div>
       `;
       
-      // Optional: click to show info
+      // Click to show info
       slotDiv.addEventListener('click', () => {
         alert(`Slot ${slotNumber}\nStatus: ${isOccupied ? 'Occupied' : 'Available'}`);
       });
@@ -554,19 +568,19 @@
         
         const data = await response.json();
         
-        // Kunin lang ang unang 9 na slots (3x3)
-        const first9Slots = data.slice(0, TOTAL_SLOTS);
+        // Kunin lang ang unang 6 na slots (3x2)
+        const first6Slots = data.slice(0, TOTAL_SLOTS);
         
         // Bilangin kung ilan ang occupied
         let currentOccupied = 0;
-        first9Slots.forEach(slot => {
+        first6Slots.forEach(slot => {
           if (slot.status && slot.status.toLowerCase() === 'occupied') {
             currentOccupied++;
           }
         });
         
-        // Check kung may nagbago compared sa previous
-        if (previousOccupied !== 0) { // Skip sa first load
+        // Check kung may nagbago compared sa previous (skip sa first load)
+        if (previousOccupied !== 0) {
           if (currentOccupied > previousOccupied) {
             // May pumasok
             const diff = currentOccupied - previousOccupied;
@@ -596,7 +610,7 @@
         // Update status badge
         if (currentAvailable === 0) {
           statusBadge.classList.add('warning');
-          statusMessage.innerHTML = '⚠️ Puno na! 9/9 occupied';
+          statusMessage.innerHTML = '⚠️ Puno na! 6/6 occupied';
         } else {
           statusBadge.classList.remove('warning');
           statusMessage.innerHTML = `✓ ${currentAvailable} bakante · ${currentOccupied} nakapark`;
@@ -605,17 +619,17 @@
         // Update parking grid
         parkingGrid.innerHTML = '';
         
-        // Create 3x3 grid
+        // Create 3x2 grid (2 rows of 3)
         for (let i = 0; i < TOTAL_SLOTS; i++) {
           const slotNumber = i + 1;
           
-          if (i < first9Slots.length) {
+          if (i < first6Slots.length) {
             // Use data from API
-            const slot = createParkingSlot(first9Slots[i], `Slot ${slotNumber}`);
+            const slot = createParkingSlot(first6Slots[i], slotNumber);
             parkingGrid.appendChild(slot);
           } else {
             // Fallback if kulang ang data
-            const emptySlot = createParkingSlot({ status: 'available' }, `Slot ${slotNumber}`);
+            const emptySlot = createParkingSlot({ status: 'available' }, slotNumber);
             parkingGrid.appendChild(emptySlot);
           }
         }
@@ -629,10 +643,10 @@
         // Show demo data
         parkingGrid.innerHTML = '';
         
-        // Random demo data
+        // Random demo data for 6 slots
         for (let i = 0; i < TOTAL_SLOTS; i++) {
           const randomStatus = Math.random() > 0.5 ? 'occupied' : 'available';
-          const slot = createParkingSlot({ status: randomStatus }, `Slot ${i + 1}`);
+          const slot = createParkingSlot({ status: randomStatus }, i + 1);
           parkingGrid.appendChild(slot);
         }
       }
