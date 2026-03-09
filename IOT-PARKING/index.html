@@ -3,631 +3,414 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x2 parking · mockapi tracker</title>
+  <title>3x2 Parking - Simple</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
     body {
-      background: linear-gradient(145deg, #e9f0f9 0%, #f5f9ff 100%);
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 1rem;
+      padding: 20px;
+      margin: 0;
     }
-
-    .glass-panel {
+    .container {
       max-width: 600px;
       width: 100%;
-      margin: 0 auto;
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 40px;
-      padding: 1.8rem 1.5rem;
-      box-shadow: 0 30px 60px -20px rgba(0, 40, 80, 0.35),
-                  inset 0 1px 2px rgba(255,255,255,0.8);
-      border: 1px solid rgba(255,255,255,0.5);
-    }
-
-    h1 {
-      font-weight: 600;
-      font-size: 1.8rem;
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: #112b3f;
-      margin-bottom: 0.8rem;
-    }
-
-    .debug-info {
-      background: #1e1e2f;
-      color: #0ff;
-      padding: 0.8rem;
-      border-radius: 12px;
-      font-family: monospace;
-      font-size: 0.8rem;
-      margin-bottom: 1rem;
-      white-space: pre-wrap;
-      word-break: break-all;
-      max-height: 100px;
-      overflow-y: auto;
-    }
-
-    .status-badge {
-      text-align: center;
-      font-size: 1rem;
-      font-weight: 500;
-      padding: 0.6rem 1.2rem;
-      border-radius: 100px;
-      width: fit-content;
-      margin: 0.3rem auto 1.2rem auto;
-      background: #edf6fc;
-      color: #0b4b6b;
-      border: 1px solid #c2dcf0;
-      transition: all 0.2s ease;
-    }
-
-    .status-badge.warning {
-      background: #ffecdd;
-      color: #ac3800;
-      border-color: #ffb68b;
-    }
-
-    .entry-exit-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .counter-card {
-      background: linear-gradient(145deg, #ffffff, #f5f9ff);
-      border-radius: 24px;
-      padding: 1.2rem;
-      text-align: center;
-      border: 1px solid rgba(30, 79, 107, 0.2);
-      box-shadow: 0 10px 20px -10px rgba(0,80,120,0.2);
-    }
-
-    .counter-card.entry {
-      border-left: 6px solid #4caf50;
-    }
-
-    .counter-card.exit {
-      border-left: 6px solid #f44336;
-    }
-
-    .counter-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #1e4f6b;
-      margin-bottom: 0.3rem;
-    }
-
-    .counter-value {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #112b3f;
-      line-height: 1.2;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.8rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .stat-card {
       background: white;
       border-radius: 20px;
-      padding: 1rem 0.5rem;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    h1 {
       text-align: center;
-      box-shadow: 0 15px 30px -12px rgba(21, 50, 80, 0.15);
-      border: 1px solid rgba(0,150,200,0.15);
+      color: #333;
+      margin-bottom: 20px;
     }
-
-    .stat-label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      font-weight: 600;
-      color: #42758e;
-      margin-bottom: 0.3rem;
+    .status {
+      text-align: center;
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: bold;
     }
-
-    .stat-value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #0f3b4f;
-      line-height: 1.2;
+    .counters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
     }
-
-    .parking-container {
-      background: rgba(255,255,255,0.6);
-      border-radius: 28px;
-      padding: 1.5rem;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.02), 0 8px 20px -12px #265e7a;
-      margin-bottom: 1.5rem;
+    .counter {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
     }
-
-    .parking-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.2rem;
+    .counter.entry {
+      border-left: 5px solid #28a745;
     }
-
-    .slot-count {
-      background: #1e4f6b;
-      color: white;
-      padding: 0.3rem 1rem;
-      border-radius: 30px;
-      font-size: 0.8rem;
+    .counter.exit {
+      border-left: 5px solid #dc3545;
     }
-
+    .counter .label {
+      font-size: 14px;
+      color: #666;
+    }
+    .counter .number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat .label {
+      font-size: 12px;
+      color: #666;
+    }
+    .stat .value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
     .parking-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
+      gap: 10px;
+      margin-bottom: 20px;
     }
-
-    .parking-slot {
-      background: #f8fafc;
-      border-radius: 16px;
-      padding: 1rem 0.3rem;
+    .slot {
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      border-radius: 10px;
+      padding: 15px 5px;
       text-align: center;
-      border: 2px solid #e2edf5;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
     }
-
-    .parking-slot.occupied {
-      background: linear-gradient(145deg, #fff1f0, #ffe7e3);
-      border-color: #f44336;
+    .slot.occupied {
+      background: #f8d7da;
+      border-color: #dc3545;
     }
-
-    .parking-slot.available {
-      background: linear-gradient(145deg, #f0faf5, #e6f3ec);
-      border-color: #4caf50;
+    .slot.available {
+      background: #d4edda;
+      border-color: #28a745;
     }
-
-    .slot-icon {
-      font-size: 2rem;
-      margin-bottom: 0.3rem;
+    .slot i {
+      font-size: 24px;
+      margin-bottom: 5px;
     }
-
-    .occupied .slot-icon {
-      color: #f44336;
+    .slot .id {
+      font-weight: bold;
+      margin-bottom: 3px;
     }
-
-    .available .slot-icon {
-      color: #4caf50;
-    }
-
-    .slot-id {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #1e4f6b;
-    }
-
-    .slot-status {
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.2rem 0.5rem;
-      border-radius: 30px;
-      margin-top: 0.2rem;
-    }
-
-    .occupied .slot-status {
-      background: #f44336;
+    .slot .status-text {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 12px;
       color: white;
     }
-
-    .available .slot-status {
-      background: #4caf50;
-      color: white;
+    .occupied .status-text {
+      background: #dc3545;
     }
-
-    .activity-log {
-      background: white;
-      border-radius: 20px;
-      padding: 1rem;
+    .available .status-text {
+      background: #28a745;
+    }
+    .log {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
       max-height: 120px;
       overflow-y: auto;
-      font-size: 0.8rem;
-      border: 1px solid #e2edf5;
     }
-
     .log-title {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #1e4f6b;
+      font-weight: bold;
+      margin-bottom: 10px;
     }
-
     .log-entry {
-      padding: 0.3rem 0;
-      border-bottom: 1px dashed #e2edf5;
+      padding: 5px 0;
+      border-bottom: 1px solid #dee2e6;
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      justify-content: space-between;
     }
-
-    .log-entry.entry {
-      color: #4caf50;
-    }
-
-    .log-entry.exit {
-      color: #f44336;
-    }
-
-    .log-time {
-      color: #888;
-      font-size: 0.7rem;
-      margin-left: auto;
-    }
-
-    .button-group {
+    .buttons {
       display: flex;
+      gap: 10px;
       justify-content: center;
-      gap: 1rem;
-      margin-top: 1.2rem;
     }
-
-    .modern-btn {
-      background: white;
+    button {
+      padding: 10px 20px;
       border: none;
-      padding: 0.7rem 1.5rem;
-      border-radius: 50px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #145c7a;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      box-shadow: 0 8px 18px -6px #173f5730, 0 0 0 1px #b9d7ea inset;
-      transition: all 0.2s ease;
-    }
-
-    .modern-btn i {
-      font-size: 1rem;
-      color: #3184a8;
-    }
-
-    .modern-btn:hover {
-      background: #edf7fd;
-      transform: scale(1.02);
-    }
-
-    .modern-btn.reset {
-      background: #fff4f0;
-      color: #ac3800;
-    }
-
-    .modern-btn.reset i {
-      color: #ac3800;
-    }
-
-    .live-badge {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: #34b56f;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(1.1); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    .footer-note {
-      text-align: center;
-      font-size: 0.7rem;
-      color: #5e849c;
-      margin-top: 1rem;
-      padding-top: 0.8rem;
-      border-top: 1px dashed #c1dae9;
-    }
-
-    .raw-data {
-      background: #f0f0f0;
-      padding: 0.5rem;
       border-radius: 8px;
-      font-size: 0.7rem;
-      margin-top: 0.5rem;
-      max-height: 60px;
-      overflow-y: auto;
-      color: #333;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .refresh {
+      background: #007bff;
+      color: white;
+    }
+    .reset {
+      background: #6c757d;
+      color: white;
+    }
+    .debug {
+      background: #333;
+      color: #0f0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      margin-top: 10px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
-<div class="glass-panel">
-  <h1>
-    <i class="fas fa-square-parking"></i> 
-    3x2 parking · mockapi
-  </h1>
+  <div class="container">
+    <h1><i class="fas fa-parking"></i> 3x2 Parking</h1>
 
-  <!-- Debug info - makikita natin kung ano ang laman ng mockapi -->
-  <div class="debug-info" id="debugInfo">
-    <i class="fas fa-spinner fa-spin"></i> Kinukuha ang data mula mockapi...
-  </div>
+    <!-- Simple status -->
+    <div class="status" id="statusDisplay">
+      <i class="fas fa-circle-notch fa-spin"></i> Loading...
+    </div>
 
-  <div class="status-badge" id="statusBadge">
-    <i class="fas fa-circle-check"></i> <span id="statusMessage">nagbabasa ng mockapi...</span>
-  </div>
+    <!-- Entry/Exit counters -->
+    <div class="counters">
+      <div class="counter entry">
+        <div class="label"><i class="fas fa-sign-in-alt"></i> PUMASOK</div>
+        <div class="number" id="entryCount">0</div>
+      </div>
+      <div class="counter exit">
+        <div class="label"><i class="fas fa-sign-out-alt"></i> LUMABAS</div>
+        <div class="number" id="exitCount">0</div>
+      </div>
+    </div>
 
-  <div class="entry-exit-grid">
-    <div class="counter-card entry">
-      <div class="counter-label"><i class="fas fa-sign-in-alt"></i> PUMASOK</div>
-      <div class="counter-value" id="totalEntry">0</div>
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="label">TOTAL</div>
+        <div class="value" id="totalSlots">6</div>
+      </div>
+      <div class="stat">
+        <div class="label">NAKAPARK</div>
+        <div class="value" id="occupiedCount">0/6</div>
+      </div>
+      <div class="stat">
+        <div class="label">BAKANTE</div>
+        <div class="value" id="availableCount">6/6</div>
+      </div>
     </div>
-    <div class="counter-card exit">
-      <div class="counter-label"><i class="fas fa-sign-out-alt"></i> LUMABAS</div>
-      <div class="counter-value" id="totalExit">0</div>
-    </div>
-  </div>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">TOTAL</div>
-      <div class="stat-value" id="totalSlots">6</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">NAKAPARK</div>
-      <div class="stat-value" id="occupiedSlots">0 <small>/6</small></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">BAKANTE</div>
-      <div class="stat-value" id="availableSlots">6 <small>/6</small></div>
-    </div>
-  </div>
-
-  <div class="parking-container">
-    <div class="parking-title">
-      <div><i class="fas fa-grid-2"></i> 3x2 Parking (6 slots)</div>
-      <div class="slot-count"><i class="fas fa-car"></i> 6 slots</div>
-    </div>
-    
+    <!-- 3x2 Parking slots -->
     <div class="parking-grid" id="parkingGrid">
-      <!-- 6 slots -->
+      <!-- Mapupuno ng JavaScript -->
     </div>
 
-    <!-- Raw data from mockapi -->
-    <div class="raw-data" id="rawData">
+    <!-- Activity log -->
+    <div class="log" id="activityLog">
+      <div class="log-title"><i class="fas fa-history"></i> Activity</div>
+      <div id="logList">— walang activity —</div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="refresh" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+      <button class="reset" id="resetBtn"><i class="fas fa-redo-alt"></i> Reset</button>
+    </div>
+
+    <!-- Debug info (makikita mo to) -->
+    <div class="debug" id="debugInfo">
       Naghihintay ng data...
     </div>
   </div>
 
-  <div class="activity-log">
-    <div class="log-title"><i class="fas fa-history"></i> Kamakailang Activity</div>
-    <div id="logEntries">— walang activity —</div>
-  </div>
-
-  <div class="button-group">
-    <button class="modern-btn" id="refreshBtn">
-      <i class="fas fa-sync-alt"></i> manual refresh
-    </button>
-    <button class="modern-btn reset" id="resetBtn">
-      <i class="fas fa-redo-alt"></i> reset counters
-    </button>
-  </div>
-
-  <div class="footer-note">
-    <i class="fas fa-database"></i> 3x2 = 6 slots · base sa mockapi
-  </div>
-</div>
-
-<script>
-  (function() {
-    const API_URL = "https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking";
-    const TOTAL_SLOTS = 6;
-
-    // DOM elements
-    const debugInfo = document.getElementById('debugInfo');
-    const rawData = document.getElementById('rawData');
-    const parkingGrid = document.getElementById('parkingGrid');
-    const totalSpan = document.getElementById('totalSlots');
-    const occupiedSpan = document.getElementById('occupiedSlots');
-    const availableSpan = document.getElementById('availableSlots');
-    const totalEntrySpan = document.getElementById('totalEntry');
-    const totalExitSpan = document.getElementById('totalExit');
-    const statusMessage = document.getElementById('statusMessage');
-    const statusBadge = document.getElementById('statusBadge');
-    const logEntries = document.getElementById('logEntries');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const resetBtn = document.getElementById('resetBtn');
-
-    // Store previous state
+  <script>
+    // Simple at direct na code
+    const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+    
+    // Variables
     let previousOccupied = 0;
     let totalEntry = 0;
     let totalExit = 0;
     let activityLog = [];
 
-    async function fetchParkingData() {
+    // Kunin ang elements
+    const debugInfo = document.getElementById('debugInfo');
+    const parkingGrid = document.getElementById('parkingGrid');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const entryCount = document.getElementById('entryCount');
+    const exitCount = document.getElementById('exitCount');
+    const occupiedCount = document.getElementById('occupiedCount');
+    const availableCount = document.getElementById('availableCount');
+    const logList = document.getElementById('logList');
+
+    // Function para mag-fetch ng data
+    async function fetchData() {
       try {
-        // Show loading
-        debugInfo.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kinukuha ang data mula mockapi...';
+        debugInfo.innerHTML = '⏳ Kinukuha ang data...';
+        statusDisplay.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Loading...';
         
         const response = await fetch(API_URL);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
         const data = await response.json();
         
-        // Ipakita ang raw data para makita natin
-        debugInfo.innerHTML = '✓ May data mula mockapi!';
-        rawData.innerHTML = `<strong>Raw mockapi data (${data.length} items):</strong><br>` + 
-                          JSON.stringify(data.slice(0, 10), null, 2)
-                            .replace(/ /g, '&nbsp;')
-                            .replace(/\n/g, '<br>');
+        // Ipakita ang unang 6 na items
+        const first6 = data.slice(0, 6);
         
-        // Kunin lang ang unang 6
-        const first6Slots = data.slice(0, TOTAL_SLOTS);
-        
-        // Check kung anong status values meron
-        const statusValues = first6Slots.map(s => s.status).join(', ');
-        debugInfo.innerHTML += `<br>Status values: ${statusValues || 'walang status'}`;
-        
-        // Bilangin occupied
-        let currentOccupied = 0;
-        first6Slots.forEach((slot, index) => {
-          // I-debug kung ano ang laman ng status
-          console.log(`Slot ${index + 1}:`, slot);
-          
-          // Check kung may status property
-          if (slot.status) {
-            const statusLower = String(slot.status).toLowerCase();
-            if (statusLower === 'occupied' || statusLower === 'true' || statusLower === '1') {
-              currentOccupied++;
-            }
+        // I-debug: ipakita ang raw data
+        debugInfo.innerHTML = '✓ May data!\n';
+        debugInfo.innerHTML += 'Total items: ' + data.length + '\n';
+        debugInfo.innerHTML += 'First 6 items:\n';
+        first6.forEach((item, i) => {
+          debugInfo.innerHTML += `  Slot ${i+1}: ${JSON.stringify(item)}\n`;
+        });
+
+        // Bilangin ang occupied
+        let occupied = 0;
+        first6.forEach(item => {
+          // Tingnan kung ano ang status value
+          const status = item.status ? item.status.toString().toLowerCase() : '';
+          if (status === 'occupied' || status === 'true' || status === '1') {
+            occupied++;
           }
         });
-        
-        // Update debug
-        debugInfo.innerHTML += `<br>Occupied count: ${currentOccupied}`;
-        
-        // Check kung may nagbago
+
+        // Check kung may nagbago (para sa entry/exit count)
         if (previousOccupied !== 0) {
-          if (currentOccupied > previousOccupied) {
-            const diff = currentOccupied - previousOccupied;
+          if (occupied > previousOccupied) {
+            const diff = occupied - previousOccupied;
             totalEntry += diff;
-            addToLog('entry', `${diff} sasakyan`);
-          } else if (currentOccupied < previousOccupied) {
-            const diff = previousOccupied - currentOccupied;
+            addToLog('entry', diff + ' sasakyan pumasok');
+          } else if (occupied < previousOccupied) {
+            const diff = previousOccupied - occupied;
             totalExit += diff;
-            addToLog('exit', `${diff} sasakyan`);
+            addToLog('exit', diff + ' sasakyan lumabas');
           }
         }
-        
-        previousOccupied = currentOccupied;
-        
-        // Update UI
-        const currentAvailable = TOTAL_SLOTS - currentOccupied;
-        
-        totalSpan.innerText = TOTAL_SLOTS;
-        occupiedSpan.innerHTML = `${currentOccupied} <small>/ ${TOTAL_SLOTS}</small>`;
-        availableSpan.innerHTML = `${currentAvailable} <small>/ ${TOTAL_SLOTS}</small>`;
-        totalEntrySpan.innerText = totalEntry;
-        totalExitSpan.innerText = totalExit;
-        
-        // Update status
-        if (currentAvailable === 0) {
-          statusBadge.classList.add('warning');
-          statusMessage.innerHTML = '⚠️ Puno na!';
-        } else {
-          statusBadge.classList.remove('warning');
-          statusMessage.innerHTML = `✓ ${currentAvailable} bakante · ${currentOccupied} nakapark`;
-        }
-        
-        // Update parking grid
-        parkingGrid.innerHTML = '';
-        
-        for (let i = 0; i < TOTAL_SLOTS; i++) {
-          const slotNumber = i + 1;
-          
-          let isOccupied = false;
-          if (i < first6Slots.length && first6Slots[i].status) {
-            const status = String(first6Slots[i].status).toLowerCase();
-            isOccupied = (status === 'occupied' || status === 'true' || status === '1');
-          }
-          
-          const slotDiv = document.createElement('div');
-          slotDiv.className = `parking-slot ${isOccupied ? 'occupied' : 'available'}`;
-          
-          slotDiv.innerHTML = `
-            <div class="slot-icon">
-              <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
-            </div>
-            <div class="slot-id">Slot ${slotNumber}</div>
-            <div class="slot-status">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
-          `;
-          
-          parkingGrid.appendChild(slotDiv);
-        }
-        
+
+        // I-save ang current state
+        previousOccupied = occupied;
+
+        // Update ang display
+        updateDisplay(first6, occupied);
+
       } catch (error) {
-        console.error('Error:', error);
-        debugInfo.innerHTML = `❌ Error: ${error.message}`;
-        rawData.innerHTML = 'Walang data mula mockapi';
-        statusBadge.classList.add('warning');
-        statusMessage.innerHTML = '⚠️ Error sa mockapi';
+        debugInfo.innerHTML = '❌ Error: ' + error.message;
+        statusDisplay.innerHTML = '❌ Error sa connection';
       }
     }
 
-    function addToLog(action, details) {
+    // Function para i-update ang display
+    function updateDisplay(slots, occupied) {
+      const total = 6;
+      const available = total - occupied;
+
+      // Update stats
+      entryCount.textContent = totalEntry;
+      exitCount.textContent = totalExit;
+      occupiedCount.textContent = occupied + '/6';
+      availableCount.textContent = available + '/6';
+      
+      // Update status
+      if (available === 0) {
+        statusDisplay.innerHTML = '⚠️ PUNO NA! Lahat occupied';
+      } else {
+        statusDisplay.innerHTML = `✅ ${available} bakante · ${occupied} nakapark`;
+      }
+
+      // Update parking grid
+      parkingGrid.innerHTML = '';
+      
+      for (let i = 0; i < total; i++) {
+        const slot = slots[i] || { status: 'available' };
+        const isOccupied = slot.status ? 
+          (slot.status.toString().toLowerCase() === 'occupied' || 
+           slot.status.toString().toLowerCase() === 'true' || 
+           slot.status === '1') : false;
+        
+        const slotDiv = document.createElement('div');
+        slotDiv.className = `slot ${isOccupied ? 'occupied' : 'available'}`;
+        
+        slotDiv.innerHTML = `
+          <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
+          <div class="id">Slot ${i+1}</div>
+          <div class="status-text">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
+        `;
+        
+        parkingGrid.appendChild(slotDiv);
+      }
+    }
+
+    // Function para mag-add sa log
+    function addToLog(type, message) {
       const time = new Date().toLocaleTimeString();
+      activityLog.unshift({ type, message, time });
       
-      activityLog.unshift({ time, action, details });
-      
+      // Keep last 5 entries
       if (activityLog.length > 5) {
         activityLog.pop();
       }
       
-      // Update log
-      logEntries.innerHTML = '';
-      
+      // Update log display
+      logList.innerHTML = '';
       if (activityLog.length === 0) {
-        logEntries.innerHTML = '— walang activity —';
-        return;
+        logList.innerHTML = '— walang activity —';
+      } else {
+        activityLog.forEach(log => {
+          const div = document.createElement('div');
+          div.className = 'log-entry';
+          div.innerHTML = `
+            <span>
+              <i class="fas ${log.type === 'entry' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}" 
+                 style="color: ${log.type === 'entry' ? '#28a745' : '#dc3545'}"></i>
+              ${log.message}
+            </span>
+            <span style="color: #999; font-size: 11px;">${log.time}</span>
+          `;
+          logList.appendChild(div);
+        });
       }
-      
-      activityLog.forEach(log => {
-        const div = document.createElement('div');
-        div.className = `log-entry ${log.action}`;
-        div.innerHTML = `
-          <i class="fas ${log.action === 'entry' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
-          <span>${log.action === 'entry' ? 'Pumasok' : 'Lumabas'} ${log.details}</span>
-          <span class="log-time">${log.time}</span>
-        `;
-        logEntries.appendChild(div);
-      });
     }
 
+    // Reset function
     function resetCounters() {
       totalEntry = 0;
       totalExit = 0;
       previousOccupied = 0;
       activityLog = [];
       
-      totalEntrySpan.innerText = '0';
-      totalExitSpan.innerText = '0';
-      logEntries.innerHTML = '— walang activity —';
+      entryCount.textContent = '0';
+      exitCount.textContent = '0';
+      logList.innerHTML = '— walang activity —';
       
-      fetchParkingData();
+      // Refresh data
+      fetchData();
     }
 
     // Initial fetch
-    fetchParkingData();
-    
-    // Auto-refresh every 3 seconds
-    setInterval(fetchParkingData, 3000);
-    
-    // Event listeners
-    refreshBtn.addEventListener('click', fetchParkingData);
-    resetBtn.addEventListener('click', resetCounters);
+    fetchData();
 
-  })();
-</script>
+    // Auto-refresh every 3 seconds
+    setInterval(fetchData, 3000);
+
+    // Button events
+    document.getElementById('refreshBtn').addEventListener('click', fetchData);
+    document.getElementById('resetBtn').addEventListener('click', resetCounters);
+
+  </script>
 </body>
 </html>
