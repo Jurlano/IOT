@@ -3,23 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>CYBER PARK · Mobile System</title>
+    <title>PARKING SLOTS · Mobile System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* CYBERPUNK THEME - MOBILE FIRST */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
 
         body {
-            background: #0a0c0f;
-            background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
+            background: #0b0e14;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -27,571 +22,697 @@
             padding: 12px;
         }
 
-        /* MAIN MOBILE CONTAINER */
-        .cyber-container {
+        /* MOBILE CONTAINER */
+        .parking-app {
             max-width: 420px;
             width: 100%;
-            margin: 0 auto;
-            background: rgba(10, 12, 18, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3),
-                        inset 0 0 20px rgba(0, 255, 255, 0.2);
-            border-radius: 32px;
-            padding: 20px 16px;
-            color: #e0e0ff;
+            background: #151e2a;
+            border-radius: 40px 40px 30px 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            border: 1px solid #2a3a4a;
         }
 
-        /* HEADER WITH GLITCH EFFECT */
-        .glitch-header {
-            text-align: center;
-            margin-bottom: 24px;
-            position: relative;
+        /* HEADER */
+        .app-header {
+            background: #0f172a;
+            padding: 24px 20px 20px;
+            color: white;
+            border-bottom: 3px solid #3b82f6;
         }
 
-        .glitch-header h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #00ffff;
-            text-shadow: 
-                3px 3px 0 #ff00ff,
-                -3px -3px 0 #ffff00;
-            letter-spacing: 4px;
-            animation: glitch 3s infinite;
+        .app-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .glitch-header p {
-            color: #00ccaa;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            border-bottom: 1px dashed #ff00ff;
-            padding-bottom: 8px;
+        .app-header h1 i {
+            color: #3b82f6;
+            background: #1e2b3c;
+            padding: 10px;
+            border-radius: 20px;
         }
 
-        @keyframes glitch {
-            0%, 100% { transform: skew(0deg, 0deg); opacity: 1; }
-            95% { transform: skew(0deg, 0deg); opacity: 1; }
-            96% { transform: skew(5deg, 2deg); opacity: 0.8; text-shadow: 5px 2px 0 cyan; }
-            97% { transform: skew(-5deg, -2deg); opacity: 0.9; text-shadow: -5px -2px 0 magenta; }
-            98% { transform: skew(3deg, 1deg); }
-        }
-
-        /* STATUS BAR - NEON */
-        .neon-status {
-            background: rgba(0, 20, 20, 0.7);
-            border: 1px solid #00ffff;
-            border-radius: 40px;
-            padding: 12px 16px;
-            margin-bottom: 24px;
+        .header-stats {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 0 15px cyan;
+            margin-top: 15px;
+            background: #1a2635;
+            padding: 15px;
+            border-radius: 25px;
         }
 
-        .pulse-dot {
+        .stat-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        /* QUICK STATUS */
+        .live-status {
+            background: #1e2a3a;
+            margin: 15px 20px;
+            padding: 12px 18px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #3b82f6;
+        }
+
+        .live-dot {
             width: 12px;
             height: 12px;
-            background: #00ff00;
+            background: #22c55e;
             border-radius: 50%;
-            box-shadow: 0 0 15px #00ff00;
-            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 10px #22c55e;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
+        .live-text {
+            color: white;
+            font-weight: 500;
+            flex: 1;
         }
 
-        .stats-rainbow {
-            display: flex;
-            gap: 16px;
-            font-weight: bold;
+        .update-time {
+            color: #94a3b8;
+            font-size: 12px;
         }
 
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #11141f;
-            padding: 6px 14px;
-            border-radius: 40px;
-            border: 1px solid #ff00ff;
+        /* PARKING SLOTS GRID */
+        .slots-container {
+            padding: 0 20px 20px;
         }
 
-        /* MAIN CARDS – PARKING OBJECTS */
-        .parking-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin: 24px 0;
-            max-height: 450px;
-            overflow-y: auto;
-            padding-right: 6px;
-            scrollbar-width: thin;
-            scrollbar-color: cyan #111;
-        }
-
-        .parking-grid::-webkit-scrollbar {
-            width: 6px;
-        }
-        .parking-grid::-webkit-scrollbar-track {
-            background: #111;
-        }
-        .parking-grid::-webkit-scrollbar-thumb {
-            background: cyan;
-            border-radius: 10px;
-            box-shadow: inset 0 0 6px magenta;
-        }
-
-        /* CYBER CARD */
-        .cyber-card {
-            background: rgba(16, 20, 30, 0.95);
-            border: 1.5px solid #00ffff;
-            border-radius: 24px;
-            padding: 16px;
+        .section-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.2);
-            transition: 0.2s;
-            backdrop-filter: blur(5px);
+            gap: 8px;
         }
 
-        .cyber-card:active {
-            transform: scale(0.99);
-            border-color: magenta;
+        .section-title i {
+            color: #3b82f6;
         }
 
-        .card-left {
-            display: flex;
-            align-items: center;
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        /* PARKING SLOT CARD */
+        .slot-card {
+            background: #1a2635;
+            border-radius: 25px;
+            padding: 20px 12px;
+            text-align: center;
+            border: 2px solid #2a3a4a;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slot-card.available {
+            border-color: #22c55e;
+            background: linear-gradient(145deg, #1a2635, #1e3a2a);
+        }
+
+        .slot-card.occupied {
+            border-color: #ef4444;
+            background: linear-gradient(145deg, #1a2635, #3a1e2a);
+        }
+
+        .slot-card.full {
+            border-color: #f59e0b;
+            background: linear-gradient(145deg, #1a2635, #3a2e1a);
         }
 
         .slot-icon {
-            width: 50px;
-            height: 50px;
-            background: #0a0e1a;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .slot-number {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .slot-status {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 12px;
             border-radius: 40px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .available .slot-status {
+            background: #22c55e;
+            color: white;
+        }
+
+        .occupied .slot-status {
+            background: #ef4444;
+            color: white;
+        }
+
+        .full .slot-status {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .slot-details {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #94a3b8;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* CAR LIST */
+        .car-list {
+            background: #0f172a;
+            border-radius: 30px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .car-list h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .car-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .car-item {
+            background: #1a2635;
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #2a3a4a;
+        }
+
+        .car-icon {
+            width: 45px;
+            height: 45px;
+            background: #2a3a4a;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
-            border: 2px solid;
-            transition: 0.2s;
+            color: #3b82f6;
+            font-size: 20px;
         }
 
-        .slot-icon.available {
-            border-color: cyan;
-            color: cyan;
-            text-shadow: 0 0 15px cyan;
+        .car-info {
+            flex: 1;
         }
 
-        .slot-icon.full {
-            border-color: magenta;
-            color: magenta;
-            text-shadow: 0 0 15px magenta;
+        .car-name {
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
         }
 
-        .slot-icon.warning {
-            border-color: yellow;
-            color: yellow;
-            text-shadow: 0 0 15px yellow;
+        .car-slot {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 3px;
         }
 
-        .slot-info h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .slot-info .badge {
-            background: #11141f;
-            padding: 4px 12px;
+        .car-status {
+            padding: 5px 12px;
             border-radius: 40px;
-            font-size: 0.75rem;
-            border: 1px solid;
-            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
         }
 
-        .badge.available {
-            border-color: cyan;
-            color: cyan;
-        }
-        .badge.full {
-            border-color: magenta;
-            color: magenta;
+        .status-parked {
+            background: #22c55e;
+            color: white;
         }
 
-        .slot-stats {
-            text-align: right;
-            font-family: 'Courier New', monospace;
+        /* ACTIVITY LOG */
+        .activity-log {
+            background: #0f172a;
+            border-radius: 30px;
+            padding: 20px;
+            margin: 20px 0;
         }
 
-        .slot-stats .occupied {
-            color: #ff7b9c;
-            font-size: 1.5rem;
-            font-weight: 800;
-            line-height: 1;
+        .log-entry {
+            background: #1a2635;
+            padding: 12px 15px;
+            border-radius: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid;
         }
 
-        .slot-stats .available {
-            color: #7bff9c;
-            font-size: 1rem;
+        .log-entry.enter {
+            border-left-color: #22c55e;
         }
 
-        /* PROGRESS BAR – CYBER STYLE */
-        .capacity-bar {
-            margin-top: 8px;
-            width: 100%;
-            height: 8px;
-            background: #222;
-            border-radius: 10px;
-            border: 1px solid cyan;
+        .log-entry.exit {
+            border-left-color: #ef4444;
         }
 
-        .capacity-fill {
-            height: 100%;
-            background: linear-gradient(90deg, cyan, magenta);
-            border-radius: 10px;
-            width: 0%;
-            box-shadow: 0 0 10px cyan;
+        .log-time {
+            color: #94a3b8;
+            font-size: 11px;
+            margin-left: auto;
         }
 
-        /* BUTTONS – NEON */
-        .cyber-button-group {
+        /* BUTTONS */
+        .action-buttons {
             display: flex;
             gap: 15px;
-            margin: 20px 0 10px;
+            padding: 0 20px 20px;
         }
 
-        .cyber-button {
+        .btn {
             flex: 1;
-            background: transparent;
-            border: 2px solid cyan;
-            color: cyan;
-            padding: 16px 0;
-            border-radius: 60px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.9rem;
+            padding: 18px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 0 15px cyan;
+            cursor: pointer;
             transition: 0.2s;
         }
 
-        .cyber-button:active {
-            background: cyan;
-            color: black;
-            box-shadow: 0 0 40px cyan;
+        .btn:active {
+            transform: scale(0.97);
         }
 
-        .cyber-button.purple {
-            border-color: magenta;
-            color: magenta;
-            box-shadow: 0 0 15px magenta;
-        }
-        .cyber-button.purple:active {
-            background: magenta;
-            color: black;
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
         }
 
-        /* FOOTER */
-        .cyber-footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #638;
-            border-top: 1px dashed cyan;
-            padding-top: 12px;
+        .btn-secondary {
+            background: #2a3a4a;
+            color: white;
         }
 
-        /* ACTIVITY TICKER */
-        .ticker {
-            background: #0c0c18;
-            border: 1px solid magenta;
-            border-radius: 40px;
-            padding: 8px 16px;
-            margin: 12px 0;
-            font-size: 0.8rem;
-            color: #bbff00;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            box-shadow: inset 0 0 10px magenta;
+        /* DEBUG PANEL (minimal) */
+        .debug-info {
+            background: #0a0f18;
+            padding: 12px 20px;
+            color: #4a5a6a;
+            font-size: 11px;
+            font-family: monospace;
+            border-top: 1px solid #2a3a4a;
         }
-
-        .ticker i {
-            color: cyan;
-            margin-right: 8px;
-        }
-
-        /* LOADER */
-        .loader {
-            border: 4px solid #11141f;
-            border-top: 4px solid cyan;
-            border-right: 4px solid magenta;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="cyber-container" id="app">
-        <!-- GLITCH HEADER -->
-        <div class="glitch-header">
-            <h1>CYBER•PARK</h1>
-            <p>>> MOBILE NODE v1.0 <<</p>
-        </div>
-
-        <!-- LIVE STATUS -->
-        <div class="neon-status" id="liveStatus">
-            <div class="pulse-dot"></div>
-            <span id="statusText">CONNECTING...</span>
-            <div class="stats-rainbow">
-                <div class="stat-item"><i class="fas fa-car" style="color: cyan;"></i> <span id="totalSpaces">0</span></div>
-                <div class="stat-item"><i class="fas fa-times-circle" style="color: magenta;"></i> <span id="totalFull">0</span></div>
+    <div class="parking-app">
+        <!-- HEADER -->
+        <div class="app-header">
+            <h1>
+                <i class="fas fa-parking"></i>
+                PARKING SLOTS
+            </h1>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalCars">0</div>
+                    <div class="stat-label">CARS PARKED</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalSlots">0</div>
+                    <div class="stat-label">TOTAL SLOTS</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="availableSlots">0</div>
+                    <div class="stat-label">AVAILABLE</div>
+                </div>
             </div>
         </div>
 
-        <!-- ACTIVITY FEED (CYBER TICKER) -->
-        <div class="ticker" id="ticker">
-            <i class="fas fa-satellite-dish"></i> <span id="tickerMessage">Awaiting data transmission...</span>
+        <!-- LIVE STATUS -->
+        <div class="live-status">
+            <div class="live-dot"></div>
+            <div class="live-text" id="statusMessage">System Online</div>
+            <div class="update-time" id="lastUpdate">Just now</div>
         </div>
 
-        <!-- PARKING GRID (DYNAMIC CARDS) -->
-        <div class="parking-grid" id="parkingGrid">
-            <div class="loader"></div>
+        <!-- MAIN SLOTS DISPLAY -->
+        <div class="slots-container">
+            <div class="section-title">
+                <i class="fas fa-grid-2"></i>
+                PARKING SLOTS (1-8)
+            </div>
+            <div class="slots-grid" id="parkingGrid">
+                <!-- Slots will be inserted here -->
+            </div>
+
+            <!-- CARS CURRENTLY PARKED -->
+            <div class="car-list" id="carListSection">
+                <h3>
+                    <i class="fas fa-car"></i>
+                    PARKED VEHICLES
+                </h3>
+                <div class="car-items" id="carList">
+                    <div class="car-item">
+                        <div class="car-icon"><i class="fas fa-car"></i></div>
+                        <div class="car-info">
+                            <div class="car-name">Loading...</div>
+                            <div class="car-slot">Please wait</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT ACTIVITY -->
+            <div class="activity-log">
+                <h3 style="color: white; margin-bottom: 15px;">
+                    <i class="fas fa-clock"></i>
+                    RECENT ACTIVITY
+                </h3>
+                <div id="activityList">
+                    <div class="log-entry">
+                        <i class="fas fa-circle-info" style="color: #94a3b8;"></i>
+                        <span style="color: #94a3b8;">Loading activity...</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- CONTROL BUTTONS (NEON) -->
-        <div class="cyber-button-group">
-            <button class="cyber-button" id="refreshBtn"><i class="fas fa-sync-alt"></i> SCAN</button>
-            <button class="cyber-button purple" id="resetBtn"><i class="fas fa-skull-crossbones"></i> RESET</button>
+        <!-- ACTION BUTTONS -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> REFRESH
+            </button>
+            <button class="btn btn-secondary" id="resetBtn">
+                <i class="fas fa-undo-alt"></i> RESET
+            </button>
         </div>
 
-        <!-- FOOTER / DEBUG INFO -->
-        <div class="cyber-footer">
-            <span id="lastUpdate">--:--:--</span> • <span id="objectCount">0</span> ACTIVE NODES
+        <!-- DEBUG INFO (minimal) -->
+        <div class="debug-info" id="debugInfo">
+            <i class="fas fa-database"></i> Connected to parking system • <span id="objectCount">0</span> records
         </div>
     </div>
 
     <script>
-        // CONFIG – YOUR WORKING API
         const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
-
-        // Global state
+        
+        // State
         let parkingData = [];
         let previousData = [];
-        let sessionActivity = [];
-        let lastTickerMessage = 'System online.';
+        let activityLog = [];
+        let sessionEnter = 0;
+        let sessionExit = 0;
 
-        // DOM elements
-        const gridEl = document.getElementById('parkingGrid');
-        const statusText = document.getElementById('statusText');
-        const totalSpacesSpan = document.getElementById('totalSpaces');
-        const totalFullSpan = document.getElementById('totalFull');
-        const tickerSpan = document.getElementById('tickerMessage');
-        const lastUpdateSpan = document.getElementById('lastUpdate');
-        const objectCountSpan = document.getElementById('objectCount');
+        // DOM Elements
+        const parkingGrid = document.getElementById('parkingGrid');
+        const carList = document.getElementById('carList');
+        const activityList = document.getElementById('activityList');
+        const totalCars = document.getElementById('totalCars');
+        const totalSlots = document.getElementById('totalSlots');
+        const availableSlots = document.getElementById('availableSlots');
+        const statusMessage = document.getElementById('statusMessage');
+        const lastUpdate = document.getElementById('lastUpdate');
+        const objectCount = document.getElementById('objectCount');
+        const debugInfo = document.getElementById('debugInfo');
 
-        // Helper: show ticker message
-        function setTicker(msg, isError = false) {
-            lastTickerMessage = msg;
-            tickerSpan.innerText = msg;
-            if (isError) {
-                document.querySelector('.ticker').style.borderColor = 'red';
-                document.querySelector('.ticker').style.boxShadow = '0 0 15px red';
-            } else {
-                document.querySelector('.ticker').style.borderColor = 'magenta';
-                document.querySelector('.ticker').style.boxShadow = 'inset 0 0 10px magenta';
+        // Car names for demo (to make it more realistic)
+        const carModels = [
+            'Toyota Vios', 'Honda Civic', 'Mitsubishi Mirage', 'Ford Ranger',
+            'Nissan Navara', 'Hyundai Accent', 'Suzuki Swift', 'Mazda 3',
+            'Kia Sportage', 'Isuzu D-Max', 'Honda CR-V', 'Toyota Fortuner'
+        ];
+
+        // Helper: Get random car name
+        function getRandomCar() {
+            return carModels[Math.floor(Math.random() * carModels.length)];
+        }
+
+        // Add to activity log
+        function addActivity(type, message) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            activityLog.unshift({ type, message, time });
+            
+            if (activityLog.length > 5) {
+                activityLog.pop();
             }
+            
+            updateActivityDisplay();
         }
 
-        // Update summary stats
-        function updateSummary(data) {
-            const total = data.length;
-            const fullCount = data.filter(item => item.status === 'full').length;
-            const totalOccupied = data.reduce((acc, item) => acc + (parseInt(item.occupied) || 0), 0);
-            totalSpacesSpan.innerText = totalOccupied;
-            totalFullSpan.innerText = fullCount;
-            objectCountSpan.innerText = total;
+        // Update activity display
+        function updateActivityDisplay() {
+            if (activityLog.length === 0) {
+                activityList.innerHTML = '<div class="log-entry"><i class="fas fa-circle-info" style="color: #94a3b8;"></i><span style="color: #94a3b8;">No recent activity</span></div>';
+                return;
+            }
+            
+            let html = '';
+            activityLog.forEach(log => {
+                html += `
+                    <div class="log-entry ${log.type}">
+                        <i class="fas ${log.type === 'enter' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
+                        <span>${log.message}</span>
+                        <span class="log-time">${log.time}</span>
+                    </div>
+                `;
+            });
+            activityList.innerHTML = html;
         }
 
-        // Determine icon/color based on available/status
-        function getSlotIconClass(item) {
-            const available = parseInt(item.available) || 0;
-            if (item.status === 'full' || available === 0) return 'full';
-            if (available <= 2) return 'warning';  // low availability
-            return 'available';
-        }
-
-        // Render the parking cards (mobile cyber style)
-        function renderCards(data) {
+        // Render parking slots (as actual parking slots, not nodes)
+        function renderSlots(data) {
             if (!data || data.length === 0) {
-                gridEl.innerHTML = `<div style="color:cyan; text-align:center; padding:30px;"><i class="fas fa-exclamation-triangle"></i> NO DATA</div>`;
+                parkingGrid.innerHTML = '<div style="grid-column: span 2; text-align: center; color: #94a3b8; padding: 30px;">No parking data available</div>';
                 return;
             }
 
             let html = '';
-            data.forEach(item => {
+            let totalCarsCount = 0;
+            let totalSlotsCount = 0;
+            let availableCount = 0;
+
+            data.forEach((item, index) => {
+                const slotNumber = index + 1;
                 const occupied = parseInt(item.occupied) || 0;
                 const available = parseInt(item.available) || 0;
-                const total = occupied + available;
-                const fillPercent = total > 0 ? (occupied / total) * 100 : 0;
-                const iconClass = getSlotIconClass(item);
+                const status = item.status || 'available';
                 
-                // icon based on class
-                let iconName = 'fa-parking';
-                if (iconClass === 'full') iconName = 'fa-skull-crossbones';
-                else if (iconClass === 'warning') iconName = 'fa-exclamation-triangle';
-                else iconName = 'fa-charging-station';
-
+                // For this demo, we'll show each "object" as a parking slot
+                // If occupied > 0, slot is occupied
+                const isOccupied = occupied > 0;
+                const isFull = status === 'full' || available === 0;
+                
+                let slotClass = 'available';
+                let statusText = 'AVAILABLE';
+                let icon = 'fa-parking';
+                
+                if (isFull) {
+                    slotClass = 'full';
+                    statusText = 'FULL';
+                    icon = 'fa-ban';
+                } else if (isOccupied) {
+                    slotClass = 'occupied';
+                    statusText = 'OCCUPIED';
+                    icon = 'fa-car';
+                }
+                
+                // For stats
+                if (isOccupied || isFull) totalCarsCount++;
+                totalSlotsCount++;
+                if (!isOccupied && !isFull) availableCount++;
+                
                 html += `
-                    <div class="cyber-card" data-id="${item.id}">
-                        <div class="card-left">
-                            <div class="slot-icon ${iconClass}">
-                                <i class="fas ${iconName}"></i>
-                            </div>
-                            <div class="slot-info">
-                                <h3>NODE #${item.id}</h3>
-                                <span class="badge ${iconClass}">${item.status}</span>
-                            </div>
-                        </div>
-                        <div class="slot-stats">
-                            <div class="occupied">${occupied}</div>
-                            <div class="available">${available} free</div>
-                            <div class="capacity-bar">
-                                <div class="capacity-fill" style="width:${fillPercent}%;"></div>
-                            </div>
+                    <div class="slot-card ${slotClass}">
+                        <div class="slot-icon"><i class="fas ${icon}"></i></div>
+                        <div class="slot-number">SLOT ${slotNumber}</div>
+                        <div class="slot-status">${statusText}</div>
+                        <div class="slot-details">
+                            <span><i class="fas fa-car"></i> ${occupied}</span>
+                            <span><i class="fas fa-circle"></i> ${available}</span>
                         </div>
                     </div>
                 `;
             });
 
-            gridEl.innerHTML = html;
-
-            // Add click listeners to cards (cyber feedback)
-            document.querySelectorAll('.cyber-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    const id = card.dataset.id;
-                    const item = data.find(d => d.id === id);
-                    if (item) {
-                        setTicker(`🔍 NODE ${id} | OCC:${item.occupied} AVAIL:${item.available} STATUS:${item.status}`);
-                        // flash effect
-                        card.style.borderColor = '#ffff00';
-                        card.style.boxShadow = '0 0 30px yellow';
-                        setTimeout(() => {
-                            card.style.borderColor = 'cyan';
-                            card.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.3)';
-                        }, 300);
-                    }
-                });
-            });
+            parkingGrid.innerHTML = html;
+            
+            // Update stats
+            totalCars.textContent = totalCarsCount;
+            totalSlots.textContent = totalSlotsCount;
+            availableSlots.textContent = availableCount;
         }
 
-        // Compare data for changes (cyberpunk log)
+        // Render parked cars list
+        function renderCars(data) {
+            let carsHtml = '';
+            let carsDisplayed = 0;
+            
+            data.forEach((item, index) => {
+                const occupied = parseInt(item.occupied) || 0;
+                if (occupied > 0) {
+                    // This slot has cars parked
+                    const carName = item.listcar || getRandomCar();
+                    carsHtml += `
+                        <div class="car-item">
+                            <div class="car-icon"><i class="fas fa-car"></i></div>
+                            <div class="car-info">
+                                <div class="car-name">${carName}</div>
+                                <div class="car-slot">Slot ${index + 1} • ${occupied} vehicle${occupied > 1 ? 's' : ''}</div>
+                            </div>
+                            <div class="car-status status-parked">PARKED</div>
+                        </div>
+                    `;
+                    carsDisplayed++;
+                }
+            });
+            
+            if (carsDisplayed === 0) {
+                carsHtml = '<div class="car-item"><div class="car-icon"><i class="fas fa-car"></i></div><div class="car-info"><div class="car-name">No cars parked</div><div class="car-slot">All slots available</div></div></div>';
+            }
+            
+            carList.innerHTML = carsHtml;
+        }
+
+        // Check for changes (cars entering/exiting)
         function detectChanges(newData, oldData) {
             if (!oldData || oldData.length === 0) return;
-
-            let changes = [];
+            
+            let enterEvents = 0;
+            let exitEvents = 0;
+            
             newData.forEach((newItem, index) => {
                 if (index < oldData.length) {
                     const oldItem = oldData[index];
-                    if (newItem.occupied !== oldItem.occupied || newItem.status !== oldItem.status) {
-                        changes.push(`NODE#${newItem.id}: ${oldItem.occupied}→${newItem.occupied}`);
+                    const newOccupied = parseInt(newItem.occupied) || 0;
+                    const oldOccupied = parseInt(oldItem.occupied) || 0;
+                    
+                    if (newOccupied > oldOccupied) {
+                        const diff = newOccupied - oldOccupied;
+                        enterEvents += diff;
+                        addActivity('enter', `${diff} car(s) entered Slot ${index + 1}`);
+                    } else if (newOccupied < oldOccupied) {
+                        const diff = oldOccupied - newOccupied;
+                        exitEvents += diff;
+                        addActivity('exit', `${diff} car(s) exited Slot ${index + 1}`);
                     }
                 }
             });
-
-            if (changes.length > 0) {
-                const msg = `⚡ UPDATE: ${changes.slice(0, 2).join(' · ')}${changes.length > 2 ? ' …' : ''}`;
-                setTicker(msg);
-                sessionActivity.unshift(msg);
-                if (sessionActivity.length > 5) sessionActivity.pop();
-            } else {
-                setTicker(`🟢 ALL STABLE · ${newData.length} NODES`);
+            
+            if (enterEvents > 0 || exitEvents > 0) {
+                statusMessage.innerHTML = `${enterEvents} entered • ${exitEvents} exited`;
+                setTimeout(() => {
+                    statusMessage.innerHTML = 'System Online';
+                }, 3000);
             }
         }
 
-        // MAIN FETCH
-        async function fetchParkingData() {
+        // Main fetch function
+        async function fetchData() {
             try {
-                statusText.innerText = 'SCANNING...';
-                setTicker('📡 REQUESTING DATA ...');
-                gridEl.innerHTML = `<div class="loader"></div>`;
-
+                statusMessage.innerHTML = 'Loading...';
+                debugInfo.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Fetching parking data...';
+                
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`STATUS ${response.status}`);
-
                 const data = await response.json();
-                parkingData = data;
-
-                // Update UI
-                updateSummary(data);
-                renderCards(data);
-                detectChanges(data, previousData);
-
-                // Status & time
-                statusText.innerText = 'ONLINE · SECURE';
-                document.querySelector('.neon-status').style.borderColor = '#00ffff';
-                document.querySelector('.neon-status').style.boxShadow = '0 0 15px cyan';
-                lastUpdateSpan.innerText = new Date().toLocaleTimeString();
-
-                // Save for next compare
-                previousData = JSON.parse(JSON.stringify(data)); // clone
+                
+                // Update object count
+                objectCount.textContent = data.length;
+                
+                // Detect changes
+                if (previousData.length > 0) {
+                    detectChanges(data, previousData);
+                }
+                
+                // Render UI
+                renderSlots(data);
+                renderCars(data);
+                
+                // Update status
+                statusMessage.innerHTML = 'System Online';
+                lastUpdate.innerHTML = 'Just now';
+                debugInfo.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> Last updated: ${new Date().toLocaleTimeString()}`;
+                
+                // Save for next comparison
+                previousData = JSON.parse(JSON.stringify(data));
+                
             } catch (error) {
                 console.error(error);
-                statusText.innerText = 'ERROR';
-                setTicker(`❌ FAILED: ${error.message}`, true);
-                gridEl.innerHTML = `<div style="color:magenta; text-align:center; padding:30px;"><i class="fas fa-bug"></i> CONNECTION LOST</div>`;
-                document.querySelector('.neon-status').style.borderColor = 'magenta';
-                document.querySelector('.neon-status').style.boxShadow = '0 0 15px magenta';
+                statusMessage.innerHTML = 'Connection Error';
+                debugInfo.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> Error: ${error.message}`;
+                
+                // Show error in grid
+                parkingGrid.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #ef4444; padding: 30px;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 40px; margin-bottom: 10px;"></i><br>
+                    Failed to load parking data
+                </div>`;
             }
         }
 
-        // Reset session activity (only local)
+        // Reset session
         function resetSession() {
-            if (confirm('⚠️ RESET SESSION? Local data only.')) {
-                sessionActivity = [];
-                previousData = [];  // force no diff on next fetch
-                setTicker('🔄 SESSION RESET · READY');
-                fetchParkingData(); // fresh scan
+            if (confirm('Reset activity log?')) {
+                activityLog = [];
+                updateActivityDisplay();
+                addActivity('enter', 'Session reset');
+                statusMessage.innerHTML = 'Session Reset';
+                debugInfo.innerHTML = '<i class="fas fa-undo-alt"></i> Session reset';
             }
         }
 
-        // Auto refresh every 5 seconds (mobile friendly)
-        let interval = setInterval(fetchParkingData, 5000);
-
-        // Initial load
-        fetchParkingData();
-
-        // Event listeners for buttons
-        document.getElementById('refreshBtn').addEventListener('click', () => {
-            fetchParkingData();
-            // haptic feedback simulation
-            navigator.vibrate ? navigator.vibrate(20) : null;
-        });
-
+        // Initial fetch
+        fetchData();
+        
+        // Auto-refresh every 5 seconds
+        setInterval(fetchData, 5000);
+        
+        // Event listeners
+        document.getElementById('refreshBtn').addEventListener('click', fetchData);
         document.getElementById('resetBtn').addEventListener('click', resetSession);
 
-        // Cleanup on page unload (for interval)
-        window.addEventListener('beforeunload', () => {
-            clearInterval(interval);
-        });
+        // Add initial activity
+        setTimeout(() => {
+            addActivity('enter', 'System initialized');
+        }, 1000);
     </script>
 </body>
 </html>
