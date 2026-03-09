@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
     }
 
     body {
@@ -22,7 +22,7 @@
     }
 
     .container {
-      max-width: 700px;
+      max-width: 800px;
       width: 100%;
       background: white;
       border-radius: 20px;
@@ -50,8 +50,11 @@
       border-radius: 12px;
       margin-bottom: 20px;
       font-family: monospace;
-      font-size: 14px;
+      font-size: 13px;
       overflow-x: auto;
+      border-left: 4px solid #667eea;
+      max-height: 150px;
+      overflow-y: auto;
     }
 
     .status-badge {
@@ -62,11 +65,25 @@
       margin-bottom: 25px;
       font-weight: bold;
       font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .status-badge.success {
+      background: #d4edda;
+      color: #155724;
     }
 
     .status-badge.warning {
-      background: #ffecdd;
-      color: #ac3800;
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-badge.error {
+      background: #f8d7da;
+      color: #721c24;
     }
 
     .main-counters {
@@ -83,6 +100,11 @@
       text-align: center;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       border: 1px solid #e0e0e0;
+      transition: transform 0.2s;
+    }
+
+    .counter-box:hover {
+      transform: translateY(-3px);
     }
 
     .counter-box.enter {
@@ -94,7 +116,7 @@
     }
 
     .counter-box .label {
-      font-size: 16px;
+      font-size: 18px;
       color: #666;
       margin-bottom: 10px;
     }
@@ -104,9 +126,10 @@
     }
 
     .counter-box .number {
-      font-size: 48px;
+      font-size: 56px;
       font-weight: bold;
       color: #333;
+      line-height: 1;
     }
 
     .stats-grid {
@@ -121,16 +144,17 @@
       padding: 15px;
       border-radius: 12px;
       text-align: center;
+      border: 1px solid #e9ecef;
     }
 
     .stat-card .label {
       font-size: 14px;
-      color: #666;
+      color: #6c757d;
       margin-bottom: 8px;
     }
 
     .stat-card .value {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
       color: #333;
     }
@@ -148,6 +172,7 @@
       align-items: center;
       margin-bottom: 15px;
       font-weight: bold;
+      color: #495057;
     }
 
     .parking-grid {
@@ -168,6 +193,12 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .parking-slot:hover {
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
 
     .parking-slot.occupied {
@@ -181,18 +212,18 @@
     }
 
     .parking-slot i {
-      font-size: 28px;
+      font-size: 32px;
       margin-bottom: 8px;
     }
 
     .parking-slot .slot-number {
       font-weight: bold;
-      font-size: 14px;
+      font-size: 16px;
       margin-bottom: 5px;
     }
 
     .parking-slot .slot-status {
-      font-size: 11px;
+      font-size: 12px;
       padding: 4px 10px;
       border-radius: 20px;
       color: white;
@@ -210,8 +241,8 @@
     .listcar-info {
       background: #fff3cd;
       border: 1px solid #ffeeba;
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 15px;
       margin-bottom: 20px;
       font-size: 14px;
     }
@@ -221,20 +252,46 @@
       margin-right: 8px;
     }
 
+    .listcar-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .listcar-tag {
+      background: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1px solid #ffe69c;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
     .activity-log {
       background: white;
       border: 1px solid #e0e0e0;
       border-radius: 12px;
       padding: 15px;
       margin-bottom: 20px;
-      max-height: 150px;
+      max-height: 200px;
       overflow-y: auto;
     }
 
     .log-title {
       font-weight: bold;
       margin-bottom: 12px;
-      color: #555;
+      color: #495057;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      background: white;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e0e0e0;
     }
 
     .log-entry {
@@ -262,10 +319,11 @@
       display: flex;
       gap: 15px;
       justify-content: center;
+      margin-bottom: 15px;
     }
 
     button {
-      padding: 12px 25px;
+      padding: 12px 30px;
       border: none;
       border-radius: 50px;
       font-weight: bold;
@@ -274,6 +332,7 @@
       align-items: center;
       gap: 8px;
       transition: all 0.3s;
+      font-size: 14px;
     }
 
     button i {
@@ -288,6 +347,7 @@
     .btn-refresh:hover {
       background: #5a67d8;
       transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
 
     .btn-reset {
@@ -298,6 +358,7 @@
     .btn-reset:hover {
       background: #5a6268;
       transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
     }
 
     .debug-panel {
@@ -306,10 +367,33 @@
       color: #0ff;
       padding: 15px;
       border-radius: 10px;
-      font-family: monospace;
+      font-family: 'Courier New', monospace;
       font-size: 12px;
-      max-height: 200px;
+      max-height: 150px;
       overflow-y: auto;
+      border: 1px solid #334;
+    }
+
+    .last-updated {
+      text-align: right;
+      font-size: 11px;
+      color: #999;
+      margin-top: 10px;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -327,20 +411,20 @@
 
     <!-- Status Badge -->
     <div class="status-badge" id="statusDisplay">
-      <i class="fas fa-circle-notch fa-spin"></i> Loading...
+      <span class="loading-spinner"></span> Loading...
     </div>
 
     <!-- Enter/Exit Main Counters -->
     <div class="main-counters">
       <div class="counter-box enter">
         <div class="label">
-          <i class="fas fa-sign-in-alt"></i> ENTER
+          <i class="fas fa-sign-in-alt"></i> ENTER (Session)
         </div>
         <div class="number" id="enterCount">0</div>
       </div>
       <div class="counter-box exit">
         <div class="label">
-          <i class="fas fa-sign-out-alt"></i> EXIT
+          <i class="fas fa-sign-out-alt"></i> EXIT (Session)
         </div>
         <div class="number" id="exitCount">0</div>
       </div>
@@ -353,18 +437,19 @@
         <div class="value" id="totalObjects">0</div>
       </div>
       <div class="stat-card">
-        <div class="label">TOTAL ENTER</div>
-        <div class="value" id="totalEnter">0</div>
+        <div class="label">TOTAL ENTER (API)</div>
+        <div class="value" id="totalEnterSum">0</div>
       </div>
       <div class="stat-card">
-        <div class="label">TOTAL EXIT</div>
-        <div class="value" id="totalExit">0</div>
+        <div class="label">TOTAL EXIT (API)</div>
+        <div class="value" id="totalExitSum">0</div>
       </div>
     </div>
 
     <!-- Listcar Information -->
     <div class="listcar-info" id="listcarDisplay">
       <i class="fas fa-list"></i> <span>Walang listcar data</span>
+      <div class="listcar-items" id="listcarItems"></div>
     </div>
 
     <!-- 3x2 Parking Grid -->
@@ -380,7 +465,10 @@
 
     <!-- Activity Log -->
     <div class="activity-log">
-      <div class="log-title"><i class="fas fa-history"></i> Recent Activity</div>
+      <div class="log-title">
+        <i class="fas fa-history"></i> Recent Activity
+        <span style="font-size: 11px; color: #999; margin-left: auto;" id="activityCount">0 events</span>
+      </div>
       <div id="activityList">
         — walang activity —
       </div>
@@ -389,12 +477,15 @@
     <!-- Buttons -->
     <div class="button-group">
       <button class="btn-refresh" id="refreshBtn">
-        <i class="fas fa-sync-alt"></i> Refresh
+        <i class="fas fa-sync-alt"></i> Refresh Now
       </button>
       <button class="btn-reset" id="resetBtn">
-        <i class="fas fa-redo-alt"></i> Reset Counters
+        <i class="fas fa-redo-alt"></i> Reset Session
       </button>
     </div>
+
+    <!-- Last Updated -->
+    <div class="last-updated" id="lastUpdated"></div>
 
     <!-- Debug Panel -->
     <div class="debug-panel" id="debugPanel">
@@ -407,9 +498,10 @@
     
     // Variables for tracking
     let previousData = [];
-    let totalEnter = 0;
-    let totalExit = 0;
+    let sessionEnter = 0;
+    let sessionExit = 0;
     let activityLog = [];
+    let autoRefreshInterval;
 
     // DOM Elements
     const mockapiDisplay = document.getElementById('mockapiDisplay');
@@ -417,46 +509,67 @@
     const enterCount = document.getElementById('enterCount');
     const exitCount = document.getElementById('exitCount');
     const totalObjects = document.getElementById('totalObjects');
-    const totalEnter = document.getElementById('totalEnter');
-    const totalExit = document.getElementById('totalExit');
+    const totalEnterSum = document.getElementById('totalEnterSum');
+    const totalExitSum = document.getElementById('totalExitSum');
     const listcarDisplay = document.getElementById('listcarDisplay');
+    const listcarItems = document.getElementById('listcarItems');
     const currentObjectId = document.getElementById('currentObjectId');
     const parkingGrid = document.getElementById('parkingGrid');
     const activityList = document.getElementById('activityList');
+    const activityCount = document.getElementById('activityCount');
+    const lastUpdated = document.getElementById('lastUpdated');
     const debugPanel = document.getElementById('debugPanel');
 
     // Function to add to activity log
-    function addToLog(type, message) {
+    function addToLog(type, message, details = '') {
       const time = new Date().toLocaleTimeString();
-      activityLog.unshift({ type, message, time });
+      activityLog.unshift({ type, message, details, time });
       
-      if (activityLog.length > 8) {
+      if (activityLog.length > 10) {
         activityLog.pop();
       }
       
-      // Update activity display
-      activityList.innerHTML = '';
-      
+      updateActivityDisplay();
+      updateDebug(`${type}: ${message} ${details}`);
+    }
+
+    // Function to update activity display
+    function updateActivityDisplay() {
       if (activityLog.length === 0) {
         activityList.innerHTML = '— walang activity —';
-      } else {
-        activityLog.forEach(log => {
-          const entry = document.createElement('div');
-          entry.className = `log-entry ${log.type}`;
-          entry.innerHTML = `
-            <span>
-              <i class="fas ${log.type === 'enter' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
-              ${log.message}
-            </span>
-            <span class="log-time">${log.time}</span>
-          `;
-          activityList.appendChild(entry);
-        });
+        activityCount.textContent = '0 events';
+        return;
+      }
+      
+      activityList.innerHTML = '';
+      activityCount.textContent = `${activityLog.length} events`;
+      
+      activityLog.forEach(log => {
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${log.type}`;
+        entry.innerHTML = `
+          <span>
+            <i class="fas ${log.type === 'enter' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
+            ${log.message}
+            ${log.details ? `<small style="color: #666;">(${log.details})</small>` : ''}
+          </span>
+          <span class="log-time">${log.time}</span>
+        `;
+        activityList.appendChild(entry);
+      });
+    }
+
+    // Function to update debug panel
+    function updateDebug(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      debugPanel.innerHTML = `[${timestamp}] ${message}\n` + debugPanel.innerHTML;
+      if (debugPanel.children.length > 5) {
+        debugPanel.lastElementChild?.remove();
       }
     }
 
     // Function to create parking slot
-    function createSlot(number, isOccupied) {
+    function createSlot(number, isOccupied, vehicleInfo = '') {
       const slot = document.createElement('div');
       slot.className = `parking-slot ${isOccupied ? 'occupied' : 'available'}`;
       
@@ -464,7 +577,13 @@
         <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
         <div class="slot-number">Slot ${number}</div>
         <div class="slot-status">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
+        ${vehicleInfo ? `<small style="font-size: 9px; margin-top: 5px;">${vehicleInfo}</small>` : ''}
       `;
+      
+      // Add click handler
+      slot.addEventListener('click', () => {
+        updateDebug(`Slot ${number} clicked - ${isOccupied ? 'Occupied' : 'Available'}`);
+      });
       
       return slot;
     }
@@ -472,12 +591,19 @@
     // Main fetch function
     async function fetchData() {
       try {
-        debugPanel.innerHTML = '⏳ Fetching data from mockapi...';
+        statusDisplay.className = 'status-badge';
+        statusDisplay.innerHTML = '<span class="loading-spinner"></span> Fetching data...';
+        updateDebug('Fetching data from API...');
         
         const response = await fetch(API_URL);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
-        // Display raw mockapi data
+        // Display raw mockapi data (formatted)
         mockapiDisplay.innerHTML = `<i class="fas fa-database"></i> ${JSON.stringify(data, null, 2)}`;
         
         // Update object count
@@ -486,37 +612,46 @@
         // Calculate totals
         let totalEnterValue = 0;
         let totalExitValue = 0;
-        let allListcars = [];
+        let listcarArray = [];
         
         data.forEach(item => {
-          // Convert string to number
           const enter = parseInt(item.enter) || 0;
           const exit = parseInt(item.exit) || 0;
           
           totalEnterValue += enter;
           totalExitValue += exit;
           
-          // Collect listcar data
-          if (item.listcar) {
-            allListcars.push(`Obj ${item.id}: ${item.listcar}`);
+          if (item.listcar && item.listcar.trim() !== '') {
+            listcarArray.push({
+              id: item.id,
+              listcar: item.listcar
+            });
           }
         });
         
         // Update total displays
-        totalEnter.textContent = totalEnterValue;
-        totalExit.textContent = totalExitValue;
+        totalEnterSum.textContent = totalEnterValue;
+        totalExitSum.textContent = totalExitValue;
         
         // Update listcar display
-        if (allListcars.length > 0) {
-          listcarDisplay.innerHTML = `<i class="fas fa-list"></i> ${allListcars.join(' | ')}`;
+        if (listcarArray.length > 0) {
+          listcarItems.innerHTML = listcarArray.map(item => 
+            `<span class="listcar-tag" title="Object ID: ${item.id}">
+              <i class="fas fa-car"></i> ${item.listcar}
+            </span>`
+          ).join('');
+          listcarDisplay.querySelector('span').textContent = 'Registered vehicles:';
+        } else {
+          listcarItems.innerHTML = '';
+          listcarDisplay.querySelector('span').textContent = 'Walang listcar data';
         }
         
         // Check for changes (entry/exit events)
         if (previousData.length > 0) {
           let enterDiff = 0;
           let exitDiff = 0;
+          let changedObjects = [];
           
-          // Compare each object
           data.forEach((item, index) => {
             if (index < previousData.length) {
               const prevEnter = parseInt(previousData[index].enter) || 0;
@@ -525,91 +660,108 @@
               const currExit = parseInt(item.exit) || 0;
               
               if (currEnter > prevEnter) {
-                enterDiff += (currEnter - prevEnter);
+                const diff = currEnter - prevEnter;
+                enterDiff += diff;
+                changedObjects.push(`Obj ${item.id}: +${diff} enter`);
               }
               if (currExit > prevExit) {
-                exitDiff += (currExit - prevExit);
+                const diff = currExit - prevExit;
+                exitDiff += diff;
+                changedObjects.push(`Obj ${item.id}: +${diff} exit`);
               }
             }
           });
           
           if (enterDiff > 0) {
-            totalEnter += enterDiff;
-            addToLog('enter', `${enterDiff} new vehicle(s) entered`);
+            sessionEnter += enterDiff;
+            addToLog('enter', `${enterDiff} new vehicle(s) entered`, changedObjects.join(', '));
           }
           
           if (exitDiff > 0) {
-            totalExit += exitDiff;
-            addToLog('exit', `${exitDiff} vehicle(s) exited`);
+            sessionExit += exitDiff;
+            addToLog('exit', `${exitDiff} vehicle(s) exited`, changedObjects.join(', '));
           }
         }
         
         // Update main counters
-        enterCount.textContent = totalEnter;
-        exitCount.textContent = totalExit;
+        enterCount.textContent = sessionEnter;
+        exitCount.textContent = sessionExit;
         
         // Update status
+        statusDisplay.className = 'status-badge success';
         statusDisplay.innerHTML = `
           <i class="fas fa-check-circle"></i> 
-          ${data.length} objects · Enter: ${totalEnterValue} · Exit: ${totalExitValue}
+          ${data.length} objects · Total Enter: ${totalEnterValue} · Total Exit: ${totalExitValue}
         `;
         
-        // Display first object's parking (for demo, we'll show 6 slots)
+        // Display first object's parking
         if (data.length > 0) {
           const firstItem = data[0];
           currentObjectId.textContent = `Object ID: ${firstItem.id}`;
           
-          // For demo, let's assume occupied = enter mod 6
-          // Para may display tayo sa parking grid
-          const occupiedCount = (parseInt(firstItem.enter) || 0) % 6;
+          // Use enter count to determine occupied slots (max 6)
+          const occupiedCount = Math.min(parseInt(firstItem.enter) || 0, 6);
           
           // Clear and populate parking grid
           parkingGrid.innerHTML = '';
           
           for (let i = 0; i < 6; i++) {
             const isOccupied = i < occupiedCount;
-            const slot = createSlot(i + 1, isOccupied);
+            const vehicleInfo = isOccupied && firstItem.listcar ? firstItem.listcar : '';
+            const slot = createSlot(i + 1, isOccupied, vehicleInfo);
             parkingGrid.appendChild(slot);
           }
         }
         
-        // Update debug panel
-        debugPanel.innerHTML = `✓ Data loaded successfully
-Objects: ${data.length}
-Previous objects: ${previousData.length}
-Total Enter Events: ${totalEnter}
-Total Exit Events: ${totalExit}`;
+        // Update last updated time
+        lastUpdated.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
         
         // Save current data for next comparison
         previousData = [...data];
         
+        updateDebug(`Data loaded: ${data.length} objects`);
+        
       } catch (error) {
-        debugPanel.innerHTML = `❌ Error: ${error.message}`;
-        statusDisplay.innerHTML = `❌ Failed to load data`;
+        console.error('Fetch error:', error);
+        statusDisplay.className = 'status-badge error';
+        statusDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
+        updateDebug(`Error: ${error.message}`);
       }
     }
 
-    // Reset counters
+    // Reset session counters
     function resetCounters() {
-      totalEnter = 0;
-      totalExit = 0;
-      activityLog = [];
-      
-      enterCount.textContent = '0';
-      exitCount.textContent = '0';
-      activityList.innerHTML = '— walang activity —';
-      
-      fetchData(); // Refresh data
+      if (confirm('Reset session counters and activity log?')) {
+        sessionEnter = 0;
+        sessionExit = 0;
+        activityLog = [];
+        
+        enterCount.textContent = '0';
+        exitCount.textContent = '0';
+        updateActivityDisplay();
+        
+        updateDebug('Session counters reset');
+      }
     }
+
+    // Clean up interval on page unload
+    window.addEventListener('beforeunload', () => {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+      }
+    });
 
     // Initial fetch
     fetchData();
     
     // Auto-refresh every 3 seconds
-    setInterval(fetchData, 3000);
+    autoRefreshInterval = setInterval(fetchData, 3000);
     
     // Event listeners
-    document.getElementById('refreshBtn').addEventListener('click', fetchData);
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      fetchData();
+    });
+    
     document.getElementById('resetBtn').addEventListener('click', resetCounters);
 
   </script>
