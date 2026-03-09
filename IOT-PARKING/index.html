@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>modern parking · flow dashboard</title>
-  <!-- Google Font & subtle icons (font awesome free) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
@@ -171,7 +170,6 @@
       border-bottom: none;
     }
 
-    /* dynamic row status styling — modern chip style */
     .row-status-chip {
       display: inline-block;
       padding: 0.4rem 1.1rem;
@@ -200,7 +198,6 @@
       color: #b13a2c;
     }
 
-    /* occupied/available numeric cells */
     td:nth-child(2), td:nth-child(3) {
       font-weight: 600;
     }
@@ -252,7 +249,6 @@
       opacity: 0.7;
     }
 
-    /* subtle animation for live indicator */
     .live-badge {
       display: inline-block;
       width: 10px;
@@ -279,12 +275,10 @@
     <i class="fas fa-wave-square" style="background:transparent; color:#1e4f6b; box-shadow:none; font-size:1.9rem;"></i>
   </h1>
 
-  <!-- dynamic status alert -->
   <div class="status-badge" id="statusBadge">
     <i class="fas fa-circle-check"></i> <span id="statusMessage">all systems live</span>
   </div>
 
-  <!-- summary cards with modern layout -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label"><i class="fas fa-layer-group" style="margin-right:6px;"></i>total slots</div>
@@ -300,7 +294,6 @@
     </div>
   </div>
 
-  <!-- parking table with refined presentation -->
   <div class="table-container">
     <table id="parkingTable">
       <thead>
@@ -311,13 +304,12 @@
           <th><i class="fas fa-flag"></i> Status</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tableBody">
         <!-- dynamic rows injected via JS -->
       </tbody>
     </table>
   </div>
 
-  <!-- refresh & live indicator -->
   <div class="refresh-action">
     <button class="modern-btn" id="refreshBtn">
       <i class="fas fa-sync-alt"></i> update now
@@ -331,70 +323,73 @@
 
 <script>
   (function() {
-    // --- CONFIG ---
     const API_URL = "https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking";
 
-    // DOM elements
-    const tbody = document.querySelector("#parkingTable tbody");
+    const tbody = document.getElementById("tableBody");
     const totalSpan = document.getElementById("totalSlots");
     const occupiedSpan = document.getElementById("occupiedSlots");
     const availableSpan = document.getElementById("availableSlots");
     const statusBadge = document.getElementById("statusBadge");
-    const statusMsg = document.getElementById("statusMessage");
     const refreshBtn = document.getElementById("refreshBtn");
 
-    // Helper: update UI with fresh data
     async function fetchParkingData() {
       try {
         const res = await fetch(API_URL);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // reset table
         tbody.innerHTML = "";
 
+        // Since the API returns 60 individual slot objects, we need to count them properly
+        let totalSlots = data.length; // This will be 60
         let totalOccupied = 0;
-        let totalAvailable = 0;
-        let totalSlots = 0;
-
+        
+        // Count occupied slots (where status is "occupied" or similar)
         data.forEach(item => {
-          // ensure numbers (mockAPI might send strings)
-          const occupied = parseInt(item.occupied) || 0;
-          const available = parseInt(item.available) || 0;
-          const slotTotal = occupied + available;
+          // Check if the slot is occupied based on status field
+          // The API might use different status values
+          if (item.status && item.status.toLowerCase() === "occupied") {
+            totalOccupied++;
+          }
+        });
+        
+        let totalAvailable = totalSlots - totalOccupied;
 
-          totalOccupied += occupied;
-          totalAvailable += available;
-          totalSlots += slotTotal;
+        // Update summary cards
+        totalSpan.innerText = totalSlots;
+        occupiedSpan.innerHTML = `${totalOccupied} <small>/ ${totalSlots}</small>`;
+        availableSpan.innerHTML = `${totalAvailable} <small>/ ${totalSlots}</small>`;
 
+        // Display each parking slot in the table
+        data.forEach((item, index) => {
           const tr = document.createElement("tr");
-
-          // dynamic class based on availability (full vs available)
-          if (available === 0) {
+          
+          // Determine if this slot is occupied
+          const isOccupied = item.status && item.status.toLowerCase() === "occupied";
+          const slotStatus = isOccupied ? "Occupied" : "Available";
+          
+          // Set row class
+          if (isOccupied) {
             tr.classList.add("full");
           } else {
             tr.classList.add("available");
           }
 
-          // create cells with clean data
+          // For occupied/available counts, we show 1 or 0 since each slot is individual
+          const occupiedCount = isOccupied ? 1 : 0;
+          const availableCount = isOccupied ? 0 : 1;
+
           tr.innerHTML = `
-            <td><span style="font-weight:600; background:#eef4f9; padding:0.3rem 0.9rem; border-radius:30px;">${item.id}</span></td>
-            <td><span style="background:${occupied > 0 ? '#fbebea' : '#f0f7fa'}; padding:0.3rem 1rem; border-radius:40px;">${occupied}</span></td>
-            <td><span style="background:${available > 0 ? '#def5e8' : '#f2e4e2'}; padding:0.3rem 1rem; border-radius:40px;">${available}</span></td>
-            <td><span class="row-status-chip">${item.status || (available === 0 ? 'FULL' : 'OPEN')}</span></td>
+            <td><span style="font-weight:600; background:#eef4f9; padding:0.3rem 0.9rem; border-radius:30px;">${item.id || index + 1}</span></td>
+            <td><span style="background:${isOccupied ? '#fbebea' : '#f0f7fa'}; padding:0.3rem 1rem; border-radius:40px;">${occupiedCount}</span></td>
+            <td><span style="background:${!isOccupied ? '#def5e8' : '#f2e4e2'}; padding:0.3rem 1rem; border-radius:40px;">${availableCount}</span></td>
+            <td><span class="row-status-chip">${slotStatus}</span></td>
           `;
 
           tbody.appendChild(tr);
         });
 
-        // update summary cards
-        totalSpan.innerText = totalSlots;
-
-        // show occupied and available as "X / total"
-        occupiedSpan.innerHTML = `${totalOccupied} <small>/ ${totalSlots}</small>`;
-        availableSpan.innerHTML = `${totalAvailable} <small>/ ${totalSlots}</small>`;
-
-        // update status badge with modern copy
+        // Update status badge
         if (totalAvailable === 0) {
           statusBadge.classList.add("warning");
           statusBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <span id="statusMessage">⚠️ parking full · no spots left</span>`;
@@ -405,30 +400,23 @@
 
       } catch (error) {
         console.warn("fetch error", error);
-        // graceful degradation: show placeholder message
-        tbody.innerHTML = `<tr><td colspan="4" style="padding:2rem; background:white; border-radius:20px; color:#b13a2c;"><i class="fas fa-plug"></i>  unable to reach server — using demo snapshot</td></tr>`;
-        // keep existing numbers if any (or fallback)
-        if (totalSpan.innerText === "0") {
-          totalSpan.innerText = "—";
-          occupiedSpan.innerHTML = `0 <small>/ —</small>`;
-          availableSpan.innerHTML = `0 <small>/ —</small>`;
-        }
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:2rem; background:white; border-radius:20px; color:#b13a2c;"><i class="fas fa-plug"></i> unable to reach server — using demo snapshot</td></tr>`;
+        
         statusBadge.classList.add("warning");
         statusBadge.innerHTML = `<i class="fas fa-wifi-slash"></i> <span>offline mode · stale data</span>`;
       }
     }
 
-    // initial fetch
+    // Initial fetch
     fetchParkingData();
 
-    // set live interval (3 sec)
+    // Set live interval (3 sec)
     const intervalId = setInterval(fetchParkingData, 3000);
 
-    // refresh button click (with haptic feedback simulation)
+    // Refresh button click
     refreshBtn.addEventListener("click", (e) => {
       e.preventDefault();
       fetchParkingData();
-      // add a quick spin animation on icon
       const icon = refreshBtn.querySelector("i");
       icon.style.transition = "transform 0.3s";
       icon.style.transform = "rotate(180deg)";
@@ -437,16 +425,17 @@
       }, 200);
     });
 
-    // (optional) clean interval if page gets unloaded – good practice
     window.addEventListener('beforeunload', () => {
       clearInterval(intervalId);
     });
 
   })();
 </script>
-
-<!-- ensure the status message span is re-targeted after badge innerHTML rewrite -->
-<!-- we already handle it by recreating the whole innerHTML with fresh span, but we also keep 'statusMessage' id inside new badge -->
-<!-- no extra action needed -->
 </body>
 </html>
+
+
+
+
+
+
