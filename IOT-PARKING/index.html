@@ -3,96 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3x2 Parking - Multiple Objects</title>
+  <title>3x2 Parking - Enter/Exit Tracker</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    body {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       font-family: Arial, sans-serif;
-      background: #f0f2f5;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       padding: 20px;
-      margin: 0;
     }
+
     .container {
       max-width: 700px;
       width: 100%;
       background: white;
       border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
+
     h1 {
       text-align: center;
       color: #333;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
-    .status {
-      text-align: center;
-      padding: 10px;
-      background: #e3f2fd;
-      border-radius: 10px;
+
+    h1 i {
+      color: #667eea;
+    }
+
+    .mockapi-info {
+      background: #f0f4f8;
+      padding: 15px;
+      border-radius: 12px;
       margin-bottom: 20px;
-      font-weight: bold;
+      font-family: monospace;
+      font-size: 14px;
+      overflow-x: auto;
     }
-    .counters {
+
+    .status-badge {
+      text-align: center;
+      padding: 12px;
+      background: #e3f2fd;
+      border-radius: 50px;
+      margin-bottom: 25px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .status-badge.warning {
+      background: #ffecdd;
+      color: #ac3800;
+    }
+
+    .main-counters {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 20px;
+      margin-bottom: 25px;
     }
-    .counter {
+
+    .counter-box {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border: 1px solid #e0e0e0;
+    }
+
+    .counter-box.enter {
+      border-top: 5px solid #28a745;
+    }
+
+    .counter-box.exit {
+      border-top: 5px solid #dc3545;
+    }
+
+    .counter-box .label {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .counter-box .label i {
+      margin-right: 8px;
+    }
+
+    .counter-box .number {
+      font-size: 48px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
       background: #f8f9fa;
       padding: 15px;
-      border-radius: 10px;
+      border-radius: 12px;
       text-align: center;
     }
-    .counter.entry {
-      border-left: 5px solid #28a745;
-    }
-    .counter.exit {
-      border-left: 5px solid #dc3545;
-    }
-    .counter .label {
+
+    .stat-card .label {
       font-size: 14px;
       color: #666;
+      margin-bottom: 8px;
     }
-    .counter .number {
-      font-size: 32px;
+
+    .stat-card .value {
+      font-size: 24px;
       font-weight: bold;
       color: #333;
     }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .stat {
+
+    .parking-section {
       background: #f8f9fa;
-      padding: 8px;
-      border-radius: 8px;
-      text-align: center;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 25px;
     }
-    .stat .label {
-      font-size: 11px;
-      color: #666;
-    }
-    .stat .value {
-      font-size: 18px;
+
+    .parking-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
       font-weight: bold;
-      color: #333;
     }
+
     .parking-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 12px;
     }
-    .slot {
-      background: #f8f9fa;
+
+    .parking-slot {
+      background: white;
       border: 2px solid #dee2e6;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 15px 5px;
       text-align: center;
       aspect-ratio: 1;
@@ -100,386 +167,448 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      transition: all 0.3s;
     }
-    .slot.occupied {
+
+    .parking-slot.occupied {
       background: #f8d7da;
       border-color: #dc3545;
     }
-    .slot.available {
+
+    .parking-slot.available {
       background: #d4edda;
       border-color: #28a745;
     }
-    .slot i {
-      font-size: 24px;
+
+    .parking-slot i {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .parking-slot .slot-number {
+      font-weight: bold;
+      font-size: 14px;
       margin-bottom: 5px;
     }
-    .slot .id {
-      font-weight: bold;
-      margin-bottom: 3px;
-    }
-    .slot .status-text {
+
+    .parking-slot .slot-status {
       font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
       color: white;
+      font-weight: bold;
     }
-    .occupied .status-text {
+
+    .occupied .slot-status {
       background: #dc3545;
     }
-    .available .status-text {
+
+    .available .slot-status {
       background: #28a745;
     }
-    .log {
-      background: #f8f9fa;
+
+    .listcar-info {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
       border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .listcar-info i {
+      color: #856404;
+      margin-right: 8px;
+    }
+
+    .activity-log {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
       padding: 15px;
       margin-bottom: 20px;
-      max-height: 120px;
+      max-height: 150px;
       overflow-y: auto;
     }
+
     .log-title {
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      color: #555;
     }
+
     .log-entry {
-      padding: 5px 0;
-      border-bottom: 1px solid #dee2e6;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e0e0e0;
       display: flex;
       justify-content: space-between;
+      font-size: 13px;
     }
-    .buttons {
+
+    .log-entry.enter {
+      color: #28a745;
+    }
+
+    .log-entry.exit {
+      color: #dc3545;
+    }
+
+    .log-time {
+      color: #999;
+      font-size: 11px;
+    }
+
+    .button-group {
       display: flex;
-      gap: 10px;
+      gap: 15px;
       justify-content: center;
     }
+
     button {
-      padding: 10px 20px;
+      padding: 12px 25px;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      border-radius: 50px;
       font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
     }
-    .refresh {
-      background: #007bff;
+
+    button i {
+      font-size: 16px;
+    }
+
+    .btn-refresh {
+      background: #667eea;
       color: white;
     }
-    .reset {
+
+    .btn-refresh:hover {
+      background: #5a67d8;
+      transform: translateY(-2px);
+    }
+
+    .btn-reset {
       background: #6c757d;
       color: white;
     }
-    .debug {
-      background: #333;
-      color: #0f0;
-      padding: 10px;
-      border-radius: 5px;
+
+    .btn-reset:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+
+    .debug-panel {
+      margin-top: 20px;
+      background: #1e1e2f;
+      color: #0ff;
+      padding: 15px;
+      border-radius: 10px;
       font-family: monospace;
       font-size: 12px;
-      margin-top: 10px;
       max-height: 200px;
       overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    .mockapi-data {
-      background: #e3f2fd;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      font-size: 12px;
-      max-height: 100px;
-      overflow-y: auto;
-    }
-    .summary {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .summary-item {
-      background: #fff3cd;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1><i class="fas fa-parking"></i> 3x2 Parking - Multiple Objects</h1>
+    <h1>
+      <i class="fas fa-parking"></i>
+      3x2 Parking Tracker
+    </h1>
 
     <!-- Mockapi Data Display -->
-    <div class="mockapi-data" id="mockapiDisplay">
-      <i class="fas fa-database"></i> <span id="mockapiContent">Waiting for data...</span>
+    <div class="mockapi-info" id="mockapiDisplay">
+      <i class="fas fa-database"></i> Naghihintay ng data...
     </div>
 
-    <!-- Simple status -->
-    <div class="status" id="statusDisplay">
+    <!-- Status Badge -->
+    <div class="status-badge" id="statusDisplay">
       <i class="fas fa-circle-notch fa-spin"></i> Loading...
     </div>
 
-    <!-- Entry/Exit counters -->
-    <div class="counters">
-      <div class="counter entry">
-        <div class="label"><i class="fas fa-sign-in-alt"></i> PUMASOK</div>
-        <div class="number" id="entryCount">0</div>
+    <!-- Enter/Exit Main Counters -->
+    <div class="main-counters">
+      <div class="counter-box enter">
+        <div class="label">
+          <i class="fas fa-sign-in-alt"></i> ENTER
+        </div>
+        <div class="number" id="enterCount">0</div>
       </div>
-      <div class="counter exit">
-        <div class="label"><i class="fas fa-sign-out-alt"></i> LUMABAS</div>
+      <div class="counter-box exit">
+        <div class="label">
+          <i class="fas fa-sign-out-alt"></i> EXIT
+        </div>
         <div class="number" id="exitCount">0</div>
       </div>
     </div>
 
-    <!-- Summary ng lahat ng objects -->
-    <div class="summary" id="summary">
-      <!-- Mapupuno ng JavaScript -->
-    </div>
-
     <!-- Stats -->
-    <div class="stats">
-      <div class="stat">
-        <div class="label">TOTAL SLOTS</div>
-        <div class="value" id="totalSlots">0</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">TOTAL OBJECTS</div>
+        <div class="value" id="totalObjects">0</div>
       </div>
-      <div class="stat">
-        <div class="label">TOTAL OCCUPIED</div>
-        <div class="value" id="totalOccupied">0</div>
+      <div class="stat-card">
+        <div class="label">TOTAL ENTER</div>
+        <div class="value" id="totalEnter">0</div>
       </div>
-      <div class="stat">
-        <div class="label">TOTAL AVAILABLE</div>
-        <div class="value" id="totalAvailable">0</div>
-      </div>
-      <div class="stat">
-        <div class="label">OBJECTS</div>
-        <div class="value" id="objectCount">0</div>
+      <div class="stat-card">
+        <div class="label">TOTAL EXIT</div>
+        <div class="value" id="totalExit">0</div>
       </div>
     </div>
 
-    <!-- 3x2 Parking slots (first object lang muna) -->
-    <h3>First Object Parking (ID: <span id="firstObjectId">1</span>)</h3>
-    <div class="parking-grid" id="parkingGrid">
-      <!-- Mapupuno ng JavaScript -->
+    <!-- Listcar Information -->
+    <div class="listcar-info" id="listcarDisplay">
+      <i class="fas fa-list"></i> <span>Walang listcar data</span>
     </div>
 
-    <!-- Activity log -->
-    <div class="log" id="activityLog">
-      <div class="log-title"><i class="fas fa-history"></i> Activity</div>
-      <div id="logList">— walang activity —</div>
+    <!-- 3x2 Parking Grid -->
+    <div class="parking-section">
+      <div class="parking-title">
+        <span><i class="fas fa-grid-2"></i> 3x2 Parking Layout</span>
+        <span class="badge" id="currentObjectId">Object ID: -</span>
+      </div>
+      <div class="parking-grid" id="parkingGrid">
+        <!-- 6 slots will be inserted here -->
+      </div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="activity-log">
+      <div class="log-title"><i class="fas fa-history"></i> Recent Activity</div>
+      <div id="activityList">
+        — walang activity —
+      </div>
     </div>
 
     <!-- Buttons -->
-    <div class="buttons">
-      <button class="refresh" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-      <button class="reset" id="resetBtn"><i class="fas fa-redo-alt"></i> Reset</button>
+    <div class="button-group">
+      <button class="btn-refresh" id="refreshBtn">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+      <button class="btn-reset" id="resetBtn">
+        <i class="fas fa-redo-alt"></i> Reset Counters
+      </button>
     </div>
 
-    <!-- Debug info -->
-    <div class="debug" id="debugInfo">
-      Naghihintay ng data...
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debugPanel">
+      Initializing...
     </div>
   </div>
 
   <script>
     const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
     
-    // Variables
+    // Variables for tracking
     let previousData = [];
-    let totalEntry = 0;
+    let totalEnter = 0;
     let totalExit = 0;
     let activityLog = [];
 
-    // Kunin ang elements
-    const debugInfo = document.getElementById('debugInfo');
-    const mockapiContent = document.getElementById('mockapiContent');
-    const summary = document.getElementById('summary');
-    const parkingGrid = document.getElementById('parkingGrid');
+    // DOM Elements
+    const mockapiDisplay = document.getElementById('mockapiDisplay');
     const statusDisplay = document.getElementById('statusDisplay');
-    const entryCount = document.getElementById('entryCount');
+    const enterCount = document.getElementById('enterCount');
     const exitCount = document.getElementById('exitCount');
-    const totalSlots = document.getElementById('totalSlots');
-    const totalOccupied = document.getElementById('totalOccupied');
-    const totalAvailable = document.getElementById('totalAvailable');
-    const objectCount = document.getElementById('objectCount');
-    const firstObjectId = document.getElementById('firstObjectId');
-    const logList = document.getElementById('logList');
+    const totalObjects = document.getElementById('totalObjects');
+    const totalEnter = document.getElementById('totalEnter');
+    const totalExit = document.getElementById('totalExit');
+    const listcarDisplay = document.getElementById('listcarDisplay');
+    const currentObjectId = document.getElementById('currentObjectId');
+    const parkingGrid = document.getElementById('parkingGrid');
+    const activityList = document.getElementById('activityList');
+    const debugPanel = document.getElementById('debugPanel');
 
-    // Function para mag-compute ng totals
-    function computeTotals(data) {
-      let slots = 0;
-      let occupied = 0;
-      let available = 0;
-      
-      data.forEach(item => {
-        const occ = parseInt(item.occupied) || 0;
-        const avail = parseInt(item.available) || 0;
-        
-        occupied += occ;
-        available += avail;
-        slots += (occ + avail);
-      });
-      
-      return { slots, occupied, available };
-    }
-
-    // Function para mag-fetch ng data
-    async function fetchData() {
-      try {
-        debugInfo.innerHTML = '⏳ Kinukuha ang data...';
-        statusDisplay.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Loading...';
-        
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        
-        // Ipakita ang mockapi data
-        mockapiContent.innerHTML = JSON.stringify(data, null, 2);
-        
-        // Compute totals
-        const totals = computeTotals(data);
-        
-        // Ipakita sa debug
-        debugInfo.innerHTML = '✓ May data!\n';
-        debugInfo.innerHTML += `Number of objects: ${data.length}\n`;
-        debugInfo.innerHTML += `Total slots: ${totals.slots}\n`;
-        debugInfo.innerHTML += `Total occupied: ${totals.occupied}\n`;
-        debugInfo.innerHTML += `Total available: ${totals.available}\n`;
-        
-        // Update summary
-        objectCount.textContent = data.length;
-        totalSlots.textContent = totals.slots;
-        totalOccupied.textContent = totals.occupied;
-        totalAvailable.textContent = totals.available;
-        
-        // Show summary ng bawat object
-        summary.innerHTML = '';
-        data.forEach((item, index) => {
-          const occ = parseInt(item.occupied) || 0;
-          const avail = parseInt(item.available) || 0;
-          
-          const summaryItem = document.createElement('div');
-          summaryItem.className = 'summary-item';
-          summaryItem.innerHTML = `
-            <div>Object ${item.id}</div>
-            <div style="font-size: 14px;">Occupied: ${occ} | Available: ${avail}</div>
-          `;
-          summary.appendChild(summaryItem);
-        });
-
-        // Check kung may nagbago (para sa entry/exit count)
-        if (previousData.length > 0) {
-          const previousTotals = computeTotals(previousData);
-          
-          if (totals.occupied > previousTotals.occupied) {
-            const diff = totals.occupied - previousTotals.occupied;
-            totalEntry += diff;
-            addToLog('entry', diff + ' sasakyan pumasok');
-          } else if (totals.occupied < previousTotals.occupied) {
-            const diff = previousTotals.occupied - totals.occupied;
-            totalExit += diff;
-            addToLog('exit', diff + ' sasakyan lumabas');
-          }
-        }
-
-        // I-save ang current data
-        previousData = [...data];
-
-        // Update counters
-        entryCount.textContent = totalEntry;
-        exitCount.textContent = totalExit;
-
-        // Update status
-        if (totals.available === 0) {
-          statusDisplay.innerHTML = '⚠️ PUNO NA! Lahat occupied';
-        } else {
-          statusDisplay.innerHTML = `✅ ${totals.available} bakante · ${totals.occupied} nakapark (total)`;
-        }
-
-        // Ipakita ang unang object sa parking grid
-        if (data.length > 0) {
-          const firstItem = data[0];
-          firstObjectId.textContent = firstItem.id;
-          
-          const occ = parseInt(firstItem.occupied) || 0;
-          const total = occ + (parseInt(firstItem.available) || 0);
-          
-          // Update parking grid - 3x2 = 6 slots
-          parkingGrid.innerHTML = '';
-          
-          for (let i = 0; i < 6; i++) {
-            // Kung ang slot number ay <= occupied, occupied siya
-            const isOccupied = i < occ;
-            
-            const slotDiv = document.createElement('div');
-            slotDiv.className = `slot ${isOccupied ? 'occupied' : 'available'}`;
-            
-            slotDiv.innerHTML = `
-              <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
-              <div class="id">Slot ${i+1}</div>
-              <div class="status-text">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
-            `;
-            
-            parkingGrid.appendChild(slotDiv);
-          }
-        }
-
-      } catch (error) {
-        debugInfo.innerHTML = '❌ Error: ' + error.message;
-        statusDisplay.innerHTML = '❌ Error sa connection';
-        mockapiContent.innerHTML = 'Error: ' + error.message;
-      }
-    }
-
-    // Function para mag-add sa log
+    // Function to add to activity log
     function addToLog(type, message) {
       const time = new Date().toLocaleTimeString();
       activityLog.unshift({ type, message, time });
       
-      // Keep last 5 entries
-      if (activityLog.length > 5) {
+      if (activityLog.length > 8) {
         activityLog.pop();
       }
       
-      // Update log display
-      logList.innerHTML = '';
+      // Update activity display
+      activityList.innerHTML = '';
+      
       if (activityLog.length === 0) {
-        logList.innerHTML = '— walang activity —';
+        activityList.innerHTML = '— walang activity —';
       } else {
         activityLog.forEach(log => {
-          const div = document.createElement('div');
-          div.className = 'log-entry';
-          div.innerHTML = `
+          const entry = document.createElement('div');
+          entry.className = `log-entry ${log.type}`;
+          entry.innerHTML = `
             <span>
-              <i class="fas ${log.type === 'entry' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}" 
-                 style="color: ${log.type === 'entry' ? '#28a745' : '#dc3545'}"></i>
+              <i class="fas ${log.type === 'enter' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
               ${log.message}
             </span>
-            <span style="color: #999; font-size: 11px;">${log.time}</span>
+            <span class="log-time">${log.time}</span>
           `;
-          logList.appendChild(div);
+          activityList.appendChild(entry);
         });
       }
     }
 
-    // Reset function
+    // Function to create parking slot
+    function createSlot(number, isOccupied) {
+      const slot = document.createElement('div');
+      slot.className = `parking-slot ${isOccupied ? 'occupied' : 'available'}`;
+      
+      slot.innerHTML = `
+        <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
+        <div class="slot-number">Slot ${number}</div>
+        <div class="slot-status">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
+      `;
+      
+      return slot;
+    }
+
+    // Main fetch function
+    async function fetchData() {
+      try {
+        debugPanel.innerHTML = '⏳ Fetching data from mockapi...';
+        
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        
+        // Display raw mockapi data
+        mockapiDisplay.innerHTML = `<i class="fas fa-database"></i> ${JSON.stringify(data, null, 2)}`;
+        
+        // Update object count
+        totalObjects.textContent = data.length;
+        
+        // Calculate totals
+        let totalEnterValue = 0;
+        let totalExitValue = 0;
+        let allListcars = [];
+        
+        data.forEach(item => {
+          // Convert string to number
+          const enter = parseInt(item.enter) || 0;
+          const exit = parseInt(item.exit) || 0;
+          
+          totalEnterValue += enter;
+          totalExitValue += exit;
+          
+          // Collect listcar data
+          if (item.listcar) {
+            allListcars.push(`Obj ${item.id}: ${item.listcar}`);
+          }
+        });
+        
+        // Update total displays
+        totalEnter.textContent = totalEnterValue;
+        totalExit.textContent = totalExitValue;
+        
+        // Update listcar display
+        if (allListcars.length > 0) {
+          listcarDisplay.innerHTML = `<i class="fas fa-list"></i> ${allListcars.join(' | ')}`;
+        }
+        
+        // Check for changes (entry/exit events)
+        if (previousData.length > 0) {
+          let enterDiff = 0;
+          let exitDiff = 0;
+          
+          // Compare each object
+          data.forEach((item, index) => {
+            if (index < previousData.length) {
+              const prevEnter = parseInt(previousData[index].enter) || 0;
+              const currEnter = parseInt(item.enter) || 0;
+              const prevExit = parseInt(previousData[index].exit) || 0;
+              const currExit = parseInt(item.exit) || 0;
+              
+              if (currEnter > prevEnter) {
+                enterDiff += (currEnter - prevEnter);
+              }
+              if (currExit > prevExit) {
+                exitDiff += (currExit - prevExit);
+              }
+            }
+          });
+          
+          if (enterDiff > 0) {
+            totalEnter += enterDiff;
+            addToLog('enter', `${enterDiff} new vehicle(s) entered`);
+          }
+          
+          if (exitDiff > 0) {
+            totalExit += exitDiff;
+            addToLog('exit', `${exitDiff} vehicle(s) exited`);
+          }
+        }
+        
+        // Update main counters
+        enterCount.textContent = totalEnter;
+        exitCount.textContent = totalExit;
+        
+        // Update status
+        statusDisplay.innerHTML = `
+          <i class="fas fa-check-circle"></i> 
+          ${data.length} objects · Enter: ${totalEnterValue} · Exit: ${totalExitValue}
+        `;
+        
+        // Display first object's parking (for demo, we'll show 6 slots)
+        if (data.length > 0) {
+          const firstItem = data[0];
+          currentObjectId.textContent = `Object ID: ${firstItem.id}`;
+          
+          // For demo, let's assume occupied = enter mod 6
+          // Para may display tayo sa parking grid
+          const occupiedCount = (parseInt(firstItem.enter) || 0) % 6;
+          
+          // Clear and populate parking grid
+          parkingGrid.innerHTML = '';
+          
+          for (let i = 0; i < 6; i++) {
+            const isOccupied = i < occupiedCount;
+            const slot = createSlot(i + 1, isOccupied);
+            parkingGrid.appendChild(slot);
+          }
+        }
+        
+        // Update debug panel
+        debugPanel.innerHTML = `✓ Data loaded successfully
+Objects: ${data.length}
+Previous objects: ${previousData.length}
+Total Enter Events: ${totalEnter}
+Total Exit Events: ${totalExit}`;
+        
+        // Save current data for next comparison
+        previousData = [...data];
+        
+      } catch (error) {
+        debugPanel.innerHTML = `❌ Error: ${error.message}`;
+        statusDisplay.innerHTML = `❌ Failed to load data`;
+      }
+    }
+
+    // Reset counters
     function resetCounters() {
-      totalEntry = 0;
+      totalEnter = 0;
       totalExit = 0;
-      previousData = [];
       activityLog = [];
       
-      entryCount.textContent = '0';
+      enterCount.textContent = '0';
       exitCount.textContent = '0';
-      logList.innerHTML = '— walang activity —';
+      activityList.innerHTML = '— walang activity —';
       
-      // Refresh data
-      fetchData();
+      fetchData(); // Refresh data
     }
 
     // Initial fetch
     fetchData();
-
+    
     // Auto-refresh every 3 seconds
     setInterval(fetchData, 3000);
-
-    // Button events
+    
+    // Event listeners
     document.getElementById('refreshBtn').addEventListener('click', fetchData);
     document.getElementById('resetBtn').addEventListener('click', resetCounters);
 
