@@ -23,7 +23,7 @@
     }
 
     .glass-panel {
-      max-width: 1200px;
+      max-width: 1000px;
       width: 100%;
       margin: 0 auto;
       background: rgba(255, 255, 255, 0.75);
@@ -84,18 +84,16 @@
     }
 
     .stats-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
       margin: 2rem 0 2.5rem 0;
     }
 
     .stat-card {
       background: white;
-      border-radius: 34px;
-      padding: 1.2rem 2.2rem;
-      min-width: 170px;
+      border-radius: 24px;
+      padding: 1.2rem 1rem;
       text-align: center;
       box-shadow: 0 15px 30px -12px rgba(21, 50, 80, 0.15);
       border: 1px solid rgba(0,150,200,0.15);
@@ -108,7 +106,7 @@
     }
 
     .stat-label {
-      font-size: 1rem;
+      font-size: 0.9rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       font-weight: 600;
@@ -117,16 +115,64 @@
     }
 
     .stat-value {
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #0f3b4f;
       line-height: 1.2;
     }
 
     .stat-value small {
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 400;
       color: #608a9f;
+    }
+
+    .entry-exit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .counter-card {
+      background: linear-gradient(145deg, #ffffff, #f5f9ff);
+      border-radius: 30px;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid rgba(30, 79, 107, 0.2);
+      box-shadow: 0 10px 20px -10px rgba(0,80,120,0.2);
+    }
+
+    .counter-card.entry {
+      border-left: 6px solid #4caf50;
+    }
+
+    .counter-card.exit {
+      border-left: 6px solid #f44336;
+    }
+
+    .counter-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e4f6b;
+      margin-bottom: 0.5rem;
+    }
+
+    .counter-label i {
+      margin-right: 8px;
+    }
+
+    .counter-value {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #112b3f;
+      line-height: 1.2;
+    }
+
+    .counter-sub {
+      font-size: 0.9rem;
+      color: #608a9f;
+      margin-top: 0.3rem;
     }
 
     .table-container {
@@ -146,27 +192,28 @@
     .parking-row {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 1rem;
-      background: white;
-      padding: 0.8rem;
-      border-radius: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+      gap: 0.8rem;
     }
 
     .parking-slot {
       background: #f8fafc;
       border-radius: 16px;
-      padding: 1rem 0.5rem;
+      padding: 1rem 0.3rem;
       text-align: center;
-      border: 1px solid #e2edf5;
+      border: 2px solid #e2edf5;
       transition: all 0.2s ease;
       position: relative;
       cursor: pointer;
+      aspect-ratio: 1 / 0.9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .parking-slot:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0,100,150,0.1);
+      box-shadow: 0 8px 16px rgba(0,100,150,0.15);
     }
 
     .parking-slot.occupied {
@@ -187,11 +234,12 @@
     }
 
     .slot-status {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       font-weight: 600;
-      padding: 0.3rem 0.5rem;
+      padding: 0.2rem 0.5rem;
       border-radius: 30px;
       display: inline-block;
+      text-transform: uppercase;
     }
 
     .occupied .slot-status {
@@ -205,11 +253,19 @@
     }
 
     .row-label {
-      font-size: 0.9rem;
+      font-size: 1rem;
       font-weight: 600;
-      color: #608a9f;
-      margin-bottom: 0.5rem;
+      color: #1e4f6b;
+      margin: 0.5rem 0 0.2rem 0;
       padding-left: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .row-label i {
+      color: #4a90e2;
+      font-size: 1rem;
     }
 
     .refresh-action {
@@ -289,15 +345,60 @@
       color: #4caf50;
     }
 
-    @media (max-width: 768px) {
-      .parking-row {
-        grid-template-columns: repeat(3, 1fr);
-      }
+    .parking-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
     }
 
-    @media (max-width: 480px) {
-      .parking-row {
+    .slot-count {
+      background: #1e4f6b;
+      color: white;
+      padding: 0.3rem 1rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+    }
+
+    .history-log {
+      margin-top: 2rem;
+      background: white;
+      border-radius: 20px;
+      padding: 1rem;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      border: 1px solid #e2edf5;
+    }
+
+    .log-entry {
+      padding: 0.3rem 0;
+      border-bottom: 1px dashed #e2edf5;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .log-entry.entry {
+      color: #4caf50;
+    }
+
+    .log-entry.exit {
+      color: #f44336;
+    }
+
+    .log-time {
+      color: #888;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .parking-row {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
   </style>
@@ -307,32 +408,66 @@
   <h1>
     <i class="fas fa-square-parking"></i> 
     park<span style="font-weight:300;">·flow</span>
-    <i class="fas fa-wave-square" style="background:transparent; color:#1e4f6b; box-shadow:none; font-size:1.9rem;"></i>
+    <i class="fas fa-chart-line" style="background:transparent; color:#1e4f6b; box-shadow:none; font-size:1.9rem;"></i>
   </h1>
 
   <div class="status-badge" id="statusBadge">
     <i class="fas fa-circle-check"></i> <span id="statusMessage">all systems live</span>
   </div>
 
+  <!-- Entry/Exit Counters -->
+  <div class="entry-exit-grid">
+    <div class="counter-card entry">
+      <div class="counter-label">
+        <i class="fas fa-sign-in-alt"></i> TOTAL ENTRY
+      </div>
+      <div class="counter-value" id="totalEntry">0</div>
+      <div class="counter-sub">vehicles pumasok</div>
+    </div>
+    <div class="counter-card exit">
+      <div class="counter-label">
+        <i class="fas fa-sign-out-alt"></i> TOTAL EXIT
+      </div>
+      <div class="counter-value" id="totalExit">0</div>
+      <div class="counter-sub">vehicles lumabas</div>
+    </div>
+  </div>
+
+  <!-- Current Status Stats -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-layer-group" style="margin-right:6px;"></i>total slots</div>
-      <div class="stat-value" id="totalSlots">0</div>
+      <div class="stat-label"><i class="fas fa-layer-group"></i> total slots</div>
+      <div class="stat-value" id="totalSlots">36</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-car-side"></i> occupied</div>
-      <div class="stat-value" id="occupiedSlots">0 <small>/ 0</small></div>
+      <div class="stat-label"><i class="fas fa-car-side"></i> currently occupied</div>
+      <div class="stat-value" id="occupiedSlots">0 <small>/ 36</small></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-arrow-circle-up"></i> available</div>
-      <div class="stat-value" id="availableSlots">0 <small>/ 0</small></div>
+      <div class="stat-label"><i class="fas fa-arrow-circle-up"></i> currently available</div>
+      <div class="stat-value" id="availableSlots">0 <small>/ 36</small></div>
     </div>
+    <div class="stat-card">
+      <div class="stat-label"><i class="fas fa-clock"></i> net flow</div>
+      <div class="stat-value" id="netFlow">0</div>
+    </div>
+  </div>
+
+  <div class="parking-title">
+    <div><i class="fas fa-grid-2"></i> 6x6 Parking Layout</div>
+    <div class="slot-count"><i class="fas fa-car"></i> 36 total slots</div>
   </div>
 
   <div class="table-container">
     <div class="parking-grid" id="parkingGrid">
-      <!-- Parking slots will be dynamically inserted here in rows of 6 -->
+      <!-- Parking slots will be dynamically inserted here - 6 rows with 6 slots each -->
     </div>
+  </div>
+
+  <!-- Activity Log -->
+  <div class="history-log" id="activityLog">
+    <div style="font-weight:600; margin-bottom:0.5rem;"><i class="fas fa-history"></i> Recent Activity</div>
+    <div id="logEntries"></div>
   </div>
 
   <div class="refresh-action">
@@ -342,7 +477,7 @@
     </button>
   </div>
   <div class="footer-note">
-    <i class="fas fa-bolt" style="margin-right:6px;"></i> live sync · 3s interval · 6 slots per row
+    <i class="fas fa-bolt"></i> live tracking · pila ka agi (entry) vs pila ka exit
   </div>
 </div>
 
@@ -354,25 +489,104 @@
     const totalSpan = document.getElementById("totalSlots");
     const occupiedSpan = document.getElementById("occupiedSlots");
     const availableSpan = document.getElementById("availableSlots");
+    const totalEntrySpan = document.getElementById("totalEntry");
+    const totalExitSpan = document.getElementById("totalExit");
+    const netFlowSpan = document.getElementById("netFlow");
     const statusBadge = document.getElementById("statusBadge");
+    const logEntries = document.getElementById("logEntries");
     const refreshBtn = document.getElementById("refreshBtn");
 
-    function createParkingSlot(slot, index) {
-      const isOccupied = slot.status && slot.status.toLowerCase() === "occupied";
+    // Fixed layout: 6 rows x 6 columns = 36 slots
+    const TOTAL_SLOTS = 36;
+    const SLOTS_PER_ROW = 6;
+    const TOTAL_ROWS = 6;
+
+    // Store previous state to detect changes
+    let previousOccupiedCount = 0;
+    let totalEntry = 0;
+    let totalExit = 0;
+    let activityLog = [];
+
+    function addToLog(action, slotNumber) {
+      const time = new Date().toLocaleTimeString();
+      const logEntry = {
+        time,
+        action,
+        slot: slotNumber
+      };
+      
+      activityLog.unshift(logEntry); // Add to beginning
+      
+      // Keep only last 10 entries
+      if (activityLog.length > 10) {
+        activityLog.pop();
+      }
+      
+      updateLogDisplay();
+    }
+
+    function updateLogDisplay() {
+      logEntries.innerHTML = '';
+      
+      if (activityLog.length === 0) {
+        logEntries.innerHTML = '<div style="color:#888; text-align:center;">No recent activity</div>';
+        return;
+      }
+      
+      activityLog.forEach(log => {
+        const logDiv = document.createElement('div');
+        logDiv.className = `log-entry ${log.action}`;
+        logDiv.innerHTML = `
+          <i class="fas ${log.action === 'entry' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
+          <span>${log.action === 'entry' ? 'Pumasok' : 'Lumabas'} sa ${log.slot}</span>
+          <span class="log-time">${log.time}</span>
+        `;
+        logEntries.appendChild(logDiv);
+      });
+    }
+
+    function createParkingSlot(slot, slotNumber, isNew = false) {
+      const isOccupied = slot && slot.status && slot.status.toLowerCase() === "occupied";
       const slotDiv = document.createElement("div");
       slotDiv.className = `parking-slot ${isOccupied ? 'occupied' : 'available'}`;
+      
+      // Add highlight animation if new
+      if (isNew) {
+        slotDiv.style.animation = 'pulse 1s';
+      }
       
       slotDiv.innerHTML = `
         <div class="slot-icon">
           <i class="fas ${isOccupied ? 'fa-car' : 'fa-parking'}"></i>
         </div>
-        <div class="slot-id">Slot ${slot.id || index + 1}</div>
-        <div class="slot-status">${isOccupied ? 'OCCUPIED' : 'AVAILABLE'}</div>
+        <div class="slot-id">Slot ${slotNumber}</div>
+        <div class="slot-status">${isOccupied ? 'occupied' : 'available'}</div>
       `;
 
-      // Optional: Add click event to show details
+      // Add click event to show details
       slotDiv.addEventListener('click', () => {
-        alert(`Slot ${slot.id || index + 1}\nStatus: ${isOccupied ? 'Occupied' : 'Available'}`);
+        const status = isOccupied ? 'Occupied' : 'Available';
+        alert(`Slot ${slotNumber}\nStatus: ${status}\nLast action: ${isOccupied ? 'Entry' : 'Exit'}`);
+      });
+
+      return slotDiv;
+    }
+
+    function createEmptySlot(slotNumber) {
+      const slotDiv = document.createElement("div");
+      slotDiv.className = "parking-slot available";
+      slotDiv.style.opacity = "0.7";
+      
+      slotDiv.innerHTML = `
+        <div class="slot-icon">
+          <i class="fas fa-parking"></i>
+        </div>
+        <div class="slot-id">Slot ${slotNumber}</div>
+        <div class="slot-status">available</div>
+      `;
+
+      slotDiv.addEventListener('click', () => {
+        alert(`Slot ${slotNumber}\nStatus: Available (Empty)`);
       });
 
       return slotDiv;
@@ -387,52 +601,74 @@
         // Clear the grid
         parkingGrid.innerHTML = "";
 
-        // Calculate statistics
-        let totalSlots = data.length;
-        let totalOccupied = 0;
+        // Calculate statistics from API data
+        let currentOccupied = 0;
+        const slotsToShow = data.slice(0, TOTAL_SLOTS); // Get first 36 slots only
         
-        data.forEach(item => {
-          if (item.status && item.status.toLowerCase() === "occupied") {
-            totalOccupied++;
+        // Store slot statuses for change detection
+        const currentStatuses = [];
+        
+        slotsToShow.forEach((item, index) => {
+          const isOccupied = item.status && item.status.toLowerCase() === "occupied";
+          currentStatuses[index] = isOccupied;
+          if (isOccupied) {
+            currentOccupied++;
           }
         });
         
-        let totalAvailable = totalSlots - totalOccupied;
+        // Detect changes from previous state
+        if (previousOccupiedCount !== 0) { // Skip on first load
+          if (currentOccupied > previousOccupiedCount) {
+            // May pumasok (entry)
+            const entryCount = currentOccupied - previousOccupiedCount;
+            totalEntry += entryCount;
+            addToLog('entry', `${entryCount} vehicle(s)`);
+          } else if (currentOccupied < previousOccupiedCount) {
+            // May lumabas (exit)
+            const exitCount = previousOccupiedCount - currentOccupied;
+            totalExit += exitCount;
+            addToLog('exit', `${exitCount} vehicle(s)`);
+          }
+        }
+        
+        // Update previous state
+        previousOccupiedCount = currentOccupied;
+        
+        let totalAvailable = TOTAL_SLOTS - currentOccupied;
+        let netFlow = totalEntry - totalExit;
 
         // Update summary cards
-        totalSpan.innerText = totalSlots;
-        occupiedSpan.innerHTML = `${totalOccupied} <small>/ ${totalSlots}</small>`;
-        availableSpan.innerHTML = `${totalAvailable} <small>/ ${totalSlots}</small>`;
+        totalSpan.innerText = TOTAL_SLOTS;
+        occupiedSpan.innerHTML = `${currentOccupied} <small>/ ${TOTAL_SLOTS}</small>`;
+        availableSpan.innerHTML = `${totalAvailable} <small>/ ${TOTAL_SLOTS}</small>`;
+        totalEntrySpan.innerText = totalEntry;
+        totalExitSpan.innerText = totalExit;
+        netFlowSpan.innerText = netFlow;
 
-        // Group slots into rows of 6
-        for (let i = 0; i < data.length; i += 6) {
+        // Create 6 rows with 6 slots each
+        for (let row = 0; row < TOTAL_ROWS; row++) {
           const rowDiv = document.createElement("div");
           rowDiv.className = "parking-row";
           
           // Add row label
-          const rowNumber = Math.floor(i / 6) + 1;
           const rowLabel = document.createElement("div");
           rowLabel.className = "row-label";
-          rowLabel.innerHTML = `<i class="fas fa-arrow-right"></i> Row ${rowNumber}`;
+          rowLabel.innerHTML = `<i class="fas fa-arrow-right"></i> Row ${row + 1} <span style="margin-left: auto; font-size:0.8rem; color:#888;">${row * SLOTS_PER_ROW + 1} - ${(row + 1) * SLOTS_PER_ROW}</span>`;
           
           // Add slots to the row
-          for (let j = i; j < i + 6 && j < data.length; j++) {
-            const slot = createParkingSlot(data[j], j);
-            rowDiv.appendChild(slot);
-          }
-          
-          // Add empty slots if needed to maintain 6 per row
-          for (let j = data.length - i; j < 6 && j > 0; j++) {
-            const emptySlot = document.createElement("div");
-            emptySlot.className = "parking-slot";
-            emptySlot.style.opacity = "0.3";
-            emptySlot.style.background = "#f0f0f0";
-            emptySlot.innerHTML = `
-              <div class="slot-icon"><i class="fas fa-minus-circle"></i></div>
-              <div class="slot-id">Empty</div>
-              <div class="slot-status">—</div>
-            `;
-            rowDiv.appendChild(emptySlot);
+          for (let col = 0; col < SLOTS_PER_ROW; col++) {
+            const slotIndex = row * SLOTS_PER_ROW + col;
+            const slotNumber = slotIndex + 1;
+            
+            if (slotIndex < slotsToShow.length) {
+              // Use actual data from API
+              const slot = createParkingSlot(slotsToShow[slotIndex], slotNumber);
+              rowDiv.appendChild(slot);
+            } else {
+              // Create empty slot if API doesn't have enough data
+              const emptySlot = createEmptySlot(slotNumber);
+              rowDiv.appendChild(emptySlot);
+            }
           }
           
           parkingGrid.appendChild(rowLabel);
@@ -442,18 +678,43 @@
         // Update status badge
         if (totalAvailable === 0) {
           statusBadge.classList.add("warning");
-          statusBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <span id="statusMessage">⚠️ parking full · no spots left</span>`;
+          statusBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <span id="statusMessage">⚠️ parking full · all 36 slots occupied</span>`;
         } else {
           statusBadge.classList.remove("warning");
-          statusBadge.innerHTML = `<i class="fas fa-circle-check"></i> <span id="statusMessage">✓ ${totalAvailable} spot${totalAvailable !== 1 ? 's' : ''} available · ready</span>`;
+          statusBadge.innerHTML = `<i class="fas fa-circle-check"></i> <span id="statusMessage">✓ ${totalAvailable} slot${totalAvailable !== 1 ? 's' : ''} available · ${currentOccupied} occupied</span>`;
         }
 
       } catch (error) {
         console.warn("fetch error", error);
-        parkingGrid.innerHTML = `<div style="text-align:center; padding:2rem; color:#b13a2c;"><i class="fas fa-plug"></i> unable to reach server — using demo snapshot</div>`;
+        
+        // Show demo data if API fails
+        parkingGrid.innerHTML = "";
+        
+        // Create demo data (random occupied/available)
+        for (let row = 0; row < TOTAL_ROWS; row++) {
+          const rowDiv = document.createElement("div");
+          rowDiv.className = "parking-row";
+          
+          const rowLabel = document.createElement("div");
+          rowLabel.className = "row-label";
+          rowLabel.innerHTML = `<i class="fas fa-arrow-right"></i> Row ${row + 1} <span style="margin-left: auto; font-size:0.8rem; color:#888;">demo mode</span>`;
+          
+          for (let col = 0; col < SLOTS_PER_ROW; col++) {
+            const slotNumber = row * SLOTS_PER_ROW + col + 1;
+            // Random occupied/available for demo
+            const mockSlot = {
+              status: Math.random() > 0.6 ? 'occupied' : 'available'
+            };
+            const slot = createParkingSlot(mockSlot, `Slot ${slotNumber}`);
+            rowDiv.appendChild(slot);
+          }
+          
+          parkingGrid.appendChild(rowLabel);
+          parkingGrid.appendChild(rowDiv);
+        }
         
         statusBadge.classList.add("warning");
-        statusBadge.innerHTML = `<i class="fas fa-wifi-slash"></i> <span>offline mode · stale data</span>`;
+        statusBadge.innerHTML = `<i class="fas fa-wifi-slash"></i> <span>offline mode · showing demo data</span>`;
       }
     }
 
@@ -474,6 +735,24 @@
         icon.style.transform = "rotate(0deg)";
       }, 200);
     });
+
+    // Reset counters button (optional)
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "modern-btn";
+    resetBtn.innerHTML = '<i class="fas fa-redo-alt"></i> reset counters';
+    resetBtn.style.marginTop = "1rem";
+    resetBtn.onclick = () => {
+      totalEntry = 0;
+      totalExit = 0;
+      previousOccupiedCount = 0;
+      activityLog = [];
+      updateLogDisplay();
+      totalEntrySpan.innerText = "0";
+      totalExitSpan.innerText = "0";
+      netFlowSpan.innerText = "0";
+    };
+    
+    document.querySelector(".refresh-action").appendChild(resetBtn);
 
     window.addEventListener('beforeunload', () => {
       clearInterval(intervalId);
