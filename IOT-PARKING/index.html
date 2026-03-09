@@ -1,189 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Parking System Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>modern parking · flow dashboard</title>
+  <!-- Google Font & subtle icons (font awesome free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
 
-<style>
-body{
-font-family:Arial;
-background:#f2f2f2;
-margin:0;
-padding:0;
-}
+    body {
+      background: linear-gradient(145deg, #e9f0f9 0%, #f5f9ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
 
-.container{
-max-width:800px;
-margin:40px auto;
-background:#fff;
-padding:20px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,0.2);
-}
+    .glass-panel {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 40px;
+      padding: 2.2rem 2rem;
+      box-shadow: 0 30px 60px -20px rgba(0, 40, 80, 0.35),
+                  inset 0 1px 2px rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
 
-h1{
-text-align:center;
-color:#00bcd4;
-}
+    h1 {
+      font-weight: 600;
+      font-size: 2.2rem;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #112b3f;
+      margin-bottom: 1rem;
+    }
 
-.status{
-text-align:center;
-font-size:18px;
-color:red;
-font-weight:bold;
-margin-bottom:20px;
-}
+    h1 i {
+      background: #1e4f6b;
+      color: white;
+      padding: 12px;
+      border-radius: 30px;
+      font-size: 1.5rem;
+      box-shadow: 0 8px 18px -6px #1e4f6b70;
+    }
 
-.summary{
-display:flex;
-justify-content:space-around;
-margin:20px 0;
-font-size:18px;
-font-weight:bold;
-}
+    .status-badge {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 0.8rem 1.5rem;
+      border-radius: 100px;
+      width: fit-content;
+      margin: 0.5rem auto 1.8rem auto;
+      background: #edf6fc;
+      color: #0b4b6b;
+      border: 1px solid #c2dcf0;
+      box-shadow: 0 2px 8px rgba(0,50,80,0.05);
+      transition: all 0.2s ease;
+    }
 
-.summary div{
-background:#00bcd4;
-color:white;
-padding:10px 20px;
-border-radius:10px;
-}
+    .status-badge i {
+      margin-right: 8px;
+      font-size: 1.2rem;
+    }
 
-table{
-width:100%;
-border-collapse:collapse;
-}
+    .status-badge.warning {
+      background: #ffecdd;
+      color: #ac3800;
+      border-color: #ffb68b;
+    }
 
-th,td{
-padding:12px;
-text-align:center;
-border-bottom:1px solid #ddd;
-}
+    .stats-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 2rem 0 2.5rem 0;
+    }
 
-th{
-background:#00bcd4;
-color:white;
-}
+    .stat-card {
+      background: white;
+      border-radius: 34px;
+      padding: 1.2rem 2.2rem;
+      min-width: 170px;
+      text-align: center;
+      box-shadow: 0 15px 30px -12px rgba(21, 50, 80, 0.15);
+      border: 1px solid rgba(0,150,200,0.15);
+      transition: all 0.2s;
+    }
 
-tr.full{
-background:#f44336;
-color:white;
-}
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: #2aa7c9;
+    }
 
-tr.available{
-background:#4caf50;
-color:white;
-}
+    .stat-label {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+      color: #42758e;
+      margin-bottom: 0.5rem;
+    }
 
-button{
-display:block;
-margin:20px auto;
-padding:10px 20px;
-border:none;
-border-radius:8px;
-background:#00bcd4;
-color:white;
-cursor:pointer;
-font-size:16px;
-}
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #0f3b4f;
+      line-height: 1.2;
+    }
 
-button:hover{
-background:#0097a7;
-}
-</style>
+    .stat-value small {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #608a9f;
+    }
+
+    .table-container {
+      background: rgba(255,255,255,0.6);
+      border-radius: 28px;
+      padding: 0.2rem 0.2rem 0.2rem 0.2rem;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.02), 0 8px 20px -12px #265e7a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 26px;
+      overflow: hidden;
+    }
+
+    th {
+      background: #173f57;
+      color: white;
+      font-weight: 500;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      padding: 1.1rem 0.8rem;
+      text-align: center;
+    }
+
+    th i {
+      margin-right: 6px;
+      opacity: 0.8;
+    }
+
+    td {
+      padding: 1rem 0.6rem;
+      text-align: center;
+      background: white;
+      border-bottom: 1px solid #e2edf5;
+      font-weight: 500;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* dynamic row status styling — modern chip style */
+    .row-status-chip {
+      display: inline-block;
+      padding: 0.4rem 1.1rem;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: #e9f2f9;
+      color: #0a4055;
+      min-width: 90px;
+    }
+
+    tr.available td:first-child {
+      border-left: 6px solid #0e9f6e;
+    }
+    tr.available .row-status-chip {
+      background: #dff3e8;
+      color: #0b6e47;
+    }
+
+    tr.full td:first-child {
+      border-left: 6px solid #d6493b;
+    }
+    tr.full .row-status-chip {
+      background: #ffe7e3;
+      color: #b13a2c;
+    }
+
+    /* occupied/available numeric cells */
+    td:nth-child(2), td:nth-child(3) {
+      font-weight: 600;
+    }
+
+    .refresh-action {
+      display: flex;
+      justify-content: center;
+      margin: 2.2rem 0 0.2rem 0;
+    }
+
+    .modern-btn {
+      background: white;
+      border: none;
+      padding: 0.9rem 2.4rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #145c7a;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -6px #173f5730, 0 0 0 1px #b9d7ea inset;
+      transition: all 0.2s ease;
+    }
+
+    .modern-btn i {
+      font-size: 1.2rem;
+      color: #3184a8;
+    }
+
+    .modern-btn:hover {
+      background: #edf7fd;
+      box-shadow: 0 12px 24px -8px #1f5979, 0 0 0 1px #7bc0db inset;
+      transform: scale(1.02);
+    }
+
+    .modern-btn:active {
+      transform: scale(0.98);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #5e849c;
+      margin-top: 1.2rem;
+      border-top: 1px dashed #c1dae9;
+      padding-top: 1rem;
+      opacity: 0.7;
+    }
+
+    /* subtle animation for live indicator */
+    .live-badge {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: #34b56f;
+      border-radius: 50%;
+      margin-right: 6px;
+      box-shadow: 0 0 0 2px #a3e0c0;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
 </head>
-
 <body>
+<div class="glass-panel">
+  <h1>
+    <i class="fas fa-square-parking"></i> 
+    park<span style="font-weight:300;">·flow</span>
+    <i class="fas fa-wave-square" style="background:transparent; color:#1e4f6b; box-shadow:none; font-size:1.9rem;"></i>
+  </h1>
 
-<div class="container">
+  <!-- dynamic status alert -->
+  <div class="status-badge" id="statusBadge">
+    <i class="fas fa-circle-check"></i> <span id="statusMessage">all systems live</span>
+  </div>
 
-<h1>⚡ Parking System Dashboard ⚡</h1>
+  <!-- summary cards with modern layout -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label"><i class="fas fa-layer-group" style="margin-right:6px;"></i>total slots</div>
+      <div class="stat-value" id="totalSlots">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label"><i class="fas fa-car-side"></i> occupied</div>
+      <div class="stat-value" id="occupiedSlots">0 <small>/ 0</small></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label"><i class="fas fa-arrow-circle-up"></i> available</div>
+      <div class="stat-value" id="availableSlots">0 <small>/ 0</small></div>
+    </div>
+  </div>
 
-<div class="status" id="statusText"></div>
+  <!-- parking table with refined presentation -->
+  <div class="table-container">
+    <table id="parkingTable">
+      <thead>
+        <tr>
+          <th><i class="fas fa-hashtag"></i> Lot ID</th>
+          <th><i class="fas fa-wheelchair"></i> Occupied</th>
+          <th><i class="fas fa-check-circle"></i> Available</th>
+          <th><i class="fas fa-flag"></i> Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- dynamic rows injected via JS -->
+      </tbody>
+    </table>
+  </div>
 
-<div class="summary">
-<div>Total Slots: <span id="totalSlots">0</span></div>
-<div>Occupied: <span id="occupiedSlots">0</span></div>
-<div>Available: <span id="availableSlots">0</span></div>
-</div>
-
-<table id="parkingTable">
-<thead>
-<tr>
-<th>Lot ID</th>
-<th>Occupied</th>
-<th>Available</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-
-<button id="refreshBtn" onclick="fetchParkingData()">Refresh</button>
-
+  <!-- refresh & live indicator -->
+  <div class="refresh-action">
+    <button class="modern-btn" id="refreshBtn">
+      <i class="fas fa-sync-alt"></i> update now
+      <span class="live-badge"></span>
+    </button>
+  </div>
+  <div class="footer-note">
+    <i class="fas fa-bolt" style="margin-right:6px;"></i> live sync · 3s interval · mockAPI
+  </div>
 </div>
 
 <script>
+  (function() {
+    // --- CONFIG ---
+    const API_URL = "https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking";
 
-const API_URL = "https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking";
+    // DOM elements
+    const tbody = document.querySelector("#parkingTable tbody");
+    const totalSpan = document.getElementById("totalSlots");
+    const occupiedSpan = document.getElementById("occupiedSlots");
+    const availableSpan = document.getElementById("availableSlots");
+    const statusBadge = document.getElementById("statusBadge");
+    const statusMsg = document.getElementById("statusMessage");
+    const refreshBtn = document.getElementById("refreshBtn");
 
-async function fetchParkingData(){
+    // Helper: update UI with fresh data
+    async function fetchParkingData() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
 
-const res = await fetch(API_URL);
-const data = await res.json();
+        // reset table
+        tbody.innerHTML = "";
 
-const tbody = document.querySelector("#parkingTable tbody");
-tbody.innerHTML="";
+        let totalOccupied = 0;
+        let totalAvailable = 0;
+        let totalSlots = 0;
 
-let totalOccupied = 0;
-let totalAvailable = 0;
-let totalSlots = 0;
+        data.forEach(item => {
+          // ensure numbers (mockAPI might send strings)
+          const occupied = parseInt(item.occupied) || 0;
+          const available = parseInt(item.available) || 0;
+          const slotTotal = occupied + available;
 
-data.forEach(item=>{
+          totalOccupied += occupied;
+          totalAvailable += available;
+          totalSlots += slotTotal;
 
-let occupied = parseInt(item.occupied);
-let available = parseInt(item.available);
+          const tr = document.createElement("tr");
 
-totalOccupied += occupied;
-totalAvailable += available;
-totalSlots += occupied + available;
+          // dynamic class based on availability (full vs available)
+          if (available === 0) {
+            tr.classList.add("full");
+          } else {
+            tr.classList.add("available");
+          }
 
-const tr = document.createElement("tr");
+          // create cells with clean data
+          tr.innerHTML = `
+            <td><span style="font-weight:600; background:#eef4f9; padding:0.3rem 0.9rem; border-radius:30px;">${item.id}</span></td>
+            <td><span style="background:${occupied > 0 ? '#fbebea' : '#f0f7fa'}; padding:0.3rem 1rem; border-radius:40px;">${occupied}</span></td>
+            <td><span style="background:${available > 0 ? '#def5e8' : '#f2e4e2'}; padding:0.3rem 1rem; border-radius:40px;">${available}</span></td>
+            <td><span class="row-status-chip">${item.status || (available === 0 ? 'FULL' : 'OPEN')}</span></td>
+          `;
 
-if(available === 0){
-tr.className="full";
-}else{
-tr.className="available";
-}
+          tbody.appendChild(tr);
+        });
 
-tr.innerHTML = `
-<td>${item.id}</td>
-<td>${occupied}</td>
-<td>${available}</td>
-<td>${item.status}</td>
-`;
+        // update summary cards
+        totalSpan.innerText = totalSlots;
 
-tbody.appendChild(tr);
+        // show occupied and available as "X / total"
+        occupiedSpan.innerHTML = `${totalOccupied} <small>/ ${totalSlots}</small>`;
+        availableSpan.innerHTML = `${totalAvailable} <small>/ ${totalSlots}</small>`;
 
-});
+        // update status badge with modern copy
+        if (totalAvailable === 0) {
+          statusBadge.classList.add("warning");
+          statusBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <span id="statusMessage">⚠️ parking full · no spots left</span>`;
+        } else {
+          statusBadge.classList.remove("warning");
+          statusBadge.innerHTML = `<i class="fas fa-circle-check"></i> <span id="statusMessage">✓ ${totalAvailable} spot${totalAvailable !== 1 ? 's' : ''} available · ready</span>`;
+        }
 
-document.getElementById("totalSlots").innerText = totalSlots;
-document.getElementById("occupiedSlots").innerText = totalOccupied + " / " + totalSlots;
-document.getElementById("availableSlots").innerText = totalAvailable + " / " + totalSlots;
+      } catch (error) {
+        console.warn("fetch error", error);
+        // graceful degradation: show placeholder message
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:2rem; background:white; border-radius:20px; color:#b13a2c;"><i class="fas fa-plug"></i>  unable to reach server — using demo snapshot</td></tr>`;
+        // keep existing numbers if any (or fallback)
+        if (totalSpan.innerText === "0") {
+          totalSpan.innerText = "—";
+          occupiedSpan.innerHTML = `0 <small>/ —</small>`;
+          availableSpan.innerHTML = `0 <small>/ —</small>`;
+        }
+        statusBadge.classList.add("warning");
+        statusBadge.innerHTML = `<i class="fas fa-wifi-slash"></i> <span>offline mode · stale data</span>`;
+      }
+    }
 
-if(totalAvailable === 0){
-document.getElementById("statusText").innerText="🚨 Parking Full!";
-}else{
-document.getElementById("statusText").innerText="";
-}
+    // initial fetch
+    fetchParkingData();
 
-}
+    // set live interval (3 sec)
+    const intervalId = setInterval(fetchParkingData, 3000);
 
-fetchParkingData();
-setInterval(fetchParkingData,3000);
+    // refresh button click (with haptic feedback simulation)
+    refreshBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      fetchParkingData();
+      // add a quick spin animation on icon
+      const icon = refreshBtn.querySelector("i");
+      icon.style.transition = "transform 0.3s";
+      icon.style.transform = "rotate(180deg)";
+      setTimeout(() => {
+        icon.style.transform = "rotate(0deg)";
+      }, 200);
+    });
 
+    // (optional) clean interval if page gets unloaded – good practice
+    window.addEventListener('beforeunload', () => {
+      clearInterval(intervalId);
+    });
+
+  })();
 </script>
 
+<!-- ensure the status message span is re-targeted after badge innerHTML rewrite -->
+<!-- we already handle it by recreating the whole innerHTML with fresh span, but we also keep 'statusMessage' id inside new badge -->
+<!-- no extra action needed -->
 </body>
 </html>
