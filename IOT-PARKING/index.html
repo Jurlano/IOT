@@ -1,12 +1,11 @@
-Here is the complete, final HTML code for your driver attendance system. It integrates with both **ImgBB** (for photo storage) and **Google Sheets** (for all attendance records), allowing you as the admin to see everything from any device.
+Here is the complete, ready-to-use HTML code for your driver attendance system. It includes **ImgBB photo upload** and **Google Sheets database** integration. You just need to add your Google Sheets Web App URL (after following the setup steps below).
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-    <title>🚛 DRIVER ATENDANCE · IMGBB + GOOGLE SHEETS · ADMIN CLOUD</title>
-    <!-- Font Awesome 6 -->
+    <title>🚛 DRIVER ATTENDANCE · IMGBB + GOOGLE SHEETS · ADMIN CLOUD</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -240,21 +239,18 @@ Here is the complete, final HTML code for your driver attendance system. It inte
     // ======================== 2. GOOGLE SHEETS SAVE (POST) ========================
     async function saveToGoogleSheets(record) {
         // Google Sheets Web App expects POST with JSON body
-        // Use no-cors + simple fetch, but we need to ensure web app accepts POST.
-        // We'll use mode 'cors' if possible, but Google Scripts supports CORS.
         const response = await fetch(GOOGLE_SHEETS_API_URL, {
             method: 'POST',
             mode: 'cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(record)
         });
-        // if response ok parse, else just assume success (web app might return text)
-        if (response.ok) {
-            const txt = await response.text();
-            return true;
-        } else {
+        if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || "Unknown error");
+        return true;
     }
     
     // ======================== 3. FETCH ALL RECORDS FROM GOOGLE SHEETS ========================
@@ -382,7 +378,7 @@ Here is the complete, final HTML code for your driver attendance system. It inte
         } catch (err) {
             console.error(err);
             uploadStatusDiv.innerHTML = `❌ Error: ${err.message}`;
-            alert("Failed to save: " + err.message + "\nCheck ImgBB key or Google Sheets URL.");
+            alert("Failed to save: " + err.message + "\n\nMake sure:\n1. Google Sheets Web App URL is correct\n2. ImgBB API key is valid\n3. Sheet headers are set (Row 1: ID, Driver Name, Type, DateTime, Timestamp, Photo URL, Status)");
         } finally {
             isUploading = false;
         }
