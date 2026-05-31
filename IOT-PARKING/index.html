@@ -1,718 +1,543 @@
+Here is the complete, final HTML code for your driver attendance system. It integrates with both **ImgBB** (for photo storage) and **Google Sheets** (for all attendance records), allowing you as the admin to see everything from any device.
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>PARKING SLOTS · Mobile System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
+    <title>🚛 DRIVER ATENDANCE · IMGBB + GOOGLE SHEETS · ADMIN CLOUD</title>
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #0b0e14;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0a0f1c;
+            background-image: radial-gradient(circle at 25% 10%, rgba(0, 180, 255, 0.1) 0%, #070c18 95%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px;
+            padding: 20px;
+            color: #eef5ff;
         }
-
-        /* MOBILE CONTAINER */
-        .parking-app {
-            max-width: 420px;
-            width: 100%;
-            background: #151e2a;
-            border-radius: 40px 40px 30px 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-            overflow: hidden;
-            border: 1px solid #2a3a4a;
+        .container { max-width: 700px; margin: 0 auto; }
+        .card {
+            background: rgba(12, 22, 40, 0.92);
+            backdrop-filter: blur(14px);
+            border-radius: 48px;
+            border: 1px solid rgba(0, 255, 255, 0.45);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,255,255,0.2) inset;
+            padding: 26px 22px;
+            margin-bottom: 28px;
+            transition: all 0.2s;
         }
-
-        /* HEADER */
-        .app-header {
-            background: #0f172a;
-            padding: 24px 20px 20px;
-            color: white;
-            border-bottom: 3px solid #3b82f6;
-        }
-
-        .app-header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .app-header h1 i {
-            color: #3b82f6;
-            background: #1e2b3c;
-            padding: 10px;
-            border-radius: 20px;
-        }
-
-        .header-stats {
+        .header {
             display: flex;
             justify-content: space-between;
-            margin-top: 15px;
-            background: #1a2635;
-            padding: 15px;
-            border-radius: 25px;
-        }
-
-        .stat-box {
-            text-align: center;
-            flex: 1;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: #3b82f6;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-top: 5px;
-        }
-
-        /* QUICK STATUS */
-        .live-status {
-            background: #1e2a3a;
-            margin: 15px 20px;
-            padding: 12px 18px;
-            border-radius: 40px;
-            display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 12px;
-            border: 1px solid #3b82f6;
+            margin-bottom: 22px;
         }
-
-        .live-dot {
-            width: 12px;
-            height: 12px;
-            background: #22c55e;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #22c55e;
+        .badge {
+            background: #00ccff20;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+            border: 1px solid cyan;
         }
-
-        .live-text {
+        select, input, button {
+            background: #0e1a2a;
+            border: 1.5px solid #0cf;
+            padding: 14px 20px;
+            border-radius: 60px;
+            width: 100%;
+            font-size: 1rem;
             color: white;
+            margin-top: 10px;
             font-weight: 500;
-            flex: 1;
+            transition: 0.1s ease;
         }
-
-        .update-time {
-            color: #94a3b8;
-            font-size: 12px;
+        button {
+            background: linear-gradient(100deg, #0f5f8a, #043b5e);
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
-
-        /* PARKING SLOTS GRID */
-        .slots-container {
-            padding: 0 20px 20px;
-        }
-
-        .section-title {
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title i {
-            color: #3b82f6;
-        }
-
-        .slots-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        /* PARKING SLOT CARD */
-        .slot-card {
-            background: #1a2635;
-            border-radius: 25px;
-            padding: 20px 12px;
+        button:active { transform: translateY(2px); box-shadow: 0 1px 4px black; }
+        .photo-preview {
             text-align: center;
-            border: 2px solid #2a3a4a;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
+            background: #021220cc;
+            border-radius: 40px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px dashed cyan;
         }
-
-        .slot-card.available {
-            border-color: #22c55e;
-            background: linear-gradient(145deg, #1a2635, #1e3a2a);
+        .photo-preview img {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 28px;
+            border: 2px solid cyan;
+            box-shadow: 0 0 12px cyan;
         }
-
-        .slot-card.occupied {
-            border-color: #ef4444;
-            background: linear-gradient(145deg, #1a2635, #3a1e2a);
+        .time-status {
+            background: #07131fcc;
+            border-radius: 36px;
+            padding: 18px;
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-left: 5px solid #0cf;
         }
-
-        .slot-card.full {
-            border-color: #f59e0b;
-            background: linear-gradient(145deg, #1a2635, #3a2e1a);
+        .late { background: #e34d1ccc; padding: 5px 14px; border-radius: 30px; font-weight: bold; display: inline-block; }
+        .ontime { background: #14cc6ecc; padding: 5px 14px; border-radius: 30px; font-weight: bold; display: inline-block; }
+        .log-item {
+            background: rgba(0, 180, 230, 0.1);
+            margin: 14px 0;
+            padding: 18px;
+            border-radius: 36px;
+            border: 1px solid #0cf6;
+            transition: 0.1s;
         }
-
-        .slot-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
-
-        .slot-number {
-            font-size: 24px;
-            font-weight: 800;
-            color: white;
-            margin-bottom: 5px;
-        }
-
-        .slot-status {
-            font-size: 14px;
+        .log-photo-link {
+            color: #ffbb66;
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.75rem;
             font-weight: 600;
-            padding: 6px 12px;
+            background: #00000055;
+            padding: 4px 10px;
             border-radius: 40px;
             display: inline-block;
-            margin-top: 8px;
         }
-
-        .available .slot-status {
-            background: #22c55e;
-            color: white;
-        }
-
-        .occupied .slot-status {
-            background: #ef4444;
-            color: white;
-        }
-
-        .full .slot-status {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .slot-details {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #94a3b8;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        /* CAR LIST */
-        .car-list {
-            background: #0f172a;
-            border-radius: 30px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .car-list h3 {
-            color: white;
-            font-size: 18px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .car-items {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .car-item {
-            background: #1a2635;
+        .log-photo-link:hover { text-decoration: underline; color: gold; }
+        .admin-note {
+            background: #102a2fcc;
             padding: 15px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border: 1px solid #2a3a4a;
+            border-radius: 32px;
+            margin-bottom: 22px;
+            font-size: 0.85rem;
+            border-left: 5px solid #2effb0;
         }
-
-        .car-icon {
-            width: 45px;
-            height: 45px;
-            background: #2a3a4a;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #3b82f6;
-            font-size: 20px;
-        }
-
-        .car-info {
-            flex: 1;
-        }
-
-        .car-name {
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .car-slot {
-            color: #94a3b8;
-            font-size: 13px;
-            margin-top: 3px;
-        }
-
-        .car-status {
-            padding: 5px 12px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-parked {
-            background: #22c55e;
-            color: white;
-        }
-
-        /* ACTIVITY LOG */
-        .activity-log {
-            background: #0f172a;
-            border-radius: 30px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .log-entry {
-            background: #1a2635;
-            padding: 12px 15px;
-            border-radius: 15px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 4px solid;
-        }
-
-        .log-entry.enter {
-            border-left-color: #22c55e;
-        }
-
-        .log-entry.exit {
-            border-left-color: #ef4444;
-        }
-
-        .log-time {
-            color: #94a3b8;
-            font-size: 11px;
-            margin-left: auto;
-        }
-
-        /* BUTTONS */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            padding: 0 20px 20px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 18px;
-            border: none;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #2a3a4a;
-            color: white;
-        }
-
-        /* DEBUG PANEL (minimal) */
-        .debug-info {
-            background: #0a0f18;
-            padding: 12px 20px;
-            color: #4a5a6a;
-            font-size: 11px;
-            font-family: monospace;
-            border-top: 1px solid #2a3a4a;
-        }
+        .export-btn { background: #1e6b4c; margin-top: 12px; }
+        .refresh-btn { background: #2c5282; margin-top: 6px; }
+        .sync-status { font-size: 0.7rem; text-align: center; margin-top: 12px; color: #aaffdd; font-weight: 500; }
+        .flex-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+        footer { text-align: center; font-size: 0.7rem; margin-top: 20px; opacity: 0.75; letter-spacing: 1px; }
+        hr { border-color: cyan; margin: 12px 0; }
+        @media (max-width: 550px) { .card { padding: 18px; } .badge { font-size: 0.7rem; } }
     </style>
 </head>
 <body>
-    <div class="parking-app">
-        <!-- HEADER -->
-        <div class="app-header">
-            <h1>
-                <i class="fas fa-parking"></i>
-                PARKING SLOTS
-            </h1>
-            <div class="header-stats">
-                <div class="stat-box">
-                    <div class="stat-value" id="totalCars">0</div>
-                    <div class="stat-label">CARS PARKED</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="totalSlots">0</div>
-                    <div class="stat-label">TOTAL SLOTS</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="availableSlots">0</div>
-                    <div class="stat-label">AVAILABLE</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LIVE STATUS -->
-        <div class="live-status">
-            <div class="live-dot"></div>
-            <div class="live-text" id="statusMessage">System Online</div>
-            <div class="update-time" id="lastUpdate">Just now</div>
-        </div>
-
-        <!-- MAIN SLOTS DISPLAY -->
-        <div class="slots-container">
-            <div class="section-title">
-                <i class="fas fa-grid-2"></i>
-                PARKING SLOTS (1-8)
-            </div>
-            <div class="slots-grid" id="parkingGrid">
-                <!-- Slots will be inserted here -->
-            </div>
-
-            <!-- CARS CURRENTLY PARKED -->
-            <div class="car-list" id="carListSection">
-                <h3>
-                    <i class="fas fa-car"></i>
-                    PARKED VEHICLES
-                </h3>
-                <div class="car-items" id="carList">
-                    <div class="car-item">
-                        <div class="car-icon"><i class="fas fa-car"></i></div>
-                        <div class="car-info">
-                            <div class="car-name">Loading...</div>
-                            <div class="car-slot">Please wait</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RECENT ACTIVITY -->
-            <div class="activity-log">
-                <h3 style="color: white; margin-bottom: 15px;">
-                    <i class="fas fa-clock"></i>
-                    RECENT ACTIVITY
-                </h3>
-                <div id="activityList">
-                    <div class="log-entry">
-                        <i class="fas fa-circle-info" style="color: #94a3b8;"></i>
-                        <span style="color: #94a3b8;">Loading activity...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ACTION BUTTONS -->
-        <div class="action-buttons">
-            <button class="btn btn-primary" id="refreshBtn">
-                <i class="fas fa-sync-alt"></i> REFRESH
-            </button>
-            <button class="btn btn-secondary" id="resetBtn">
-                <i class="fas fa-undo-alt"></i> RESET
-            </button>
-        </div>
-
-        <!-- DEBUG INFO (minimal) -->
-        <div class="debug-info" id="debugInfo">
-            <i class="fas fa-database"></i> Connected to parking system • <span id="objectCount">0</span> records
-        </div>
+<div class="container">
+    <div class="header">
+        <span class="badge"><i class="fab fa-google"></i> + <i class="fas fa-cloud-upload-alt"></i> IMGBB</span>
+        <span class="badge" id="liveDate"><i class="far fa-clock"></i> LIVE SYNC</span>
     </div>
 
-    <script>
-        const API_URL = 'https://698d3f03b79d1c928ed4ccbd.mockapi.io/parking';
+    <div class="card">
+        <h2><i class="fas fa-truck-fast"></i> DRIVER TIME · PHOTO CLOUD</h2>
+        <div class="admin-note">
+            <i class="fas fa-database"></i> <strong>✅ FULL CLOUD MODE (GOOGLE SHEETS + IMGBB)</strong><br>
+            📸 Pictures → stored safely on ImgBB (permanent links).<br>
+            📋 Time-in/out records → saved to YOUR Google Sheets.<br>
+            👑 <strong>AS ADMIN:</strong> open this page → see ALL drivers logs + click any photo link.<br>
+            🌍 Works across different phones — data never lost.
+        </div>
+        <select id="driverSelect">
+            <option value="Juan Dela Cruz">🚛 Juan Dela Cruz</option>
+            <option value="Maria Santos">🚚 Maria Santos</option>
+            <option value="Ramon Flores">🚛 Ramon Flores</option>
+            <option value="Kristoff Ortega">🚛 Kristoff Ortega</option>
+            <option value="Luningning Reyes">🚚 Luningning Reyes</option>
+            <option value="Emil Fernandez">🚛 Emil Fernandez</option>
+        </select>
+
+        <div class="photo-preview">
+            <i class="fas fa-camera" style="font-size: 1.8rem;"></i>
+            <p>📸 PICTURE REQUIRED for TIME IN (auto-upload to ImgBB)</p>
+            <input type="file" id="photoInput" accept="image/*" capture="environment" style="display: none;">
+            <button id="triggerPhotoBtn" type="button"><i class="fas fa-image"></i> Select / Take Photo</button>
+            <div id="previewContainer" style="margin-top: 14px;"></div>
+            <div id="uploadStatus" style="font-size: 0.8rem; margin-top: 8px; font-weight: 500;"></div>
+        </div>
+
+        <div class="flex-btns">
+            <button id="timeInBtn" style="flex:1; background:#0f6b3a;"><i class="fas fa-sign-in-alt"></i> TIME IN (8AM strict)</button>
+            <button id="timeOutBtn" style="flex:1; background:#b45309;"><i class="fas fa-sign-out-alt"></i> TIME OUT</button>
+        </div>
+
+        <div class="time-status">
+            <span><i class="far fa-calendar-alt"></i> <span id="currentTimeText">--:--:--</span></span>
+            <span id="lateIndicator">⚡ No time-in today</span>
+        </div>
+        <p style="font-size:0.7rem; margin-top: 12px;"><i class="fas fa-info-circle"></i> TIME-IN before or exactly 8:00 = ON TIME ; after 8:00 = LATE (recorded). Time-out anytime. All data saved to Google Sheets.</p>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-list-ul"></i> 📋 ALL DRIVERS ATTENDANCE (from Google Sheets)</h3>
+        <button id="refreshLogsBtn" class="refresh-btn"><i class="fas fa-sync-alt"></i> REFRESH / SYNC FROM CLOUD</button>
+        <button id="exportCsvBtn" class="export-btn"><i class="fas fa-download"></i> EXPORT to CSV (admin report)</button>
+        <div id="logListContainer" style="max-height: 450px; overflow-y: auto; margin-top: 20px;">
+            <div style="text-align:center; padding:35px;"><i class="fas fa-spinner fa-pulse"></i> Loading records from Google Sheets...</div>
+        </div>
+        <div class="sync-status" id="syncStatus"></div>
+    </div>
+    <footer><i class="fab fa-google"></i> Google Sheets Database + ImgBB cloud photos | Admin can see every driver's picture & log</footer>
+</div>
+
+<script>
+    // ======================== 🔐 CONFIGURATION (EDIT HERE) ========================
+    // ⚠️ IMPORTANT: Replace with your own Google Apps Script Web App URL (from step 2-6)
+    const GOOGLE_SHEETS_API_URL = "YOUR_GOOGLE_WEBAPP_URL_HERE";   // <--- 🔴 CHANGE THIS
+    
+    // Your ImgBB API key (valid)
+    const IMGBB_API_KEY = "8ff9e2756b630847808e7d0e8d56a5b8";
+    
+    // ======================== GLOBAL STATE ========================
+    let currentPhotoBase64 = null;      // base64 of selected photo
+    let isUploading = false;
+    
+    // DOM elements
+    const photoInput = document.getElementById('photoInput');
+    const triggerBtn = document.getElementById('triggerPhotoBtn');
+    const previewContainer = document.getElementById('previewContainer');
+    const uploadStatusDiv = document.getElementById('uploadStatus');
+    const timeInBtn = document.getElementById('timeInBtn');
+    const timeOutBtn = document.getElementById('timeOutBtn');
+    const refreshBtn = document.getElementById('refreshLogsBtn');
+    const exportBtn = document.getElementById('exportCsvBtn');
+    const driverSelect = document.getElementById('driverSelect');
+    
+    // ======================== 1. IMGBB UPLOAD ========================
+    async function uploadToImgBB(base64Image) {
+        try {
+            // extract raw base64 (remove data:image/xxx;base64,)
+            const pureBase64 = base64Image.split(',')[1];
+            const formData = new FormData();
+            formData.append('key', IMGBB_API_KEY);
+            formData.append('image', pureBase64);
+            
+            const response = await fetch('https://api.imgbb.com/1/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                return data.data.url;   // direct image link (permanent)
+            } else {
+                throw new Error(data.error?.message || "ImgBB upload failed");
+            }
+        } catch (err) {
+            console.error("ImgBB error:", err);
+            throw err;
+        }
+    }
+    
+    // ======================== 2. GOOGLE SHEETS SAVE (POST) ========================
+    async function saveToGoogleSheets(record) {
+        // Google Sheets Web App expects POST with JSON body
+        // Use no-cors + simple fetch, but we need to ensure web app accepts POST.
+        // We'll use mode 'cors' if possible, but Google Scripts supports CORS.
+        const response = await fetch(GOOGLE_SHEETS_API_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(record)
+        });
+        // if response ok parse, else just assume success (web app might return text)
+        if (response.ok) {
+            const txt = await response.text();
+            return true;
+        } else {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    }
+    
+    // ======================== 3. FETCH ALL RECORDS FROM GOOGLE SHEETS ========================
+    async function fetchAllRecordsFromSheets() {
+        if (!GOOGLE_SHEETS_API_URL || GOOGLE_SHEETS_API_URL === "YOUR_GOOGLE_WEBAPP_URL_HERE") {
+            console.warn("Google Sheets URL not configured");
+            return [];
+        }
+        try {
+            const response = await fetch(GOOGLE_SHEETS_API_URL, { method: 'GET', cache: 'no-store' });
+            const data = await response.json();
+            // data should be array of objects (each row)
+            if (Array.isArray(data)) return data;
+            return [];
+        } catch (err) {
+            console.error("Fetch error:", err);
+            return [];
+        }
+    }
+    
+    // ======================== 4. RENDER LOGS (ADMIN VIEW - ALL DRIVERS) ========================
+    async function renderAllLogs() {
+        const container = document.getElementById('logListContainer');
+        if (!container) return;
         
-        // State
-        let parkingData = [];
-        let previousData = [];
-        let activityLog = [];
-        let sessionEnter = 0;
-        let sessionExit = 0;
-
-        // DOM Elements
-        const parkingGrid = document.getElementById('parkingGrid');
-        const carList = document.getElementById('carList');
-        const activityList = document.getElementById('activityList');
-        const totalCars = document.getElementById('totalCars');
-        const totalSlots = document.getElementById('totalSlots');
-        const availableSlots = document.getElementById('availableSlots');
-        const statusMessage = document.getElementById('statusMessage');
-        const lastUpdate = document.getElementById('lastUpdate');
-        const objectCount = document.getElementById('objectCount');
-        const debugInfo = document.getElementById('debugInfo');
-
-        // Car names for demo (to make it more realistic)
-        const carModels = [
-            'Toyota Vios', 'Honda Civic', 'Mitsubishi Mirage', 'Ford Ranger',
-            'Nissan Navara', 'Hyundai Accent', 'Suzuki Swift', 'Mazda 3',
-            'Kia Sportage', 'Isuzu D-Max', 'Honda CR-V', 'Toyota Fortuner'
-        ];
-
-        // Helper: Get random car name
-        function getRandomCar() {
-            return carModels[Math.floor(Math.random() * carModels.length)];
+        container.innerHTML = '<div style="text-align:center; padding:25px;"><i class="fas fa-spinner fa-pulse"></i> Syncing with Google Sheets...</div>';
+        
+        let records = await fetchAllRecordsFromSheets();
+        if (!records || records.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:30px;">📭 No attendance records yet. Ask drivers to TIME IN with photo.</div>';
+            document.getElementById('syncStatus').innerHTML = '✅ No records found. Waiting for check-ins.';
+            return;
         }
-
-        // Add to activity log
-        function addActivity(type, message) {
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            activityLog.unshift({ type, message, time });
+        
+        // sort by timestamp descending (newest first)
+        const sorted = [...records].sort((a,b) => (b.Timestamp || 0) - (a.Timestamp || 0));
+        let html = '';
+        for (let rec of sorted) {
+            const driverName = rec["Driver Name"] || rec.driverName || "Unknown";
+            const recType = rec.Type || rec.type || "EVENT";
+            const dateTimeStr = rec.DateTime || rec.dateTime || "";
+            const photoUrl = rec["Photo URL"] || rec.photoURL || "";
+            const statusField = rec.Status || rec.status || "";
+            const isLate = (statusField === "LATE");
             
-            if (activityLog.length > 5) {
-                activityLog.pop();
+            let lateBadgeHtml = "";
+            if (recType === "TIME_IN") {
+                if (isLate) lateBadgeHtml = '<span class="late">⚠️ LATE</span>';
+                else lateBadgeHtml = '<span class="ontime">✅ ON TIME</span>';
             }
             
-            updateActivityDisplay();
-        }
-
-        // Update activity display
-        function updateActivityDisplay() {
-            if (activityLog.length === 0) {
-                activityList.innerHTML = '<div class="log-entry"><i class="fas fa-circle-info" style="color: #94a3b8;"></i><span style="color: #94a3b8;">No recent activity</span></div>';
-                return;
-            }
+            const photoDisplay = photoUrl && photoUrl !== "" ? 
+                `<a href="${photoUrl}" target="_blank" class="log-photo-link"><i class="fas fa-image"></i> 📸 VIEW PICTURE (click)</a>` : 
+                '<span style="color:#aaa;"><i class="fas fa-ban"></i> no photo</span>';
             
-            let html = '';
-            activityLog.forEach(log => {
-                html += `
-                    <div class="log-entry ${log.type}">
-                        <i class="fas ${log.type === 'enter' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
-                        <span>${log.message}</span>
-                        <span class="log-time">${log.time}</span>
+            html += `
+                <div class="log-item">
+                    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                        <strong><i class="fas ${recType === 'TIME_IN' ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i> ${recType}</strong>
+                        <span><i class="fas fa-user"></i> ${escapeHtml(driverName)}</span>
                     </div>
-                `;
-            });
-            activityList.innerHTML = html;
+                    <div style="margin: 8px 0;">📅 ${escapeHtml(dateTimeStr)}</div>
+                    <div>📸 ${photoDisplay}</div>
+                    <div style="margin-top: 6px;">${lateBadgeHtml}</div>
+                </div>
+            `;
         }
-
-        // Render parking slots (as actual parking slots, not nodes)
-        function renderSlots(data) {
-            if (!data || data.length === 0) {
-                parkingGrid.innerHTML = '<div style="grid-column: span 2; text-align: center; color: #94a3b8; padding: 30px;">No parking data available</div>';
-                return;
-            }
-
-            let html = '';
-            let totalCarsCount = 0;
-            let totalSlotsCount = 0;
-            let availableCount = 0;
-
-            data.forEach((item, index) => {
-                const slotNumber = index + 1;
-                const occupied = parseInt(item.occupied) || 0;
-                const available = parseInt(item.available) || 0;
-                const status = item.status || 'available';
-                
-                // For this demo, we'll show each "object" as a parking slot
-                // If occupied > 0, slot is occupied
-                const isOccupied = occupied > 0;
-                const isFull = status === 'full' || available === 0;
-                
-                let slotClass = 'available';
-                let statusText = 'AVAILABLE';
-                let icon = 'fa-parking';
-                
-                if (isFull) {
-                    slotClass = 'full';
-                    statusText = 'FULL';
-                    icon = 'fa-ban';
-                } else if (isOccupied) {
-                    slotClass = 'occupied';
-                    statusText = 'OCCUPIED';
-                    icon = 'fa-car';
-                }
-                
-                // For stats
-                if (isOccupied || isFull) totalCarsCount++;
-                totalSlotsCount++;
-                if (!isOccupied && !isFull) availableCount++;
-                
-                html += `
-                    <div class="slot-card ${slotClass}">
-                        <div class="slot-icon"><i class="fas ${icon}"></i></div>
-                        <div class="slot-number">SLOT ${slotNumber}</div>
-                        <div class="slot-status">${statusText}</div>
-                        <div class="slot-details">
-                            <span><i class="fas fa-car"></i> ${occupied}</span>
-                            <span><i class="fas fa-circle"></i> ${available}</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            parkingGrid.innerHTML = html;
-            
-            // Update stats
-            totalCars.textContent = totalCarsCount;
-            totalSlots.textContent = totalSlotsCount;
-            availableSlots.textContent = availableCount;
+        container.innerHTML = html;
+        document.getElementById('syncStatus').innerHTML = `✅ Last sync: ${new Date().toLocaleTimeString()} | total records: ${records.length}`;
+    }
+    
+    // simple escape to avoid XSS
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    // ======================== 5. TIME IN LOGIC (with ImgBB + Google Sheets) ========================
+    async function handleTimeIn() {
+        const driver = driverSelect.value;
+        if (!currentPhotoBase64) {
+            alert("⚠️ REQUIRED: Please take/select a photo for TIME IN!");
+            return;
         }
-
-        // Render parked cars list
-        function renderCars(data) {
-            let carsHtml = '';
-            let carsDisplayed = 0;
-            
-            data.forEach((item, index) => {
-                const occupied = parseInt(item.occupied) || 0;
-                if (occupied > 0) {
-                    // This slot has cars parked
-                    const carName = item.listcar || getRandomCar();
-                    carsHtml += `
-                        <div class="car-item">
-                            <div class="car-icon"><i class="fas fa-car"></i></div>
-                            <div class="car-info">
-                                <div class="car-name">${carName}</div>
-                                <div class="car-slot">Slot ${index + 1} • ${occupied} vehicle${occupied > 1 ? 's' : ''}</div>
-                            </div>
-                            <div class="car-status status-parked">PARKED</div>
-                        </div>
-                    `;
-                    carsDisplayed++;
-                }
-            });
-            
-            if (carsDisplayed === 0) {
-                carsHtml = '<div class="car-item"><div class="car-icon"><i class="fas fa-car"></i></div><div class="car-info"><div class="car-name">No cars parked</div><div class="car-slot">All slots available</div></div></div>';
-            }
-            
-            carList.innerHTML = carsHtml;
-        }
-
-        // Check for changes (cars entering/exiting)
-        function detectChanges(newData, oldData) {
-            if (!oldData || oldData.length === 0) return;
-            
-            let enterEvents = 0;
-            let exitEvents = 0;
-            
-            newData.forEach((newItem, index) => {
-                if (index < oldData.length) {
-                    const oldItem = oldData[index];
-                    const newOccupied = parseInt(newItem.occupied) || 0;
-                    const oldOccupied = parseInt(oldItem.occupied) || 0;
-                    
-                    if (newOccupied > oldOccupied) {
-                        const diff = newOccupied - oldOccupied;
-                        enterEvents += diff;
-                        addActivity('enter', `${diff} car(s) entered Slot ${index + 1}`);
-                    } else if (newOccupied < oldOccupied) {
-                        const diff = oldOccupied - newOccupied;
-                        exitEvents += diff;
-                        addActivity('exit', `${diff} car(s) exited Slot ${index + 1}`);
-                    }
-                }
-            });
-            
-            if (enterEvents > 0 || exitEvents > 0) {
-                statusMessage.innerHTML = `${enterEvents} entered • ${exitEvents} exited`;
-                setTimeout(() => {
-                    statusMessage.innerHTML = 'System Online';
-                }, 3000);
-            }
-        }
-
-        // Main fetch function
-        async function fetchData() {
-            try {
-                statusMessage.innerHTML = 'Loading...';
-                debugInfo.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Fetching parking data...';
-                
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                // Update object count
-                objectCount.textContent = data.length;
-                
-                // Detect changes
-                if (previousData.length > 0) {
-                    detectChanges(data, previousData);
-                }
-                
-                // Render UI
-                renderSlots(data);
-                renderCars(data);
-                
-                // Update status
-                statusMessage.innerHTML = 'System Online';
-                lastUpdate.innerHTML = 'Just now';
-                debugInfo.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> Last updated: ${new Date().toLocaleTimeString()}`;
-                
-                // Save for next comparison
-                previousData = JSON.parse(JSON.stringify(data));
-                
-            } catch (error) {
-                console.error(error);
-                statusMessage.innerHTML = 'Connection Error';
-                debugInfo.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> Error: ${error.message}`;
-                
-                // Show error in grid
-                parkingGrid.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #ef4444; padding: 30px;">
-                    <i class="fas fa-exclamation-circle" style="font-size: 40px; margin-bottom: 10px;"></i><br>
-                    Failed to load parking data
-                </div>`;
-            }
-        }
-
-        // Reset session
-        function resetSession() {
-            if (confirm('Reset activity log?')) {
-                activityLog = [];
-                updateActivityDisplay();
-                addActivity('enter', 'Session reset');
-                statusMessage.innerHTML = 'Session Reset';
-                debugInfo.innerHTML = '<i class="fas fa-undo-alt"></i> Session reset';
-            }
-        }
-
-        // Initial fetch
-        fetchData();
+        if (isUploading) { alert("Please wait, previous action still processing..."); return; }
         
-        // Auto-refresh every 5 seconds
-        setInterval(fetchData, 5000);
+        uploadStatusDiv.innerHTML = '<i class="fas fa-cloud-upload-alt fa-pulse"></i> Uploading picture to ImgBB cloud...';
+        isUploading = true;
         
-        // Event listeners
-        document.getElementById('refreshBtn').addEventListener('click', fetchData);
-        document.getElementById('resetBtn').addEventListener('click', resetSession);
-
-        // Add initial activity
-        setTimeout(() => {
-            addActivity('enter', 'System initialized');
-        }, 1000);
-    </script>
+        try {
+            // 1. upload photo to ImgBB
+            const photoUrl = await uploadToImgBB(currentPhotoBase64);
+            uploadStatusDiv.innerHTML = '✅ Photo uploaded! Saving to Google Sheets...';
+            
+            // 2. timestamp & late detection (strict 8:00 AM)
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const isLate = (hours > 8) || (hours === 8 && minutes > 0);
+            const formattedDateTime = `${now.toLocaleDateString('en-PH')} ${now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
+            const timestampMs = now.getTime();
+            
+            // 3. create record object (matching Google Sheets columns)
+            const record = {
+                id: `IN_${Date.now()}_${Math.floor(Math.random()*10000)}`,
+                driverName: driver,
+                type: "TIME_IN",
+                dateTime: formattedDateTime,
+                timestamp: timestampMs,
+                photoURL: photoUrl,
+                status: isLate ? "LATE" : "ON TIME"
+            };
+            
+            // 4. save to Google Sheets
+            await saveToGoogleSheets(record);
+            
+            uploadStatusDiv.innerHTML = '✅ TIME IN recorded + cloud photo stored!';
+            // reset photo after success
+            currentPhotoBase64 = null;
+            previewContainer.innerHTML = '';
+            photoInput.value = '';
+            
+            // refresh logs so admin sees immediately
+            await renderAllLogs();
+            updateStatusPanelLocal();
+            
+            setTimeout(() => { if(uploadStatusDiv) uploadStatusDiv.innerHTML = ''; }, 3000);
+        } catch (err) {
+            console.error(err);
+            uploadStatusDiv.innerHTML = `❌ Error: ${err.message}`;
+            alert("Failed to save: " + err.message + "\nCheck ImgBB key or Google Sheets URL.");
+        } finally {
+            isUploading = false;
+        }
+    }
+    
+    // ======================== 6. TIME OUT (photo optional, but also saved) ========================
+    async function handleTimeOut() {
+        const driver = driverSelect.value;
+        let photoUrl = "";
+        
+        if (isUploading) { alert("Please wait, previous action processing..."); return; }
+        
+        uploadStatusDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing time-out...';
+        isUploading = true;
+        
+        try {
+            // optional photo upload if driver selected one
+            if (currentPhotoBase64) {
+                uploadStatusDiv.innerHTML = '<i class="fas fa-cloud-upload-alt fa-pulse"></i> Uploading time-out photo...';
+                photoUrl = await uploadToImgBB(currentPhotoBase64);
+            }
+            
+            const now = new Date();
+            const formattedDateTime = `${now.toLocaleDateString('en-PH')} ${now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
+            const timestampMs = now.getTime();
+            
+            const record = {
+                id: `OUT_${Date.now()}_${Math.floor(Math.random()*10000)}`,
+                driverName: driver,
+                type: "TIME_OUT",
+                dateTime: formattedDateTime,
+                timestamp: timestampMs,
+                photoURL: photoUrl || "",
+                status: "TIME_OUT"
+            };
+            
+            await saveToGoogleSheets(record);
+            uploadStatusDiv.innerHTML = '✅ TIME OUT saved to Google Sheets!';
+            
+            // reset photo
+            currentPhotoBase64 = null;
+            previewContainer.innerHTML = '';
+            photoInput.value = '';
+            
+            await renderAllLogs();
+            updateStatusPanelLocal();
+            setTimeout(() => { if(uploadStatusDiv) uploadStatusDiv.innerHTML = ''; }, 2500);
+        } catch (err) {
+            uploadStatusDiv.innerHTML = `❌ Time-out error: ${err.message}`;
+            alert("Error saving time-out: " + err.message);
+        } finally {
+            isUploading = false;
+        }
+    }
+    
+    // ======================== 7. UI HELPERS ========================
+    function updateDateTimeUI() {
+        const now = new Date();
+        const dateStr = now.toLocaleString();
+        document.getElementById('liveDate').innerHTML = `<i class="far fa-calendar-alt"></i> ${dateStr}`;
+        document.getElementById('currentTimeText').innerText = now.toLocaleTimeString();
+    }
+    
+    async function updateStatusPanelLocal() {
+        const driver = driverSelect.value;
+        const records = await fetchAllRecordsFromSheets();
+        if (!records.length) {
+            document.getElementById('lateIndicator').innerHTML = `⚡ No records today`;
+            return;
+        }
+        const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+        const todayRecords = records.filter(r => {
+            const ts = r.Timestamp || 0;
+            return (r["Driver Name"] === driver || r.driverName === driver) && r.Type === "TIME_IN" && ts >= todayStart.getTime();
+        });
+        const lastIn = todayRecords.sort((a,b) => (b.Timestamp||0) - (a.Timestamp||0))[0];
+        if(lastIn) {
+            const isLateStatus = (lastIn.Status === "LATE");
+            if(isLateStatus) {
+                document.getElementById('lateIndicator').innerHTML = `<span class="late"><i class="fas fa-hourglass-end"></i> LATE time-in at ${lastIn.DateTime || "?"}</span>`;
+            } else {
+                document.getElementById('lateIndicator').innerHTML = `<span class="ontime"><i class="fas fa-check-circle"></i> ON TIME at ${lastIn.DateTime || "?"}</span>`;
+            }
+        } else {
+            document.getElementById('lateIndicator').innerHTML = `⚡ No time-in today`;
+        }
+    }
+    
+    // export CSV from current fetched records
+    async function exportToCSV() {
+        const records = await fetchAllRecordsFromSheets();
+        if(!records || records.length === 0) { alert("No records to export"); return; }
+        let csvRows = [["ID","Driver Name","Type","DateTime","Timestamp","Photo URL","Status"]];
+        for(let rec of records) {
+            csvRows.push([
+                rec.id || rec.ID || "",
+                rec["Driver Name"] || rec.driverName || "",
+                rec.Type || rec.type || "",
+                rec.DateTime || rec.dateTime || "",
+                rec.Timestamp || rec.timestamp || "",
+                rec["Photo URL"] || rec.photoURL || "",
+                rec.Status || rec.status || ""
+            ]);
+        }
+        const csvContent = csvRows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+        const blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv;charset=utf-8;"});
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', `attendance_export_${new Date().toISOString().slice(0,19)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        alert("✅ CSV exported. Includes all driver records and photo links.");
+    }
+    
+    // photo handling
+    triggerBtn.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            currentPhotoBase64 = ev.target.result;
+            previewContainer.innerHTML = `<img src="${currentPhotoBase64}" alt="preview"> <p style="font-size:0.7rem;">✓ ready for cloud upload</p>`;
+            uploadStatusDiv.innerHTML = '';
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    // attach events
+    timeInBtn.addEventListener('click', handleTimeIn);
+    timeOutBtn.addEventListener('click', handleTimeOut);
+    refreshBtn.addEventListener('click', async () => { await renderAllLogs(); updateStatusPanelLocal(); });
+    exportBtn.addEventListener('click', exportToCSV);
+    driverSelect.addEventListener('change', () => updateStatusPanelLocal());
+    
+    // initial warning if URL not set
+    if (GOOGLE_SHEETS_API_URL === "YOUR_GOOGLE_WEBAPP_URL_HERE") {
+        const warnDiv = document.createElement('div');
+        warnDiv.style.background = "#aa3300aa";
+        warnDiv.style.padding = "12px";
+        warnDiv.style.borderRadius = "40px";
+        warnDiv.style.marginBottom = "16px";
+        warnDiv.innerHTML = "<i class='fas fa-exclamation-triangle'></i> ⚠️ GOOGLE SHEETS URL NOT CONFIGURED. Please edit the variable 'GOOGLE_SHEETS_API_URL' inside the code (replace with your Apps Script web app URL).";
+        document.querySelector('.card').prepend(warnDiv);
+    } else {
+        // initial load
+        renderAllLogs();
+    }
+    updateDateTimeUI();
+    setInterval(() => updateDateTimeUI(), 30000);
+    setInterval(() => { renderAllLogs(); updateStatusPanelLocal(); }, 20000);
+</script>
 </body>
 </html>
+```
